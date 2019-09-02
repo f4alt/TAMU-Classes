@@ -7,20 +7,22 @@ using namespace std;
 
 int main(){
 // welcome statement and define variables
+  int n;
   int min_value;
-  cin >> min_value;
+  cin >> n;
+  min_value = n;
   if (min_value == 0){
-    cout << "The list is empty" << endl;
+    cout << "empty" << endl;
   }
   else {
 // if input is lesser than last, replace as lowest
   while (n != 0){
-    if (n < min_value){
+    if (n > min_value){
       min_value = n;
     }
     cin >> n;
   }
 // output results
-  cout << "min: " << min_value << endl;
+  cout << "max: " << min_value << endl;
 }
 }
