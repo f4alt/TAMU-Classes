@@ -5,9 +5,14 @@ using namespace std;
 
 int main()
 {
-  int input, input_amount = 0, running_total = 0;
-  float average;
+  float input, input_amount = 0, running_total = 0, average;
   cin >> input;
+  if (input == 0)
+  {
+    cout << "empty" << endl;
+  }
+  else
+  {
   do
   {
     running_total += input;
@@ -15,7 +20,9 @@ int main()
     ++input_amount;
   }
   while (input != 0);
+
   average = running_total / input_amount;
-  cout << "avg: " << fixed << setprecision(4) << average << endl;
+  cout << "avg: " << average << endl;
+  }
   return 0;
 }
