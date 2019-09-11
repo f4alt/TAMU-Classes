@@ -1,2 +1,8 @@
+# ignore all
 *
-!*.cpp
+
+# except files with extensions
+!*.*
+
+# also except dir
+!*/
