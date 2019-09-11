@@ -1,8 +1,0 @@
-# ignore all
-*
-
-# except files with extensions
-!*.*
-
-# also except dir
-!*/*
