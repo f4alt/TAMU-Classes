@@ -10,7 +10,7 @@ Find the element with the maximum absolute value.
 Input:
 	x : vector (as array of doubles)
 	len : number of elements in x (dimension)
-Output: index of the first element with maximum absolute value
+Output: [index] of the first element with maximum absolute value
 Errors: returns -1 if vector is empty (len = 0)
 */
 int amax(
@@ -108,3 +108,5 @@ void swap(
     double* x,
     double* y,
     const unsigned int len);
+
+#endif
