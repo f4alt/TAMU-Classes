@@ -200,113 +200,59 @@ bool outputImage(string filename, Pixel** image, int width, int height) {
       }
     }
   }
+  fout.close();
   return true;
 }
 
 int energy(Pixel** image, int x, int y, int width, int height) {
-  int xr, xg, xb;
-  int yr, yg, yb;
-  int energy;
-  // if left column
-  if (x == 0) {
-    // top corner
-    if (y == 0) {
-      xr = (image[1][0].r - image[width - 1][0].r);
-      xg = (image[1][0].g - image[width - 1][0].g);
-      xb = (image[1][0].b - image[width - 1][0].b);
-      yr = (image[0][1].r - image[0][height - 1].r);
-      yg = (image[0][1].g - image[0][height - 1].g);
-      yb = (image[0][1].b - image[0][height - 1].b);
-      energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-      return energy;
-    }
-    // bottom corner
-    if (y == (height - 1)) {
-      xr = (image[1][0].r - image[width - 1][0].r);
-      xg = (image[1][0].g - image[width - 1][0].g);
-      xb = (image[1][0].b - image[width - 1][0].b);
-      yr = (image[0][y - 1].r - image[0][0].r);
-      yg = (image[0][y - 1].g - image[0][0].g);
-      yb = (image[0][y - 1].b - image[0][0].b);
-      energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-      return energy;
-    }
-    // the rest
-    xr = (image[1][y].r - image[width - 1][y].r);
-    xg = (image[1][y].g - image[width - 1][y].g);
-    xb = (image[1][y].b - image[width - 1][y].b);
-    yr = (image[0][y-1].r - image[0][y+1].r);
-    yg = (image[0][y-1].g - image[0][y+1].g);
-    yb = (image[0][y-1].b - image[0][y+1].b);
-    energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-    return energy;
+  int pixel_rx;
+  int pixel_gx;
+  int pixel_bx;
+  int pixel_ry;
+  int pixel_rg;
+  int pixel_rb;
+  int total_energy_x;
+  int total_energy_y;
+  int Energy = 0;
+  if (x != 0 && x != width-1) {
+    pixel_rx = (image[x-1][y].r - image[x+1][y].r);
+    pixel_gx = (image[x-1][y].g - image[x+1][y].g);
+    pixel_bx = (image[x-1][y].b - image[x+1][y].b);
+
+    total_energy_x = pixel_rx * pixel_rx + pixel_gx * pixel_gx + pixel_bx * pixel_bx;
+  } else if (x == 0) {
+    pixel_rx = (image[width - 1][y].r - image[x+1][y].r);
+    pixel_gx = (image[width - 1][y].g - image[x+1][y].g);
+    pixel_bx = (image[width - 1][y].b - image[x+1][y].b);
+
+    total_energy_x = pixel_rx * pixel_rx + pixel_gx * pixel_gx + pixel_bx * pixel_bx;
+  } else if (x == width-1) {
+    pixel_rx = (image[x-1][y].r - image[0][y].r);
+    pixel_gx = (image[x-1][y].g - image[0][y].g);
+    pixel_bx = (image[x-1][y].b - image[0][y].b);
+
+    total_energy_x = pixel_rx * pixel_rx + pixel_gx * pixel_gx + pixel_bx * pixel_bx;
+  } if (y != 0 && y != height - 1) {
+    pixel_ry = (image[x][y-1].r - image[x][y+1].r);
+    pixel_rg = (image[x][y-1].g - image[x][y+1].g);
+    pixel_rb = (image[x][y-1].b - image[x][y+1].b);
+
+    total_energy_y = pixel_ry * pixel_ry + pixel_rg * pixel_rg + pixel_rb * pixel_rb;
+  } else if (y == 0) {
+    pixel_ry = (image[x][height-1].r - image[x][y+1].r);
+    pixel_rg = (image[x][height-1].g - image[x][y+1].g);
+    pixel_rb = (image[x][height-1].b - image[x][y+1].b);
+
+    total_energy_y = pixel_ry * pixel_ry + pixel_rg * pixel_rg + pixel_rb * pixel_rb;
+  } else if (y == height - 1) {
+    pixel_ry = (image[x][y-1].r - image[x][0].r);
+    pixel_rg = (image[x][y-1].g - image[x][0].g);
+    pixel_rb = (image[x][y-1].b - image[x][0].b);
+
+    total_energy_y = pixel_ry * pixel_ry + pixel_rg * pixel_rg + pixel_rb * pixel_rb;
   }
-  // if top row
-  if (y == 0) {
-    // if right corner
-    if (x == (width - 1)) {
-      xr = (image[x - 1][0].r - image[0][0].r);
-      xg = (image[x - 1][0].g - image[0][0].g);
-      xb = (image[x - 1][0].b - image[0][0].b);
-      yr = (image[x][y + 1].r - image[x][height - 1].r);
-      yg = (image[x][y + 1].g - image[x][height - 1].g);
-      yb = (image[x][y + 1].b - image[x][height - 1].b);
-      energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-      return energy;
-    }
-    // the rest
-    xr = (image[x + 1][0].r - image[x - 1][0].r);
-    xg = (image[x + 1][0].g - image[x - 1][0].g);
-    xb = (image[x + 1][0].b - image[x - 1][0].b);
-    yr = (image[x][y + 1].r - image[x][height - 1].r);
-    yg = (image[x][y + 1].g - image[x][height - 1].g);
-    yb = (image[x][y + 1].b - image[x][height - 1].b);
-    energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-    return energy;
-  }
-  // if right column
-  if (x == (width - 1)) {
-    // if bottom right corner
-    if (y == (height - 1)) {
-      xr = (image[x - 1][y].r - image[0][y].r);
-      xg = (image[x - 1][y].g - image[0][y].g);
-      xb = (image[x - 1][y].b - image[0][y].b);
-      yr = (image[x][y - 1].r - image[x][0].r);
-      yg = (image[x][y - 1].g - image[x][0].g);
-      yb = (image[x][y - 1].b - image[x][0].b);
-      energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-      return energy;
-    }
-    // the rest
-    xr = (image[x - 1][y].r - image[0][y].r);
-    xg = (image[x - 1][y].g - image[0][y].g);
-    xb = (image[x - 1][y].b - image[0][y].b);
-    yr = (image[x][y - 1].r - image[x][y + 1].r);
-    yg = (image[x][y - 1].g - image[x][y + 1].g);
-    yb = (image[x][y - 1].b - image[x][y + 1].b);
-    energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-    return energy;
-  }
-  // bottom row
-  if (y == (height - 1)) {
-    xr = (image[x + 1][y].r - image[x - 1][y].r);
-    xg = (image[x + 1][y].g - image[x - 1][y].g);
-    xb = (image[x + 1][y].b - image[x - 1][y].b);
-    yr = (image[x][y - 1].r - image[x][0].r);
-    yg = (image[x][y - 1].g - image[x][0].g);
-    yb = (image[x][y - 1].b - image[x][0].b);
-    energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-    return energy;
-  }
-  // all non edge cases
-  xr = (image[x - 1][y].r - image[x + 1][y].r);
-  xg = (image[x - 1][y].g - image[x + 1][y].g);
-  xb = (image[x - 1][y].b - image[x + 1][y].b);
-  yr = (image[x][y - 1].r - image[x][y + 1].r);
-  yg = (image[x][y - 1].g - image[x][y + 1].g);
-  yb = (image[x][y - 1].b - image[x][y + 1].b);
-  energy = (xr * xr) + (xg * xg) + (xb * xb) + (yr * yr) + (yg * yg) + (yb * yb);
-  return energy;
+  Energy = total_energy_x + total_energy_y;
+  return Energy;
 }
 
 // implement for part 2
@@ -316,41 +262,35 @@ int energy(Pixel** image, int x, int y, int width, int height) {
 int loadVerticalSeam(Pixel** image, int start_col, int width, int height, int* seam) {
   seam[0] = start_col;
   int total_energy = energy(image, start_col, 0, width, height);
-  int curr_col, down_col, right_col, left_col;
-  curr_col = start_col;
-  for (int i = 1; i <= (height - 1); i++) {
-    if (curr_col == 0) {
-      cout << "using 1" << endl; //testline*****
-      down_col = energy(image, curr_col, i, width, height);
-      left_col = energy(image, curr_col+1, i, width, height);
-      right_col = down_col + right_col;
-    } else if (curr_col == width - 1) {
-      cout << "using 2" << endl; //testline*********
-      down_col = energy(image, curr_col, i , width, height);
-      right_col = energy(image, curr_col-1, i, width, height);
-      left_col = down_col + left_col;
+  int curr_col_number = start_col;
+  int down_col_e = 0;
+  int right_col_e = 0;
+  int left_col_e = 0;
+  for (int i = 1; i <= height-1; i++) {
+    if (curr_col_number == 0) {
+      down_col_e = energy(image, curr_col_number, i, width, height);
+      left_col_e = energy(image, curr_col_number+1, i, width, height);
+      right_col_e = down_col_e + right_col_e;
+    } else if (curr_col_number == (width - 1)) {
+      down_col_e = energy(image, curr_col_number, i, width, height);
+      right_col_e = energy(image, curr_col_number-1, i, width, height);
+      left_col_e = down_col_e + left_col_e;
     } else {
-      cout << "using 3" << endl; //testline*************
-    down_col = energy(image, curr_col, i, width, height);
-    right_col = energy(image, curr_col-1, i, width, height);
-    left_col = energy(image, curr_col+1, i, width, height);
+    down_col_e = energy(image, curr_col_number, i, width, height);
+    right_col_e = energy(image, curr_col_number-1, i, width, height);
+    left_col_e = energy(image, curr_col_number+1, i, width, height);
     }
-    //testline
-    cout << "right " << right_col << endl;
-    cout << "left " << left_col << endl;
-    cout << "down " << down_col << endl;
-    //testline
-    if (right_col < down_col && right_col < left_col) {
-      seam[i] = curr_col-1;
-      total_energy += right_col;
-      curr_col -= 1;
-    } else if ((left_col < down_col) && (left_col < right_col || left_col == right_col)) {
-      seam[i] = curr_col+1;
-      total_energy += left_col;
-      curr_col += 1;
+    if (right_col_e < down_col_e && right_col_e < left_col_e) {
+      seam[i] = curr_col_number-1;
+      total_energy += right_col_e;
+      curr_col_number -= 1;
+    } else if (left_col_e < down_col_e && (left_col_e < right_col_e || left_col_e == right_col_e)) {
+      seam[i] = curr_col_number+1;
+      total_energy += left_col_e;
+      curr_col_number += 1;
     } else {
-      seam[i] = curr_col;
-      total_energy += down_col;
+      seam[i] = curr_col_number;
+      total_energy += down_col_e;
     }
   }
   return total_energy;
@@ -359,6 +299,7 @@ int loadVerticalSeam(Pixel** image, int start_col, int width, int height, int* s
 int loadHorizontalSeam(Pixel** image, int start_row, int width, int height, int* seam) {
   seam[0] = start_row;
   int total_energy = energy(image, 0, start_row, width, height);
+  // cout << "Start energy " << total_energy << endl; //testline*******
   int curr_row, down_row, right_row, left_row;
   curr_row = start_row;
   for (int i = 1; i <= (width - 1); i++) {
@@ -376,9 +317,9 @@ int loadHorizontalSeam(Pixel** image, int start_row, int width, int height, int*
     left_row = energy(image, i, curr_row-1, width, height);
     }
     //testline
-    cout << "down " << down_row << endl;
-    cout << "right " << right_row << endl;
-    cout << "left " << left_row << endl;
+    // cout << "down " << down_row << endl;
+    // cout << "right " << right_row << endl;
+    // cout << "left " << left_row << endl;
     if (right_row < down_row && right_row < left_row) {
       seam[i] = curr_row+1;
       total_energy += right_row;
@@ -395,18 +336,80 @@ int loadHorizontalSeam(Pixel** image, int start_row, int width, int height, int*
   return total_energy;
 }
 
-/*
 int* findMinVerticalSeam(Pixel** image, int width, int height) {
-  return nullptr;
+  int* p = new int[height];
+  int curr_lowest_total = loadVerticalSeam(image, 0, width, height, p);
+  int curr_lowest_col = 0;
+  int check_lowest;
+  for (int i = 1; i < width; i++) {
+    check_lowest = loadVerticalSeam(image, i, width, height, p);
+    if (check_lowest < curr_lowest_total) {
+      curr_lowest_total = check_lowest;
+      curr_lowest_col = i;
+    }
+  }
+  loadVerticalSeam(image, curr_lowest_col, width, height, p);
+  return p;
 }
 
 int* findMinHorizontalSeam(Pixel** image, int width, int height) {
-  return nullptr;
+  int* p = new int[width];
+  int curr_lowest_total = loadHorizontalSeam(image, 0, width, height, p);
+  int curr_lowest_row = 0;
+  int check_lowest;
+  for (int i = 1; i < height; i++) {
+    check_lowest = loadHorizontalSeam(image, i, width, height, p);
+    if (check_lowest < curr_lowest_total) {
+      curr_lowest_total = check_lowest;
+      curr_lowest_row = i;
+    }
+  }
+  loadHorizontalSeam(image, curr_lowest_row, width, height, p);
+  return p;
 }
 
 void removeVerticalSeam(Pixel** image, int width, int height, int* verticalSeam) {
+  int right_val_r;
+  int right_val_g;
+  int right_val_b;
+  int col_number;
+
+  // i = row, j = column
+  for (int row = 0; row < height; row++) {
+    col_number = verticalSeam[row];
+    for (int col = col_number; col < width-1; col++) {
+      // define pixel to right values
+      right_val_r = image[col + 1][row].r;
+      right_val_g = image[col + 1][row].g;
+      right_val_b = image[col + 1][row].b;
+
+      // set pixel to pixel to right values
+      image[col][row].r = right_val_r;
+      image[col][row].g = right_val_g;
+      image[col][row].b = right_val_b;
+    }
+  }
 }
 
 void removeHorizontalSeam(Pixel** image, int width, int height, int* horizontalSeam) {
+  int right_val_r;
+  int right_val_g;
+  int right_val_b;
+  int row_number;
+
+  // i = column, j = row
+  for (int col = 0; col < width; col++) {
+    row_number = horizontalSeam[col];
+    for (int row = row_number; row < height; row++) {
+      // define pixel to right values
+      right_val_r = image[col][row + 1].r;
+      right_val_g = image[col][row + 1].g;
+      right_val_b = image[col][row + 1].b;
+
+      // set pixel to pixel to right values
+      image[col][row].r = right_val_r;
+      image[col][row].g = right_val_g;
+      image[col][row].b = right_val_b;
+    }
+  }
 }
-*/

@@ -76,14 +76,30 @@ int main() {
 
 
   int originalWidth = width; // need to delete image array at end of program
+  // int width_difference = width - targetWidth;
+  // int height_difference = height - targetHeight;
+  // int total_difference = width_difference + height_difference;
 
   Pixel** image = createImage(width, height); // create array of size that we need
   if (image != nullptr) {
     if (loadImage(filename, image, width, height)) {
       cout << "Start carving..." << endl;
 
-
       // Add code to remove seams from image (Do in part 2)
+      while (width > targetWidth || height > targetHeight) {
+        if (width > targetWidth) {
+          int* mvs = findMinVerticalSeam(image, width, height);
+          removeVerticalSeam(image, width, height, mvs);
+          width--;
+          delete[] mvs;
+        }
+        if (height > targetHeight) {
+          int* mhs = findMinHorizontalSeam(image, width, height);
+          removeHorizontalSeam(image, width, height, mhs);
+          height--;
+          delete[] mhs;
+        }
+      }
 
       // set up output filename
       stringstream ss;
@@ -93,7 +109,8 @@ int main() {
 
     // call last to remove the memory from the heap
     deleteImage(image, originalWidth);
+  } else {
+    cout << "Yeet" << endl;
   }
-  // else
 
 }
