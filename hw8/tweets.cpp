@@ -41,16 +41,19 @@ int main() {
   printMenu();
   int chosen_option = getOption();
   bool goodFile;
+  OrderedHashtagList orderedhl;
 
   // keep asking for options
     while(chosen_option != 9) {
       // option 1
       if (chosen_option == 1) {
+        // get filename and validate file
         string filename;
         cout << "Enter filename: ";
         cin >> filename;
         goodFile = validFile(filename);
 
+        // if valid file, open and start sorting tweets
         if (goodFile == true) {
           string line;
           ifstream fin;
@@ -68,7 +71,7 @@ int main() {
               string temp_string;
               for (int i = 0; i < nb_hashtags; i++) {
                 temp_string = p[i];
-                insertHashtag(temp_string, hashlist);
+                insertHashtag(temp_string, orderedhl);
               }
             }
           }

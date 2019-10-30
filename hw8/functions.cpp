@@ -88,7 +88,8 @@ void readTweet(string line, bool& isRetweet, int& nb_htags, string*& array_of_ht
  */
 
 bool insertHashtag(string ht, OrderedHashtagList& hashlist) {
-
+// use to lower
+// compare with ordered hashtaglist hashlist.list[i].name
     return true;
 }
 
