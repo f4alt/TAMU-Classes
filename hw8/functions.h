@@ -41,4 +41,6 @@ bool validFile(std::string);
 
 int string_length(std::string);
 
+void pushup(OrderedHashtagList, int);
+
 #endif //#ifndef _FUNCTIONS_H
