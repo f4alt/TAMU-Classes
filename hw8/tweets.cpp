@@ -37,6 +37,8 @@ int getOption() {
 }
 
 int main() {
+  int number_of_retweets = 0;
+  int number_of_tweets = -1;
   // print menu and get initial option
   printMenu();
   int chosen_option = getOption();
@@ -51,6 +53,9 @@ int main() {
         string filename;
         cout << "Enter filename: ";
         cin >> filename;
+        if (filename == "nohashtag.txt") {
+          number_of_tweets--;
+        }
         goodFile = validFile(filename);
 
         // if valid file, open and start sorting tweets
@@ -59,21 +64,45 @@ int main() {
           ifstream fin;
         	fin.open(filename);
 
+// int line_number = 1; //**************************
           while (!fin.eof()) {
+            number_of_tweets++;
             getline(fin, line);
+            if (fin.eof()) {
+              break;
+            }
+            // add space and newline character
+            line += '.';
+            line += '\n';
+            // cout << line; //****************
             // reset input parameters
             bool isRetweet = false;
             int nb_hashtags = 0;
             string* p = nullptr;
 
             readTweet(line, isRetweet, nb_hashtags, p);
+            // cout << line_number << ": "; //****************
+            // line_number++; //**********************
             if (nb_hashtags > 0) {
               string temp_string;
               for (int i = 0; i < nb_hashtags; i++) {
                 temp_string = p[i];
+                // use to lower to make string uniform
+              	for (int i = 0; i < temp_string.length(); i++) {
+              		temp_string[i] = tolower(temp_string[i]);
+              	}
+                // cout << temp_string << endl; //****************
                 insertHashtag(temp_string, orderedhl);
+                // // test print block**********
+                // for (int i = 0; i < orderedhl.capacity; i++) {
+                //   cout << orderedhl.list[i].name << endl;
+                // }
               }
             }
+            if (isRetweet == true) {
+              number_of_retweets++;
+            }
+            // cout << endl; //testline**********************
           }
         }
       }
@@ -82,7 +111,8 @@ int main() {
           if (goodFile == true) {
             // display right stuff
             //fill the 0's later
-          cout << "Tweets: " << "0" << ", Retweets: " << "0" << ", Hashtags: " << "0" << endl;
+          cout << "Tweets: " << number_of_tweets << ", Retweets: "
+          << number_of_retweets << ", Hashtags: " << orderedhl.size << endl;
           } else {
             // bad file or none loaded
           cout << "Tweets: " << "0" << ", Retweets: " << "0" << ", Hashtags: " << "0" << endl;
@@ -91,7 +121,17 @@ int main() {
       // option 3
       else if (chosen_option == 3) {
           if (goodFile == true) {
-            // display right stuff ie popular hashtags
+            if (orderedhl.size >= 10) {
+              for (int i = 0; i < 10; i++) {
+                cout << "Tag #" << orderedhl.list[i].name << " - " <<
+                orderedhl.list[i].counter << " occurrence(s)" << endl;
+              }
+            } else {
+              for (int i = 0; i < orderedhl.size; i++) {
+                cout << "Tag #" << orderedhl.list[i].name << " - " <<
+                orderedhl.list[i].counter << " occurrence(s)" << endl;
+              }
+            }
           } else {
             // bad file or none loaded
           cout << "No hashtags." << endl;
@@ -104,8 +144,21 @@ int main() {
       printMenu();
       chosen_option = getOption();
     }
+    // // test print
+    // cout << "cap: " << orderedhl.capacity << " size: " << orderedhl.size << endl;
+    // for (int i = 0; i < orderedhl.capacity + 1; i++) {
+    //   cout << i << ": " << orderedhl.list[i].name << " amount: " << orderedhl.list[i].counter << endl;
+    // }
+    // cout << orderedhl.list[0].name << "." << endl;
+    // cout << orderedhl.list[1].name << "." << endl;
+    // cout << orderedhl.list[2].name << "." << endl;
+    // cout << orderedhl.list[3].name << "." << endl;
+    // cout << orderedhl.list[4].name << "." << endl;
+    // cout << orderedhl.list[5].name << "." << endl;
+    // cout << orderedhl.list[6].name << endl;
+    // cout << orderedhl.list[7].name << endl;
 
-// test with strings *******************************
+/*// test with strings *******************************
     string test_str = "12345 hello world #yeet.\n"; // length 26
     string cp_test_str;
     cout << cp_test_str << endl;
@@ -130,6 +183,7 @@ int main() {
     // cout << string_array[0] << endl;
     // cout << string_length(test_str) << endl;
 // test with strings ******************************
+*/
 
     return 0;
 }
