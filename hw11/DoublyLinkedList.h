@@ -38,7 +38,7 @@ private:
     // dO nOt CHanGe oRdEriNg.
     Node<T> *head;
     Node<T> *tail;
-    unsigned int size;
+    unsigned int sz;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ std::string DoublyLinkedList<T>::to_str() const
     os << std::endl << std::setfill('-') << std::setw(80) << '-' << std::setfill(' ') << std::endl;
     os << "head: " << head << std::endl;
     os << "tail: " << tail << std::endl;
-    os << "  sz: " << size << std::endl;
+    os << "  sz: " << sz << std::endl;
     os << std::setw(16) << "node" << std::setw(16) << "node.prev" << std::setw(16) << "node.data" <<  std::setw(16) << "node.next" << std::endl;
     while (curr) {
         os << std::setw(16) << curr;
