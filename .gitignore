@@ -4,5 +4,8 @@
 # except files with extensions
 !*.*
 
+# ignore .out
+!*.out
+
 # except directories
 !*/
