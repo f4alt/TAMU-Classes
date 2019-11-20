@@ -6,10 +6,11 @@
 //////////////////////////////////////////////////////////////////////////////
 template<typename T>
 struct Node {
-    Node(T data); // need to define this
     T data;
     Node* next;
     Node* prev;
+
+    Node(T data = 0): data(data), next(nullptr), prev(nullptr) {} // need to define this
 };
 
 //////////////////////////////////////////////////////////////////////////////
