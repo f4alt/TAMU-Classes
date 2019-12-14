@@ -64,9 +64,10 @@ DoublyLinkedList<T>::DoublyLinkedList() {
 
 template<typename T>
 DoublyLinkedList<T>::DoublyLinkedList(T data) {
-  this->head->data = data;
-  this->tail->data = data;
-  this->sz = 1;
+  Node<T>* node = new Node<T>(data);
+  head = node;
+  tail = node;
+  sz = 1;
 }
 
 template<typename T>
@@ -84,23 +85,14 @@ DoublyLinkedList<T>::DoublyLinkedList(const DoublyLinkedList<T>& tocopy) {
 template<typename T>
 DoublyLinkedList<T>& DoublyLinkedList<T>::operator=(const DoublyLinkedList<T>& tocopy) {
   if (this != &tocopy) {
-    Node<T>* clear = this->head;
-     while (clear) {
-      Node<T>* next = clear->next;
-      delete clear;
-      clear = next;
-    }
-    sz = 0;
-    head = nullptr;
-    tail = nullptr;
-
+    clear();
     Node<T>* current = tocopy.head;
     while (current) {
       this->push_back(current->data);
       current = current->next;
     }
   }
-  return* this;
+  return *this;
 }
 
 template<typename T>
@@ -111,7 +103,7 @@ DoublyLinkedList<T>::~DoublyLinkedList() {
 template<typename T>
 void DoublyLinkedList<T>::push_back(T elem) {
   Node<T>* node = new Node<T>(elem);
-  if (!head) {
+  if (sz == 0) {
       // empty list
       head = node;
       tail = node;
