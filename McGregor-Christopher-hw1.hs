@@ -3,7 +3,7 @@
 -- Homework Assignment 1
 
 -- Problem 1 (5 points)
--- Student Name: Christopher Mcgregor
+-- Student Name: Christopher McGregor
 -- UIN: 726009537
 -- (ACKNOWLEDGE ANY HELP RECEIVED HERE)
 
@@ -33,11 +33,11 @@ qsort1(x:xs) = qsort1 larger ++ [x] ++ qsort1 smaller
 {- Write your answer for Question 3.2 within this block comment.
 
 qsort1 [3,2,3,1,4]
-looks like:         qsort1 [1,2]             ++ [3] ++            qsort1 [3,4]          || qsort1 is 2 times
-looks like: (qsort1 [] ++ [1] ++ qsort1 [2]) ++ [3] ++ (qsort1 [3] ++ [4] ++ qsort1 []) || qsort1 is called 4 more times
-looks like:        ([] ++ [1] ++ [2])        ++ [3] ++        ([3] ++ [4] ++ [])
-then applying ++:        [1,2]               ++ [3] ++               [3,4]
-finally applying ++ again∷                  [1,2,3,3,4]
+looks like:                       qsort1 [1,2]             ++ [3] ++                         qsort1 [3,4]          || qsort1 is 2 times
+looks like:               (qsort1 [] ++ [1] ++ qsort1 [2]) ++ [3] ++              (qsort1 [3] ++ [4] ++ qsort1 []) || qsort1 is called 4 more times
+looks like: (qsort1 [] ++ [1] ++ [2] ++ qsort1 [] )        ++ [3] ++        (qsort [0] ++ [3] ++ [4] ++ qsort1 []) || qsort1 is called 4 more times
+then applying ++: [1,2] ++ [3] ++ [3,4]
+finally applying ++ again: [1,2,3,3,4] || qsort1 is called 10 times
 
 -}
 
