@@ -60,17 +60,11 @@ reaching the answer: 32
 
 
 -- Problem 5 (Chapter 6, Exercise 7) (10 points)
-sort :: Ord a => [a] -> [a]
-sort [] = []
-sort(x:xs) = sort smaller ++ [x] ++ sort larger
-               where
-                 smaller = [a | a <- xs, a <= x]
-                 larger  = [b | b <- xs, b > x]
-
 merge :: Ord a => [a] -> [a] -> [a]
 merge xs [] = xs
 merge [] ys = ys
-merge (x:xs) (y:ys) = sort (x : y : merge xs ys)
+merge (x:xs) (y:ys) = if x > y then y : merge (x:xs) ys
+                      else x : merge (y:ys) xs
 
 
 
