@@ -84,26 +84,43 @@ halve :: [a] -> ([a], [a])
 halve xs = splitAt ((length xs) `div` 2) xs
 
 mergeBy :: (a -> a -> Bool) -> [a] -> [a] -> [a]  -- 8 points
-mergeBy = undefined
+mergeBy p xs [] = xs
+mergeBy p [] ys = ys
+mergeBy p (x:xs) (y:ys) = if (p x y) then x : mergeBy p xs (y:ys)
+                          else y : mergeBy p (x:xs) ys
+
 
 msortBy :: (a -> a -> Bool) -> [a] -> [a]  -- 7 points
-msortBy = undefined
+msortBy p xs | length xs < 2 = xs
+             | otherwise = mergeBy p (msortBy p beg) (msortBy p end)
+              where beg = fst (halve xs)
+                    end = snd (halve xs)
 
 
 -- Problem 7 (10+5 = 15 points) Chapter 7, Exercise 9
 altMap :: (a -> b) -> (a -> b) -> [a] -> [b]  -- 10 points
-altMap = undefined
+altMap f g (x:y:xs) = if length xs < 2 then f x : g y : map f xs
+                      else f x : g y : altMap f g xs
 
 {- (5 points)
    Explain how your altMap works when it is applied as below.
    > altMap (*2) (`div` 2) [0..6]
+   = {applying altmap using else}
+    [(*2) 0, (`div` 2) 1, altmap (*2) (`div` 2) [2,3,4,5,6]]
+   = {applying altmap using else}
+    [(*2) 0, (`div` 2) 1, (*2) 2, (`div` 1) 3, altmap (*2) (`div` 2) [4,5,6]]
+   = {applying altmap using if}
+    [(*2) 0, (`div` 2) 1, (*2) 2, (`div` 1) 3, (*2) 4, (`div` 2) 5, map (*2) [6]]
+   = {applying (*2), (`div` 2) and map}
+    [0, 0, 4, 1, 8, 2, 12]
 
 -}
 
 
 -- Problem 8 (10 points)
 concatenateAndUpcaseOddLengthStrings :: [String] -> String
-concatenateAndUpcaseOddLengthStrings = undefined
+concatenateAndUpcaseOddLengthStrings xs = foldr (++) "" (map(map toUpper) ys)
+                                         where ys = filter (odd . length) xs
 
 
 
