@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	assemblyParser in(infile);
 	output c(outfile, &symbolTable);
 
-  // pass 1 - read input
+  // pass 1 - read input and load labels
 	while (in.keep_going()) {
 		in.advance();
 		if (in.command() == assemblyParser::commandType::l)
