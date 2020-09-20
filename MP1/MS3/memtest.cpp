@@ -194,9 +194,30 @@ int main(int argc, char * argv[]) {
 
 
     // In your version, these parameters are passed as command-line arguments!
+    size_t block_size = 128; // default 128 bytes
+    size_t mem_size = 524288; // default 512kB
+    int option;
 
-    size_t block_size = 1024; /* 1kB -- CHANGE THIS! */
-    size_t mem_size = 1024 * block_size; /* 1MB -- CHANGE THIS! */
+    while ((option = getopt (argc, argv, "b:s:")) != -1)
+      switch (option)
+        {
+        case 'b':
+          block_size = stoi(optarg);
+          break;
+        case 's':
+          mem_size = stoi(optarg);
+          break;
+        case '?':
+          if (isprint (optopt))
+            fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+          else
+            fprintf (stderr,
+                     "Unknown option character `\\x%x'.\n",
+                     optopt);
+          return 1;
+        default:
+          abort ();
+        }
 
     for (;;) { // Loop forewer, or until we break.
 
