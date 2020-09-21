@@ -67,11 +67,13 @@ public:
 class FreeList {
 
  private:
-   SegmentHeader* head;
-   SegmentHeader* tail;
-   int list_size;
 
  public:
+   size_t expected_capacity;
+   int list_size;
+   SegmentHeader* head;
+   SegmentHeader* tail;
+   
    FreeList();
    /* This function initializes a new free-list. */
 

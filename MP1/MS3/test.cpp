@@ -3,11 +3,14 @@
 using namespace std;
 
 int main() {
-  int block_size = 100;
-  int size = 100;
-  int allocated = 0;
+  int* test_pointer;
 
-  allocated = ((block_size + size - 1) / block_size) * block_size;
+  int test_array[] = {1,2,3};
 
-  cout << allocated << endl;
+  test_pointer = test_array;
+
+
+  // test_pointer[2] = {1,2,3};
+
+  cout << test_pointer[2] << endl;
 }
