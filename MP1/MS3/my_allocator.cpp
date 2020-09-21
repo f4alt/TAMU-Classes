@@ -91,14 +91,19 @@ void* MyAllocator::Malloc(size_t _length) {
     }
   }
 
-  int i = 0;
-  while(i <= sizeof(list)) {
-    cout << "i:" << i << " expected cap:" << list[i].expected_capacity << " round up:" << round_up << endl;
-    if(list[i].head == NULL || round_up > Fib(i)) {
+  while(true) {
+    int i = 0;
+    while((list[i].list_size == 0) || (Fib(i) * block_size) < round_up) {
       i++;
+      if (Fib(i)*block_size == round_up) {
+        break;
+      }
+      if (i == sizeof(list)) {
+        break;
+      }
     }
-
     if (list[i].expected_capacity == round_up) {
+      cout << "found" << endl;
       void* ptr = (void*)(list[i].head + sizeof(SegmentHeader));    // **************
       return ptr;
     }
