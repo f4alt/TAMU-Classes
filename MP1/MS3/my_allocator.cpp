@@ -56,25 +56,42 @@ using namespace std;
 /*--------------------------------------------------------------------------*/
 
 MyAllocator::MyAllocator(size_t _basic_block_size, size_t _size) {
-  size_t remaining_size = _size;
+  size_t remaining_total = _size;
+  size = 0;
   block_size = _basic_block_size;
 
   this->start = std::malloc(_size);
 
-  // find max fib quantity and set free_list size
-  int array_size = 0;
-  while ((Fib(array_size) * _basic_block_size) < _size) {
-    array_size++;
+  while (remaining_total > _basic_block_size) {
+    int array_size = 0;
+    while ((Fib(array_size) * _basic_block_size) < remaining_total) {
+      array_size++;
+    }
+    if (size == 0) {
+      list = new FreeList[array_size];
+      size = array_size-2;
+    }
+
+    SegmentHeader* seg = new SegmentHeader(Fib(array_size - 2) * _basic_block_size);
+    list[array_size - 2].Add(seg);
+    remaining_total -= Fib(array_size - 1) * _basic_block_size;
+
+    // cout << remaining_total << endl;
   }
-  list = new FreeList[array_size];
 
-  SegmentHeader* seg = new SegmentHeader(Fib(array_size - 1) * _basic_block_size);
-  list[array_size - 1].Add(seg);
 
-  // for (int i = 0; i < array_size; i++) {
-  //   list[i].expected_capacity = Fib(i+1) * block_size;
-  //   cout << list[i].list_size << endl;
-  //   cout << list[i].expected_capacity << endl;
+  if (remaining_total == _basic_block_size) {
+    SegmentHeader* seg = new SegmentHeader(_basic_block_size);
+    list[0].Add(seg);
+  }
+  for (int i = 0; i <= size; i++) {
+    list[i].expected_capacity = Fib(i+1) * block_size;
+  }
+
+  total_size = _size;
+  //
+  // for (int i = 0; i <= size; i++) {
+  //   cout << "pos " << i << " size:" << list[i].list_size << " quantity:" << list[i].expected_capacity << endl;
   // }
 }
 
@@ -90,51 +107,52 @@ void* MyAllocator::Malloc(size_t _length) {
       break;
     }
   }
+  if (round_up == 0) {
+    round_up = block_size;
+  }
+  if (round_up > total_size) {
+    cout << "Error, cant allocate more - I didn't finish Coalesce() :(" << endl;
+    exit(1);
+  }
 
   while(true) {
     int i = 0;
-    while((list[i].list_size == 0) || (Fib(i) * block_size) < round_up) {
+    while(list[i].list_size == 0 || (Fib(i) * block_size) <= round_up) {
+      // if (found) {
+      //   break;
+      // }
+      // if (list[i].head != NULL) {
+      //   if (list[i].head->length == round_up) {
+      //     found = true;
+      //     continue;
+      //   }
+      // }
       i++;
-      if (Fib(i)*block_size == round_up) {
-        break;
-      }
-      if (i == sizeof(list)) {
-        break;
-      }
     }
-    if (list[i].expected_capacity == round_up) {
-      cout << "found" << endl;
+    // cout << "i:" << i << endl;
+
+    SegmentHeader *seg = list[i].head;
+
+    // cout << "looking for:" << round_up << " expected_capacity: " << list[i].expected_capacity << endl;
+    if (list[i].head->length == round_up || round_up == block_size) {
+      // cout << "found" << endl;
       void* ptr = (void*)(list[i].head + sizeof(SegmentHeader));    // **************
       return ptr;
-    }
-    else { // split into buddies
-      SegmentHeader* SmallerBud = list[i].head->Split(round_up);
-      list[i - 2].Add(SmallerBud);
+    } else { // split into buddies
+      // cout << "split" << round_up << endl;
+      SegmentHeader* SmallerBud = list[i].head->Split(Fib(i-1)*block_size);
       list[i - 1].Add(list[i].head);
-      list[i].Remove(list[i].head);
+      list[i - 2].Add(SmallerBud);
+      list[i].Remove(seg);
     }
+
+    // for (int i = 0; i <= size; i++) {
+    //   cout << "pos " << i << " size:" << list[i].list_size << " quantity:" << list[i].expected_capacity << endl;
+    // }
   }
-
-
-  // OLD CODE
-  // // round up to next multiple of blocksize
-  // size_t len = ((block_size + (_length + sizeof(SegmentHeader)) - 1) / block_size) * block_size;
-  // SegmentHeader* seg = list.Head();
-  // while (seg != NULL && seg->length < len) {  // iterate until list is exhausted or we find something
-  //   seg = seg->next;
+  // for (int i = 0; i <= size; i++) {
+  //   cout << "pos " << i << " size:" << list[i].list_size << " quantity:" << list[i].expected_capacity << endl;
   // }
-  // if (seg == NULL) { // Didn't find valid segment
-  //   return NULL;
-  // }
-  // list.Remove(seg); // found valid segment, segment is no longer free
-  // if (seg->length > len) {
-  //   SegmentHeader* seg2 = seg->Split(len);
-  //   list.Add(seg2);
-  // }
-  //
-  // // return new starting point
-  // void* ptr = (void*)((char*)seg + sizeof(SegmentHeader));
-  // return ptr;
 }
 
 bool MyAllocator::Free(void* _a) {
@@ -142,6 +160,10 @@ bool MyAllocator::Free(void* _a) {
     SegmentHeader* seg = (SegmentHeader*)((char*)_a - sizeof(SegmentHeader));
     // list.Add(seg);
     return true;
+}
+
+SegmentHeader* MyAllocator::Coalesce(SegmentHeader* seg) {
+
 }
 
 int MyAllocator::Fib(int stop_pos) {

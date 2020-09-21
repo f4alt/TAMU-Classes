@@ -51,6 +51,7 @@ class MyAllocator {
    size_t block_size; // basic block size of memory space
    void* start; // beginning of allocated memory space
    FreeList* list;
+   size_t size;
 
  public:
   MyAllocator(size_t _basic_block_size, size_t _size);
@@ -78,6 +79,8 @@ class MyAllocator {
      using ’Malloc’. Returns true if everything ok. */
 
   int Fib(int stop_pos);
+
+  SegmentHeader* Coalesce(SegmentHeader* seg);
 };
 
 #endif
