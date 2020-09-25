@@ -70,7 +70,6 @@ class FreeList {
    SegmentHeader* head;
    SegmentHeader* tail;
    int list_size;
-   int list_capacity;
 
  public:
    FreeList();

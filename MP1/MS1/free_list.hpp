@@ -1,10 +1,10 @@
 /*
     File: free_list.hpp
 
-    Author: Christopher McGregor
+    Author: <your name>
             Department of Computer Science and Engineering
             Texas A&M University
-    Date  : Sept 9, 2020
+    Date  : <date>
 
     Modified:
 
@@ -32,15 +32,16 @@
 class SegmentHeader {
 
 private:
+
   static const unsigned COOKIE_VALUE = 0xBADB00;
   unsigned int cookie; /* To check whether this is a genuine header! */
-
-
-public:
-  SegmentHeader* next; // make getters/setters for next and prev!     ************************
-  SegmentHeader* prev;
   size_t length;
   bool is_free;
+
+  // You will need additional data here!
+
+public:
+
   SegmentHeader(size_t _length, bool _is_free = true);
 
   ~SegmentHeader();
@@ -48,11 +49,6 @@ public:
 
   void CheckValid();
   /* Check if the cookie is valid. */
-
-  SegmentHeader* Split(size_t _len);
-
-  // GETTERS
-  size_t Length();
 };
 
 /*--------------------------------------------------------------------------*/
@@ -70,9 +66,9 @@ class FreeList {
    SegmentHeader* head;
    SegmentHeader* tail;
    int list_size;
-   int list_capacity;
 
  public:
+
    FreeList();
    /* This function initializes a new free-list. */
 
@@ -86,11 +82,6 @@ class FreeList {
    bool Add(SegmentHeader * _segment);
    /* Add the segment to the given free list. */
 
-   /* GETTER FUNCTIONS, AND FULL LIST PRINT FOR TESTING */
-   int Size();
-   SegmentHeader* Head();
-   SegmentHeader* Tail();
-   void PrintList();
 };
 
 #endif

@@ -26,7 +26,6 @@
 #include <cstdlib>
 #include <vector>
 #include <unistd.h>
-#include "free_list.hpp"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */
@@ -47,10 +46,9 @@
 class MyAllocator {
 
  private:
-   size_t total_size; // overall available size
-   size_t block_size; // basic block size of memory space
+   size_t size_remaining; // overall available size
    void* start; // beginning of allocated memory space
-   FreeList* list;
+   char* curr; // where current pointer is in memory
 
  public:
   MyAllocator(size_t _basic_block_size, size_t _size);

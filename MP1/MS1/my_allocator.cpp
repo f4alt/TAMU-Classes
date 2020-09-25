@@ -9,6 +9,7 @@
  Modified:
 
  This file contains the implementation of the class MyAllocator.
+
  */
 
 /*--------------------------------------------------------------------------*/
@@ -56,63 +57,30 @@ using namespace std;
 /*--------------------------------------------------------------------------*/
 
 MyAllocator::MyAllocator(size_t _basic_block_size, size_t _size) {
-  this->total_size = _size; // set total size_remaining of allocator
-  this->block_size = _basic_block_size;
-  this->start = std::malloc(_size);
-
-  // create new segment header with size = entire available and add to free list
-  SegmentHeader* seg1 = new(this->start)SegmentHeader(_size);
-  this->list.Add(seg1);
+  this->size_remaining = _size; // set total size_remaining of allocator
+  this->start = std::malloc(_size); // set start pointer
+  this->curr = (char*)(this->start); //typecast curr pointer to be used
 }
 
 MyAllocator::~MyAllocator() {
-  // ?                  **************************************************************
+    // Same here...
 }
 
 void* MyAllocator::Malloc(size_t _length) {
-  // round up to next multiple of blocksize
-  size_t len = ((block_size + (_length + sizeof(SegmentHeader)) - 1) / block_size) * block_size;
-
-  // find right size list
-  int idx = 0;
-  while (!sizeof(list) && (list[idx].empty() || list[idx].head->length < len)) { //******************* F(idx)??
-    idx++;
-  }
-
-  // remove found segment from freelist
-  seg = list[idx].Remove()
-  if (seg.length == len) {
-    // success? Now what                                                    ***************
-    is_free = false;
-  } else {
-
-  }
-
-
-
-
-  // OLD CODE
-  SegmentHeader* seg = list.Head();
-  while (seg != NULL && seg->length < len) {  // iterate until list is exhausted or we find something
-    seg = seg->next;
-  }
-  if (seg == NULL) { // Didn't find valid segment
-    return NULL;
-  }
-  list.Remove(seg); // found valid segment, segment is no longer free
-  if (seg->length > len) {
-    SegmentHeader* seg2 = seg->Split(len);
-    list.Add(seg2);
-  }
-
-  // return new starting point
-  void* ptr = (void*)((char*)seg + sizeof(SegmentHeader));
-  return ptr;
+    if(_length >= this->size_remaining) { // check if theres enough memory left
+      cout << "not enough" << endl;
+      return NULL;
+    } else {
+      void* result = (void*)this->curr; // save where the curr pointer is to return
+      this->size_remaining -= _length; // decrement remaining memory amount
+      this->curr += _length; // increment the current pointer
+      return result; // return where the current pointer was
+    }
 }
 
 bool MyAllocator::Free(void* _a) {
-    // add segment back to free list
-    SegmentHeader* seg = (SegmentHeader*)((char*)_a - sizeof(SegmentHeader));
-    return list.Add(seg);
+    // This empty implementation just uses C standard library free
+    cout << "MyAllocator::Free called" << endl;
+    // std::free(_a);
     return true;
 }

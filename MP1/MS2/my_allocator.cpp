@@ -9,6 +9,7 @@
  Modified:
 
  This file contains the implementation of the class MyAllocator.
+
  */
 
 /*--------------------------------------------------------------------------*/
@@ -72,26 +73,6 @@ MyAllocator::~MyAllocator() {
 void* MyAllocator::Malloc(size_t _length) {
   // round up to next multiple of blocksize
   size_t len = ((block_size + (_length + sizeof(SegmentHeader)) - 1) / block_size) * block_size;
-
-  // find right size list
-  int idx = 0;
-  while (!sizeof(list) && (list[idx].empty() || list[idx].head->length < len)) { //******************* F(idx)??
-    idx++;
-  }
-
-  // remove found segment from freelist
-  seg = list[idx].Remove()
-  if (seg.length == len) {
-    // success? Now what                                                    ***************
-    is_free = false;
-  } else {
-
-  }
-
-
-
-
-  // OLD CODE
   SegmentHeader* seg = list.Head();
   while (seg != NULL && seg->length < len) {  // iterate until list is exhausted or we find something
     seg = seg->next;

@@ -50,7 +50,7 @@ class MyAllocator {
    size_t total_size; // overall available size
    size_t block_size; // basic block size of memory space
    void* start; // beginning of allocated memory space
-   FreeList* list;
+   FreeList list;
 
  public:
   MyAllocator(size_t _basic_block_size, size_t _size);
