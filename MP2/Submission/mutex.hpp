@@ -1,12 +1,12 @@
 /*
-    File: mutex.hpp
-
-    Author: R. Bettati
-            Department of Computer Science
-            Texas A&M University
-    Date  : 09/23/19
-
-*/
+ File: mutex.hpp
+ 
+ Author: R. Bettati
+ Department of Computer Science
+ Texas A&M University
+ Date  : 09/23/19
+ 
+ */
 
 #ifndef _mutex_H_                   // include file only once
 #define _mutex_H_
@@ -41,25 +41,23 @@
 
 class Mutex {
 private:
-  /* -- INTERNAL DATA STRUCTURES
+    /* -- INTERNAL DATA STRUCTURES
      You may need to change them to fit your implementation. */
-
-  pthread_mutex_t m;
-
+    
+    pthread_mutex_t m;
+    
 public:
-
-  /* -- CONSTRUCTOR/DESTRUCTOR */
-
-  Mutex();
-
-  ~Mutex();
-
-  /* -- MUTEX OPERATIONS */
-
-  void Lock();
-
-  void Unlock();
+    
+    /* -- CONSTRUCTOR/DESTRUCTOR */
+    
+    Mutex(){};
+    ~Mutex();
+    
+    /* -- MUTEX OPERATIONS */
+    void Lock();
+    void Unlock();
 };
 
-
 #endif
+
+

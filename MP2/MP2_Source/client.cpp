@@ -1,10 +1,10 @@
-/* 
-    File: simpleclient.cpp
+/*
+    File: client.cpp
 
-    Author: R. Bettati
+    Author: Christopher McGregor
             Department of Computer Science
             Texas A&M University
-    Date  : 2019/09/23
+    Date  : 2020/09/28
 
     Simple client main program for MP2 in CSCE 313
 */
@@ -25,14 +25,19 @@
 #include <sstream>
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <errno.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <iomanip>
+#include <cmath>
+#include <limits>
 
 #include "reqchannel.hpp"
 
+using namespace std;
+
 /*--------------------------------------------------------------------------*/
-/* DATA STRUCTURES */ 
+/* DATA STRUCTURES */
 /*--------------------------------------------------------------------------*/
 
     /* -- (none) -- */
@@ -62,8 +67,20 @@ std::string int2string(int number) {
 /*--------------------------------------------------------------------------*/
 /* MAIN FUNCTION */
 /*--------------------------------------------------------------------------*/
+std::string generate_data() {
+  // std::cout << "gen_data" << std::endl;
+  return int2string(rand() % 100);
+}
 
 int main(int argc, char * argv[]) {
+  pid_t pid = fork();
+  if (pid == -1) {
+    exit(0);
+  }
+  if (pid == 0) {
+    // std::cout << "Child" << std::endl;
+    execv("dataserver", NULL);
+  }
 
   std::cout << "CLIENT STARTED:" << std::endl;
 
@@ -71,8 +88,26 @@ int main(int argc, char * argv[]) {
   RequestChannel chan("control", RequestChannel::Side::CLIENT);
   std::cout << "done." << std::endl;
 
-  /* -- Start sending a sequence of requests */
+  // ********* PART TWO TIME DIFFERENCIAL *************
+  // struct timeval start, end;
+  // gettimeofday(&start, NULL);
+  // std::string reply = chan.send_request("data Christopher McGregor");
+  // chan.send_request(generate_data);
+  // std::string a = chan.generate_data;
+  // chan->generate_data;
+  // std::string* return_data = &chan.send_request.generate_data;
+  // gettimeofday(&end, NULL);
+  // double time_taken;
+  // std::cout<<"------------------------"<<std::endl;
+  // time_taken = (end.tv_sec - start.tv_sec) * 1e6;
+  // time_taken = (time_taken + (end.tv_usec -
+  //                            start.tv_usec)) * 1e-6;
+  //
+  // std::cout << "Time taken:" << std::fixed << time_taken << std::setprecision(6);
+  // std::cout << " sec" << std::endl;
+  // string return_data = RequestChannel(generate_data());
 
+  // ************  DEFAULT STUFF  *******************
   std::string reply1 = chan.send_request("hello");
   std::cout << "Reply to request 'hello' is '" << reply1 << "'" << std::endl;
 
@@ -87,7 +122,7 @@ int main(int argc, char * argv[]) {
     std::string reply_string = chan.send_request(request_string);
     std::cout << "reply to request " << i << ":" << reply_string << std::endl;;
   }
- 
+
   std::string reply4 = chan.send_request("quit");
   std::cout << "Reply to request 'quit' is '" << reply4 << std::endl;
 

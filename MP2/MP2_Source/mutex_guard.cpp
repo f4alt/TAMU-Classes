@@ -1,16 +1,12 @@
 /*
-    File: mutex.hpp
+    File: mutex_guard.cpp
 
-    Author: R. Bettati
+    Author: Christopher McGregor
             Department of Computer Science
             Texas A&M University
-    Date  : 09/23/19
+    Date  : 07/14/16
 
 */
-
-#ifndef _mutex_H_                   // include file only once
-#define _mutex_H_
-
 /*--------------------------------------------------------------------------*/
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
@@ -21,7 +17,7 @@
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
 
-#include <pthread.h>
+#include "mutex_guard.hpp"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */
@@ -35,31 +31,13 @@
 
 /* -- (none) -- */
 
-/*--------------------------------------------------------------------------*/
-/* CLASS   M u t e x  */
-/*--------------------------------------------------------------------------*/
-
-class Mutex {
-private:
-  /* -- INTERNAL DATA STRUCTURES
-     You may need to change them to fit your implementation. */
-
-  pthread_mutex_t m;
-
-public:
-
   /* -- CONSTRUCTOR/DESTRUCTOR */
 
-  Mutex();
+  MutexGuard::MutexGuard(Mutex & m) {
+    this->m = &m;
+    m.Lock();
+  }
 
-  ~Mutex();
-
-  /* -- MUTEX OPERATIONS */
-
-  void Lock();
-
-  void Unlock();
-};
-
-
-#endif
+  MutexGuard::~MutexGuard(){
+    m->Unlock();
+  }
