@@ -1,15 +1,15 @@
-/*
-    File: pcbuffer.hpp
+/* 
+    File: semaphore.H
 
     Author: R. Bettati
             Department of Computer Science
             Texas A&M University
-    Date  : 2020/09/27
+    Date  : 08/02/11
 
 */
 
-#ifndef _pcbuffer_H_                   // include file only once
-#define _pcbuffer_H_
+#ifndef _semaphore_H_                   // include file only once
+#define _semaphore_H_
 
 /*--------------------------------------------------------------------------*/
 /* DEFINES */
@@ -21,57 +21,48 @@
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
 
-#include <string>
 #include <pthread.h>
-#include <queue>
-#include "semaphore.hpp"
 
-using namespace std;
 /*--------------------------------------------------------------------------*/
-/* DATA STRUCTURES */
+/* DATA STRUCTURES */ 
 /*--------------------------------------------------------------------------*/
 
 /* -- (none) -- */
 
 /*--------------------------------------------------------------------------*/
-/* FORWARDS */
+/* FORWARDS */ 
 /*--------------------------------------------------------------------------*/
 
 /* -- (none) -- */
 
 /*--------------------------------------------------------------------------*/
-/* CLASS   bounded P C B u f f e r  */
+/* CLASS   S e m a p h o r e  */
 /*--------------------------------------------------------------------------*/
 
-class PCBuffer {
-
+class Semaphore {
 private:
   /* -- INTERNAL DATA STRUCTURES
-     You will need to change them to fit your implementation. */
+     You may need to change them to fit your implementation. */
 
-  queue<string>   q;
-  // string        * buffer; // We buffer the data in an array of strings.
-                          // You may instead prefer a vector, or a queue, or ...
-  int             size;   // Size of the bounded buffer.
-  Semaphore*      lock;
-  Semaphore*      full;
-  Semaphore*      empty;
+  int             value;
+  pthread_mutex_t m;
+  pthread_cond_t  c;
 
 public:
 
   /* -- CONSTRUCTOR/DESTRUCTOR */
 
-  PCBuffer(int _size);
+  Semaphore(int _val);
 
-  ~PCBuffer();
+  ~Semaphore();
 
-  /* -- OPERATIONS ON PC BUFFER */
+  /* -- SEMAPHORE OPERATIONS */
 
-  int Deposit(string _item);
-
-  string Retrieve();
-
+  int P();
+  int V();
 };
 
 
 #endif
+
+

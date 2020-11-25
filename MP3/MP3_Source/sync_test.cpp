@@ -60,7 +60,7 @@ Mutex m;
 #include "semaphore.hpp"
 Semaphore s(5);
 #elif PCBUFFER_TEST
-#include "pc_buffer.hpp"
+#include "pcbuffer.hpp"
 #endif
 
 /*--------------------------------------------------------------------------*/
@@ -194,10 +194,11 @@ int main(int argc, char* argv[]) {
 #ifdef PCBUFFER_TEST
   run_pcbuffer_test();
 #else
-  run_test_threads(10, // Number of threads to spin off
-      10, // Number of iterations each thread will take
-      500000 // Wait time in usecs. This value is 0.5 sec
-    );
+  run_test_threads(10,10,500000);
+  // run_test_threads(10, // Number of threads to spin off
+  //     10, // Number of iterations each thread will take
+  //     500000 // Wait time in usecs. This value is 0.5 sec
+  //   );
 #endif
 
   cout << "Done with the test." << endl

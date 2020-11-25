@@ -1,11 +1,9 @@
 /*
     File: pcbuffer.hpp
-
     Author: R. Bettati
             Department of Computer Science
             Texas A&M University
     Date  : 2020/09/27
-
 */
 
 #ifndef _pcbuffer_H_                   // include file only once
@@ -20,13 +18,13 @@
 /*--------------------------------------------------------------------------*/
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
-
-#include <string>
 #include <pthread.h>
 #include <queue>
+#include <string>
 #include "semaphore.hpp"
 
 using namespace std;
+
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */
 /*--------------------------------------------------------------------------*/
@@ -40,38 +38,35 @@ using namespace std;
 /* -- (none) -- */
 
 /*--------------------------------------------------------------------------*/
-/* CLASS   bounded P C B u f f e r  */
+/* CLASS Response  */
 /*--------------------------------------------------------------------------*/
+class Response{
+  public:
 
-class PCBuffer {
+    string res;      // string server response
+    int id;          // int client id
 
-private:
-  /* -- INTERNAL DATA STRUCTURES
-     You will need to change them to fit your implementation. */
-
-  queue<string>   q;
-  // string        * buffer; // We buffer the data in an array of strings.
-                          // You may instead prefer a vector, or a queue, or ...
-  int             size;   // Size of the bounded buffer.
-  Semaphore*      lock;
-  Semaphore*      full;
-  Semaphore*      empty;
-
-public:
-
-  /* -- CONSTRUCTOR/DESTRUCTOR */
-
-  PCBuffer(int _size);
-
-  ~PCBuffer();
-
-  /* -- OPERATIONS ON PC BUFFER */
-
-  int Deposit(string _item);
-
-  string Retrieve();
-
+    Response(string s, int i);
 };
 
+/*--------------------------------------------------------------------------*/
+/* CLASS   bounded P C B u f f e r  */
+/*--------------------------------------------------------------------------*/
+class PCBuffer {
+  private:
+    int size;
+    queue<Response> q;
+
+    Semaphore * lock;
+    Semaphore * full;
+    Semaphore * empty;
+
+  public:
+   PCBuffer(int _size);
+   ~PCBuffer();
+
+   void Deposit(Response _response);
+   Response Retrieve();
+};
 
 #endif

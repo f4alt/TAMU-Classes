@@ -1,4 +1,4 @@
-/*
+/* 
     File: requestchannel.cpp
 
     Author: R. Bettati
@@ -31,10 +31,9 @@
 #include <errno.h>
 
 #include "reqchannel.hpp"
-using namespace std;
 
 /*--------------------------------------------------------------------------*/
-/* DATA STRUCTURES */
+/* DATA STRUCTURES */ 
 /*--------------------------------------------------------------------------*/
 
     /* -- (none) -- */
@@ -59,7 +58,7 @@ char * RequestChannel::pipe_name(const Mode _mode) {
   std::string pname = "fifo_" + this->my_name;
 
   switch(_mode) {
-  case Mode::READ:
+  case Mode::READ: 
     pname += this->my_side == Side::CLIENT ? "1" : "2";
     break;
   case Mode::WRITE:
@@ -116,7 +115,7 @@ void RequestChannel::open_read_pipe(char * _pipe_name) {
   }
 
   std::cout << "done opening read pipe" << std::endl;
-
+  
 }
 
 /*--------------------------------------------------------------------------*/
@@ -136,7 +135,7 @@ RequestChannel::RequestChannel(const std::string _name, const Side _side)
     open_read_pipe(pipe_name(Mode::READ));
     open_write_pipe(pipe_name(Mode::WRITE));
   }
-
+  
 }
 
 RequestChannel::~RequestChannel() {
@@ -144,26 +143,26 @@ RequestChannel::~RequestChannel() {
 
   close(wfd);
   close(rfd);
-
+  
   if (my_side == Side::SERVER) {
-
+    
     std::cout << "closing IPC mechanisms on server side for channel '" << this->my_name << "'..." << std::endl;
 
     /* Destruct the underlying IPC mechanisms. */
     if (remove(pipe_name(Mode::READ)) != 0) {
       perror(std::string("Request Channel (" + this->my_name + ") : Error deleting pipe for reading").c_str());
     }
-
+      
     if (remove(pipe_name(Mode::WRITE)) != 0) {
       perror(std::string("Request Channel (" + this->my_name + ") : Error deleting pipe for writing").c_str());
     }
 
     std::cout << "done closing IPC mechanisms on server side for channel '" << this->my_name << "'" << std::endl;
-
+    
   }
 
   std::cout << "done closing request channel '" << my_name << "'" << std::endl;
-
+  
 }
 
 /*--------------------------------------------------------------------------*/
@@ -185,11 +184,11 @@ std::string RequestChannel::cread() {
   if (read(rfd, buf, MAX_MESSAGE) < 0) {
     perror(std::string("Request Channel (" + this->my_name + "): Error reading from pipe!").c_str());
   }
-
+  
   std::string s = buf;
 
   std::cout << "Request Channel (" << this->my_name << ") reads [" << buf << "]" << std::endl;
-
+  
   return s;
 
 }
@@ -209,7 +208,7 @@ void RequestChannel::cwrite(std::string _msg) {
   }
 
   std::cout << "(" << this->my_name << ") done writing." << std::endl;
-
+  
 }
 
 /*--------------------------------------------------------------------------*/
@@ -231,3 +230,6 @@ int RequestChannel::read_fd() {
 int RequestChannel::write_fd() {
   return wfd;
 }
+
+
+

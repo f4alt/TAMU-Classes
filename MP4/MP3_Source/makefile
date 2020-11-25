@@ -28,11 +28,10 @@ pcbuffer.o: pcbuffer.hpp pcbuffer.cpp
 semaphore.o: semaphore.hpp semaphore.cpp
 	$(C++) -c -g semaphore.cpp
 
-
-test_suite: sync_test_semaphore sync_test_pcbuffer
-
-sync_test_semaphore: sync_test.cpp semaphore.o
-	$(C++) -o sync_test_semaphore sync_test.cpp semaphore.o -lpthread
-
-sync_test_pcbuffer: sync_test.cpp pcbuffer.o semaphore.o
-	$(C++) -o sync_test_pcbuffer sync_test.cpp pcbuffer.o semaphore.o -lpthread
+# test_suite: sync_test_semaphore sync_test_pcbuffer
+#
+# sync_test_semaphore: sync_test.cpp semaphore.o
+# 	$(C++) -o sync_test_semaphore sync_test.cpp semaphore.o -lpthread
+#
+# sync_test_pcbuffer: sync_test.cpp pcbuffer.o semaphore.o
+# 	$(C++) -o sync_test_pcbuffer sync_test.cpp pcbuffer.o semaphore.o -lpthread
