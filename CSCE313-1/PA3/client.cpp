@@ -196,6 +196,12 @@ int main(int argc, char *argv[]){
 		FIFORequestChannel new_chan (new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 
 		cout << "new channel created, name: " << new_chan_name << endl;
+
+		// test use
+		DataRequest dr (person_num, time, ecg_num);
+		new_chan.cwrite (&dr, sizeof (DataRequest)); // question
+		double reply3;
+		new_chan.cread (&reply3, sizeof(double));
 	}
 
 
