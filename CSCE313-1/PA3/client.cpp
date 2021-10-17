@@ -129,40 +129,96 @@ int main(int argc, char *argv[]){
 	you have to obtain the entire file over multiple requests
 	(i.e., due to buffer space limitation) and assemble it
 	such that it is identical to the original*/
-	FileRequest fm (0,0);
-	// cout << "filename:" << filename << endl;
-	int len = sizeof (FileRequest) + filename.size()+1;
-	char buf2 [len];
-	memcpy (buf2, &fm, sizeof (FileRequest));
-	strcpy (buf2 + sizeof (FileRequest), filename.c_str());
-	chan.cwrite (buf2, len);
-	int64 filelen;
-	chan.cread (&filelen, sizeof(int64));
-	if (isValidResponse(&filelen)){
-		cout << "File length is: " << filelen << " bytes" << endl;
-	}
+	// FileRequest fm (0,0);
+	// // cout << "filename:" << filename << endl;
+	// int len = sizeof (FileRequest) + filename.size()+1;
+	// char buf2 [len];
+	// memcpy (buf2, &fm, sizeof (FileRequest));
+	// strcpy (buf2 + sizeof (FileRequest), filename.c_str());
+	// chan.cwrite (buf2, len);
+	// int64 filelen;
+	// chan.cread (&filelen, sizeof(int64));
+	// if (isValidResponse(&filelen)){
+	// 	cout << "File length is: " << filelen << " bytes" << endl;
+	// }
 
 	// open output file
-	ofstream outfile;
-	string outfile_name = "received/" + filename;
-	outfile.open(outfile_name);
+	//cout << "We have a file" <<endl;
+            FileRequest f(0, 0);
+            int size_total = sizeof(FileRequest) + filename.size() + 1;// we cant append the filemesage with the filename,
+            //so we need to create a buffer to hold both of those variables. In reality we need to send 1 more byte and that is the
+            //null byte
+            //need to create pointer to buffer of the size of everything together
+            //cout << "size total" <<size_total <<endl;
+            char *buf = new char[size_total];
+            memcpy(buf, &f, sizeof(FileRequest));
+            //buffer has the file message, but we need to append the filename as well
+            strcpy(buf + sizeof(FileRequest), filename.c_str());
 
-	// iterate through file til all data is moved
-	for (int i = 0; i < (filelen - buffer_size); i = i + buffer_size + 1) {
-		cout << "req , req+buf:" << i << "," << i+buffer_size << endl;
-		FileRequest fr(i, i+buffer_size);
+            chan.cwrite(buf, size_total);
+            __int64_t fs;
+            chan.cread(&fs,sizeof(__int64_t));
+            //cout << "total file size: " << fs << endl;
+            int num_messages = ceil (double(fs)/buffer_size);
+            //cout << "How many times do we need to send messages: " << num_messages  <<endl;
 
-		int len = sizeof (FileRequest) + filename.size()+1;
-		char buf2 [len];
-		memcpy (buf2, &fr, sizeof (FileRequest));
-		strcpy (buf2 + sizeof (FileRequest), filename.c_str());
-		cout << "buf2:" << buf2 << endl;
-		chan.cwrite (buf2, len);
-		char* filechunk;
-		chan.cread (&filechunk, sizeof(char*));
+            //file size is less than 256
+            FileRequest* fm = (FileRequest*) buf;
+            if (num_messages == 1 )
+            {
+                //cout << "Inside if" <<endl;
+                fm->offset = 0;
+                fm->length = fs;
+            }
+            else
+            {
+                fm->length = buffer_size;//want to extract the max number of bytes from the file at a time
+                fm->offset = 0;
+            }
+            __int64_t  last_count = fs - buffer_size* (num_messages-1);
+            chan.cwrite(buf, size_total);
+            char* ret_buf = new char[buffer_size];
+            chan.cread(ret_buf,buffer_size);
 
-		outfile << filechunk << "\n";
-	}
+            string outputfilepath = string("received/") + string(filename);
+            FILE* fp = fopen(outputfilepath.c_str(),"wb");
+            fwrite(ret_buf, 1, fm->length, fp);
+
+            struct timeval start1, end1;
+            gettimeofday(&start1, NULL);
+            for (int i = 1; i < num_messages; i++)
+            {
+                //cout << "Inside for loop" <<endl;
+
+                if (i == num_messages-1)
+                {
+                    //cout << fm->offset + buffer_size <<endl;
+                    //cout <<"last chunk ";
+                    //cout << last_count <<endl;
+                    fm->length = last_count;
+                    ret_buf = new char[last_count];
+                    fm->offset +=buffer_size;
+                    //cout << "HERE " << endl ;
+                    chan.cwrite(buf, size_total);
+                    chan.cread(ret_buf,buffer_size);
+                    fwrite(ret_buf, 1, fm->length, fp);
+                }
+                else
+                {
+                    //count += new_buff_capacity;
+                    fm->offset +=buffer_size;
+                    //cout << "HERE " << endl ;
+                    chan.cwrite(buf, size_total);
+                    chan.cread(ret_buf,buffer_size);
+                    fwrite(ret_buf, 1, fm->length, fp);
+
+                }
+                //count += new_buff_capacity;
+
+            }
+
+            delete [] ret_buf;
+            delete [] buf;
 
 
 
