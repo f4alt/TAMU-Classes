@@ -203,6 +203,8 @@ int main(int argc, char *argv[]){
 		new_chan.cwrite (&dr, sizeof (DataRequest)); // question
 		double reply3;
 		new_chan.cread (&reply3, sizeof(double));
+
+		cout << "reply3:" << reply3 << endl;
 	}
 
 
