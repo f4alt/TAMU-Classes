@@ -16,9 +16,10 @@ int main(int argc, char *argv[]){
 	int ecg_num = 1;
 	int req_amt = 0;
 	int buffer_size = 256;
+	int new_channel_flag = 0;
 	string filename = "";
 	// take all the arguments first because some of these may go to the server
-	while ((opt = getopt(argc, argv, "p:t:e:f:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "p:t:e:f:r:c")) != -1) {
 		switch(opt) {
 			case 'f':
 				filename = optarg;
@@ -35,6 +36,9 @@ int main(int argc, char *argv[]){
 			case 'r':
 				req_amt = stoi(optarg);
 				break;
+			case 'c':
+				new_channel_flag = 1;
+				break;
 			case '?':
         if (isprint (optopt))
           fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -47,7 +51,7 @@ int main(int argc, char *argv[]){
         abort ();
 		}
 	}
-	cout << "req_amt:" << req_amt << endl;
+	// cout << "req_amt:" << req_amt << endl;
 
 	int pid = fork ();
 	if (pid < 0){
@@ -154,7 +158,7 @@ int main(int argc, char *argv[]){
   }
   int64 last_req = filelen - buffer_size* (num_requests-1);
   chan.cwrite(buf2, len);
-  char* response = new char[buffer_size];
+	char response[buffer_size];
   chan.cread(response,buffer_size);
 
   string outputfilepath = string("received/") + filename;
@@ -166,11 +170,11 @@ int main(int argc, char *argv[]){
   for (int i = 1; i < num_requests; i++) {	// starting from i=1
       if (i == num_requests-1) {	// last call
           fc->length = last_req;
-          response = new char[last_req];
+					char last_res[last_req];
           fc->offset += buffer_size;
           chan.cwrite(buf2, len);
-          chan.cread(response,buffer_size);
-          fwrite(response, 1, fc->length, fp);
+          chan.cread(last_res,buffer_size);
+          fwrite(last_res, 1, fc->length, fp);
 					// cout << "DONE" << endl;
       } else {
           fc->offset +=buffer_size;
@@ -180,9 +184,19 @@ int main(int argc, char *argv[]){
       }
   }
 
-	// cleanup
-  delete [] response;
+	// *********** new channel ***********
+	if (new_channel_flag == 1) {
+		REQUEST_TYPE_PREFIX req_type = NEWCHAN_REQ_TYPE;
+		// send req
+		chan.cwrite(&req_type, sizeof(REQUEST_TYPE_PREFIX));
+		char buf3[buffer_size];
+		chan.cread(buf3, sizeof(buf3));
+		string new_chan_name = buf3;
 
+		FIFORequestChannel new_chan (new_chan_name, FIFORequestChannel::CLIENT_SIDE);
+
+		cout << "new channel created, name: " << new_chan_name << endl;
+	}
 
 
 	// closing the channel
