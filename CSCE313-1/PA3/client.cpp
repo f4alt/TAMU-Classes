@@ -128,7 +128,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// *********** Requesting files ***********
-
+	if (filename != "") {
 	/* this section shows how to get the length of a file
 	you have to obtain the entire file over multiple requests
 	(i.e., due to buffer space limitation) and assemble it
@@ -183,6 +183,7 @@ int main(int argc, char *argv[]){
           fwrite(response, 1, fc->length, fp);
       }
   }
+}
 
 	// *********** new channel ***********
 	if (new_channel_flag == 1) {
