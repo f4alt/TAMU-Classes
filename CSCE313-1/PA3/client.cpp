@@ -69,75 +69,58 @@ int main(int argc, char *argv[]){
 		cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply << endl;
 	}
 
-	// ***********   req 1000 data points and send to x1.csv   ***********
-	// keeping track of time
-	struct timeval start, end;
-	gettimeofday(&start, NULL);
-    // sync the I/O of C and C++.
-    ios_base::sync_with_stdio(false);
-    //getting the entirety of data points in 1.csv
-    ofstream myfile;
-    myfile.open("received/x1.csv");
-    double i = 0;
-  //while ( i < .012){
-  cout << "Recieving Data Points..." << endl;
-    // while ( i < 59.996 ) {
+	// ***********   req_amt data points and send to x1.csv   ***********
+	if (req_amt > 0) {
+		// keeping track of time
+		struct timeval start, end;
+		gettimeofday(&start, NULL);
+
+		// create / open output file "x1.csv"
+	  ofstream outfile;
+	  outfile.open("received/x1.csv");
+
+	  double i = 0;
+	  cout << "*Starting*\nRequesting:" << req_amt << " data points from person " << person_num << " starting at 0 sec" << endl;
 		for (int a = 0; a < req_amt; a++) {
-      myfile << i << ":";
+	    outfile << i << ",";
 
 			DataRequest ecg1 = DataRequest(person_num, i, 1);
 			DataRequest ecg2 = DataRequest(person_num, i, 2);
-			// DataRequest ecg2 (person_num, i, 2);
 
-			chan.cwrite (&ecg1, sizeof (DataRequest)); // question
+			// get reply 1 for ecg1
+			chan.cwrite (&ecg1, sizeof (DataRequest));
 			double reply1;
 			chan.cread (&reply1, sizeof(double));
 
-			myfile << reply1 << ",";
+			// write
+			outfile << reply1 << ",";
 
-			chan.cwrite (&ecg2, sizeof (DataRequest)); // question
+			// get reply 2 for ecg2
+			chan.cwrite (&ecg2, sizeof (DataRequest));
 			double reply2;
 			chan.cread (&reply2, sizeof(double));
 
-			myfile << reply2 << "\n";
+			// write to file
+			outfile << reply2 << "\n";
 
-      // datamsg ecg1 = datamsg(1 , i , 1);
-      // datamsg ecg2 = datamsg(1 , i , 2);
+			// inc by .004 as this is how csv are incremented
+	    i = i + .004;
+	  }
+		// gracefully close file
+	  outfile.close();
+	  cout << "*Done Requesting*" << endl;
 
-      // char* buffer1 = new char[sizeof(ecg1)];
-      // *(datamsg*)buffer1 = ecg1;
-      // chan.cwrite( buffer1, sizeof(datamsg));
-      // char* ptr1 = chan.cread();
-      // double data1 = *(double*)ptr1;
-			//
-      // myfile << data1 << ",";
-			//
-      // char* buffer2 = new char[sizeof(ecg2)];
-      // *(datamsg*)buffer2 = ecg2;
-      // chan.cwrite( buffer2, sizeof(datamsg));
-      // char* ptr2 = chan.cread();
-      // double data2 = *(double*)ptr2;
+	  // stop timer.
+	  gettimeofday(&end, NULL);
+	  // Calculating total time
+	  double time_taken;
 
-      // myfile << data2 << "\n";
+	  time_taken = (end.tv_sec - start.tv_sec) * 1e6;
+	  time_taken = (time_taken + (end.tv_usec -
+	                            start.tv_usec)) * 1e-6;
 
-      i = i + .004;
-    }
-    myfile.close();
-    cout << "Sucessfully Transferred File Data Points" << endl;
-
-
-    // stop timer.
-    gettimeofday(&end, NULL);
-    // Calculating total time taken by the program.
-    double time_taken;
-
-    time_taken = (end.tv_sec - start.tv_sec) * 1e6;
-    time_taken = (time_taken + (end.tv_usec -
-                              start.tv_usec)) * 1e-6;
-
-    cout << "Time taken to transfer all 1.csv datapoints : " << fixed
-         << time_taken << setprecision(6);
-    cout << " sec" << endl;
+	  cout << "Time taken for " << req_amt << " data points:" << fixed << time_taken << setprecision(6) << " sec" << endl;
+	}
 
 
 
