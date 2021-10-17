@@ -143,46 +143,26 @@ int main(int argc, char *argv[]){
 	// }
 
 	// open output file
-	// ofstream outfile;
-	// string outfile_name = "received/" + filename;
-	// cout << "outfile_name" << outfile_name << endl;
-	// outfile.open(outfile_name);
-	//
-	// // iterate through file til all data is moved
-	// for (int i = 0; i < (filelen - buffer_size); i + buffer_size + 1) {
-	// 	FileRequest fr(i, i+buffer_size);
-	// 	char* fr_buf = new char[sizeof(FileRequest) + sizeof(t1) + 1];
-	// }
+	ofstream outfile;
+	string outfile_name = "received/" + filename;
+	cout << "outfile_name" << outfile_name << endl;
+	outfile.open(outfile_name);
 
-	FILE * pFile;
-pFile = fopen("y1.csv","wb");
+	// iterate through file til all data is moved
+	for (int i = 0; i < (filelen - buffer_size); i + buffer_size + 1) {
+		FileRequest fr(i, i+buffer_size);
 
-int j = 0;
-int k = 256;
-while ( j < filelen ){
-	cout << j << " , " << k << endl;
-	//FUNCTION
-	FileRequest f2 = FileRequest(j,k);
-	char t1 [] {'1','.','c','s','v'};
-	char* bufferf = new char[sizeof(FileRequest) + sizeof(t1) + 1];
-	*(FileRequest*)bufferf = f2;
-	for(int i = 0 ; i < 5 ; i ++ ) {
-		*(char*)(bufferf + sizeof(FileRequest) + i ) = t1[i];
+		int len = sizeof (FileRequest) + filename.size()+1;
+		char buf2 [len];
+		memcpy (buf2, &fr, sizeof (FileRequest));
+		strcpy (buf2 + sizeof (FileRequest), filename.c_str());
+		chan.cwrite (buf2, len);
+		string filechunk;
+		chan.cread (&filechunk, sizeof(string));
+
+		outfile << filechunk << "\n";
 	}
-	*(char*)(bufferf + sizeof(FileRequest) + sizeof(t1)) = '\0';
-	chan.cwrite( bufferf, sizeof(FileRequest) + sizeof(t1) + 1);
-	string line;
-	chan.cread (&line, sizeof(string));
-	//int lengthf;
-	//lengthf = chan.cread(lengthf);
 
-
-	j += 256 + 1;
-	if ( filelen - j < 256 ){
-		k = filelen - j;
-	}
-}
-fclose(pFile);
 
 
 	// closing the channel
