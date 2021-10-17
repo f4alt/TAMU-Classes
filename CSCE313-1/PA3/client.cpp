@@ -160,6 +160,7 @@ pFile = fopen("y1.csv","wb");
 int j = 0;
 int k = 256;
 while ( j < filelen ){
+	cout << j << " , " << k << endl;
 	//FUNCTION
 	FileRequest f2 = FileRequest(j,k);
 	char t1 [] {'1','.','c','s','v'};
@@ -176,7 +177,6 @@ while ( j < filelen ){
 	//lengthf = chan.cread(lengthf);
 
 
-	cout << j << " , " << k << endl;
 	j += 256 + 1;
 	if ( filelen - j < 256 ){
 		k = filelen - j;
