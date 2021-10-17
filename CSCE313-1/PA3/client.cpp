@@ -71,6 +71,7 @@ int main(int argc, char *argv[]){
 
 	// ***********   req 1000 data points and send to x1.csv   ***********
 	// keeping track of time
+	struct timeval start, end;
 	gettimeofday(&start, NULL);
     // sync the I/O of C and C++.
     ios_base::sync_with_stdio(false);
@@ -80,27 +81,44 @@ int main(int argc, char *argv[]){
     double i = 0;
   //while ( i < .012){
   cout << "Recieving Data Points..." << endl;
-    while ( i < 59.996 ){
-      myfile << i << ",";
+    // while ( i < 59.996 ) {
+		for (int a = 0; a < req_amt; a++) {
+      myfile << i << ":";
 
-      datamsg d1 = datamsg(1 , i , 1);
-      datamsg d2 = datamsg(1 , i , 2);
+			DataRequest ecg1 = DataRequest(person_num, i, 1);
+			DataRequest ecg2 = DataRequest(person_num, i, 2);
+			// DataRequest ecg2 (person_num, i, 2);
 
-      char* buffer1 = new char[sizeof(d1)];
-      *(datamsg*)buffer1 = d1;
-      chan.cwrite( buffer1, sizeof(datamsg));
-      char* ptr1 = chan.cread();
-      double data1 = *(double*)ptr1;
+			chan.cwrite (&ecg1, sizeof (DataRequest)); // question
+			double reply1;
+			chan.cread (&reply1, sizeof(double));
 
-      myfile << data1 << ",";
+			myfile << reply1 << ",";
 
-      char* buffer2 = new char[sizeof(d2)];
-      *(datamsg*)buffer2 = d2;
-      chan.cwrite( buffer2, sizeof(datamsg));
-      char* ptr2 = chan.cread();
-      double data2 = *(double*)ptr2;
+			chan.cwrite (&ecg2, sizeof (DataRequest)); // question
+			double reply2;
+			chan.cread (&reply2, sizeof(double));
 
-      myfile << data2 << "\n";
+			myfile << reply2 << "\n";
+
+      // datamsg ecg1 = datamsg(1 , i , 1);
+      // datamsg ecg2 = datamsg(1 , i , 2);
+
+      // char* buffer1 = new char[sizeof(ecg1)];
+      // *(datamsg*)buffer1 = ecg1;
+      // chan.cwrite( buffer1, sizeof(datamsg));
+      // char* ptr1 = chan.cread();
+      // double data1 = *(double*)ptr1;
+			//
+      // myfile << data1 << ",";
+			//
+      // char* buffer2 = new char[sizeof(ecg2)];
+      // *(datamsg*)buffer2 = ecg2;
+      // chan.cwrite( buffer2, sizeof(datamsg));
+      // char* ptr2 = chan.cread();
+      // double data2 = *(double*)ptr2;
+
+      // myfile << data2 << "\n";
 
       i = i + .004;
     }
