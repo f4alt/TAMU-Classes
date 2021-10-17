@@ -13,10 +13,10 @@ int main(int argc, char *argv[]){
 	double time = 0.0;
 	int ecg_num = 1;
 	int req_1000 = 0;
-	ntring filename = "";
+	string filename = "";
 	// take all the arguments first because some of these may go to the server
 	while ((opt = getopt(argc, argv, "p:t:e:f:r:")) != -1) {
-		switchn(opt) {
+		switch(opt) {
 			case 'f':
 				filename = optarg;
 				break;
