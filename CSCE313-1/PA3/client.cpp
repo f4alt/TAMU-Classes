@@ -187,9 +187,10 @@ int main(int argc, char *argv[]){
 
 	// *********** new channel ***********
 	if (new_channel_flag == 1) {
-		REQUEST_TYPE_PREFIX req_type = NEWCHAN_REQ_TYPE;
+		// REQUEST_TYPE_PREFIX req_type = NEWCHAN_REQ_TYPE;
+		Request nc (NEWCHAN_REQ_TYPE);
 		// send req
-		chan.cwrite(&req_type, sizeof(REQUEST_TYPE_PREFIX));
+		chan.cwrite(&nc, sizeof(Request));
 		char buf3[buffer_size];
 		chan.cread(buf3, sizeof(buf3));
 		string new_chan_name = buf3;
