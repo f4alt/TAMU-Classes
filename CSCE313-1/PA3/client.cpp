@@ -12,10 +12,11 @@ int main(int argc, char *argv[]){
 	int person_num = 1;
 	double time = 0.0;
 	int ecg_num = 1;
-	string filename = "";
+	int req_1000 = 0;
+	ntring filename = "";
 	// take all the arguments first because some of these may go to the server
-	while ((opt = getopt(argc, argv, "p:t:e:f:")) != -1) {
-		switch (opt) {
+	while ((opt = getopt(argc, argv, "p:t:e:f:r:")) != -1) {
+		switchn(opt) {
 			case 'f':
 				filename = optarg;
 				break;
@@ -27,6 +28,9 @@ int main(int argc, char *argv[]){
 				break;
 			case 'e':
 				ecg_num = stoi(optarg);
+				break;
+			case 'r':
+				req_1000 = 1;
 				break;
 			case '?':
         if (isprint (optopt))
@@ -40,6 +44,7 @@ int main(int argc, char *argv[]){
         abort ();
 		}
 	}
+	cout << "req_1000:" << req_1000 << endl;
 
 	int pid = fork ();
 	if (pid < 0){
@@ -52,7 +57,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
-	cout << "here" << endl;
+
+	// req ONE data point
 	DataRequest d (person_num, time, ecg_num);
 	chan.cwrite (&d, sizeof (DataRequest)); // question
 	double reply;
@@ -60,6 +66,9 @@ int main(int argc, char *argv[]){
 	if (isValidResponse(&reply)){
 		cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply << endl;
 	}
+
+	if (req_1000 == 1) {
+
 
 
 	/* this section shows how to get the length of a file
