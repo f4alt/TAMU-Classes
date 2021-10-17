@@ -138,24 +138,25 @@ int main(int argc, char *argv[]){
 	chan.cwrite (buf2, len);
 	int64 filelen;
 	chan.cread (&filelen, sizeof(int64));
-	// if (isValidResponse(&filelen)){
-	// 	cout << "File length is: " << filelen << " bytes" << endl;
-	// }
+	if (isValidResponse(&filelen)){
+		cout << "File length is: " << filelen << " bytes" << endl;
+	}
 
 	// open output file
 	ofstream outfile;
 	string outfile_name = "received/" + filename;
-	cout << "outfile_name" << outfile_name << endl;
 	outfile.open(outfile_name);
 
 	// iterate through file til all data is moved
 	for (int i = 0; i < (filelen - buffer_size); i + buffer_size + 1) {
+		cout << "req , req+buf:" << i << "," << i+buffer_size << endl;
 		FileRequest fr(i, i+buffer_size);
 
 		int len = sizeof (FileRequest) + filename.size()+1;
 		char buf2 [len];
 		memcpy (buf2, &fr, sizeof (FileRequest));
 		strcpy (buf2 + sizeof (FileRequest), filename.c_str());
+		cout << "buf2:" << buf2 << endl;
 		chan.cwrite (buf2, len);
 		string filechunk;
 		chan.cread (&filechunk, sizeof(string));
