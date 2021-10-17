@@ -38,7 +38,7 @@ void process_newchannel_request (FIFORequestChannel *_channel){
 
 	FIFORequestChannel *data_channel = new FIFORequestChannel (new_channel_name, FIFORequestChannel::SERVER_SIDE);
 	channel_threads.push_back(thread (handle_process_loop, data_channel));
-}	
+}
 
 void populate_file_data (int person){
 	//cout << "populating for person " << person << endl;
@@ -62,11 +62,11 @@ void populate_file_data (int person){
 
 double get_data_from_memory (int person, double seconds, int ecgno){
 	int index = (int)round (seconds / 0.004);
-	string line = all_data [person-1][index]; 
+	string line = all_data [person-1][index];
 	vector<string> parts = split (line, ',');
 	double sec = stod(parts [0]);
 	double ecg1 = stod (parts [1]);
-	double ecg2 = stod (parts [2]); 
+	double ecg2 = stod (parts [2]);
 	if (ecgno == 1)
 		return ecg1;
 	else
@@ -74,7 +74,7 @@ double get_data_from_memory (int person, double seconds, int ecgno){
 }
 
 void process_file_request (FIFORequestChannel* rc, Request* request){
-	
+
 	FileRequest f = *(FileRequest *) request;
 	string filename = (char*) request + sizeof (FileRequest);
 	if (filename.empty()){
@@ -83,7 +83,7 @@ void process_file_request (FIFORequestChannel* rc, Request* request){
 		return;
 	}
 
-	filename = "BIMDC/" + filename; 
+	filename = "BIMDC/" + filename;
 	int fd = open (filename.c_str(), O_RDONLY);
 	if (fd < 0){
 		cerr << "Server received request for file: " << filename << " which cannot be opened" << endl;
@@ -101,7 +101,7 @@ void process_file_request (FIFORequestChannel* rc, Request* request){
 
 	/* request buffer can be used for response buffer, because everything necessary have
 	been copied over to filemsg f and filename*/
-	char* response = (char*) request; 
+	char* response = (char*) request;
 
 	// make sure that client is not requesting too big a chunk
 	if (f.length > buffercapacity){
@@ -110,11 +110,11 @@ void process_file_request (FIFORequestChannel* rc, Request* request){
 		rc->cwrite (&r, sizeof (r));
 		return;
 	}
-	
+
 	lseek (fd, f.offset, SEEK_SET);
 	int nbytes = read (fd, response, f.length);
 	/* making sure that the client is asking for the right # of bytes,
-	this is especially imp for the last chunk of a file when the 
+	this is especially imp for the last chunk of a file when the
 	remaining lenght is < buffercap of the client*/
 	if (nbytes != f.length){
 		cerr << "The server received an incorrect length in the filemsg field" << endl;
@@ -129,7 +129,7 @@ void process_file_request (FIFORequestChannel* rc, Request* request){
 
 void process_data_request (FIFORequestChannel* rc, Request* r){
 	DataRequest* d = (DataRequest* ) r;
-	
+
 	if (d->person < 1 || d->person > 15 || d->seconds < 0 || d->seconds >= 60.0 || d->ecgno <1 || d->ecgno > 2){
 		cerr << "Incorrectly formatted data request" << endl;
 		Request resp (UNKNOWN_REQ_TYPE);
@@ -202,7 +202,7 @@ int main(int argc, char *argv[]){
 	for (int i=0; i<NUM_PERSONS; i++){
 		populate_file_data(i+1);
 	}
-	
+
 	FIFORequestChannel* control_channel = new FIFORequestChannel ("control", FIFORequestChannel::SERVER_SIDE);
 	handle_process_loop (control_channel);
 	for (int i=0; i<channel_threads.size(); i++){

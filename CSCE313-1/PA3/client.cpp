@@ -15,6 +15,7 @@ int main(int argc, char *argv[]){
 	double time = 0.0;
 	int ecg_num = 1;
 	int req_amt = 0;
+	int buffer_size = 256;
 	string filename = "";
 	// take all the arguments first because some of these may go to the server
 	while ((opt = getopt(argc, argv, "p:t:e:f:r:")) != -1) {
@@ -80,7 +81,7 @@ int main(int argc, char *argv[]){
 	  outfile.open("received/x1.csv");
 
 	  double i = 0;
-	  cout << "*Starting*\nRequesting:" << req_amt << " data points from person " << person_num << " starting at 0 sec" << endl;
+	  cout << "*Starting*\nRequesting " << req_amt << " data points from person " << person_num << " starting at 0 sec" << endl;
 		for (int a = 0; a < req_amt; a++) {
 	    outfile << i << ",";
 
@@ -122,8 +123,7 @@ int main(int argc, char *argv[]){
 	  cout << "Time taken for " << req_amt << " data points:" << fixed << time_taken << setprecision(6) << " sec" << endl;
 	}
 
-
-
+	// *********** Requesting files ***********
 
 	/* this section shows how to get the length of a file
 	you have to obtain the entire file over multiple requests
@@ -138,9 +138,51 @@ int main(int argc, char *argv[]){
 	chan.cwrite (buf2, len);
 	int64 filelen;
 	chan.cread (&filelen, sizeof(int64));
-	if (isValidResponse(&filelen)){
-		cout << "File length is: " << filelen << " bytes" << endl;
+	// if (isValidResponse(&filelen)){
+	// 	cout << "File length is: " << filelen << " bytes" << endl;
+	// }
+
+	// open output file
+	// ofstream outfile;
+	// string outfile_name = "received/" + filename;
+	// cout << "outfile_name" << outfile_name << endl;
+	// outfile.open(outfile_name);
+	//
+	// // iterate through file til all data is moved
+	// for (int i = 0; i < (filelen - buffer_size); i + buffer_size + 1) {
+	// 	FileRequest fr(i, i+buffer_size);
+	// 	char* fr_buf = new char[sizeof(FileRequest) + sizeof(t1) + 1];
+	// }
+
+	FILE * pFile;
+pFile = fopen("y1.csv","wb");
+
+int j = 0;
+int k = 256;
+while ( j < filelen ){
+	//FUNCTION
+	FileRequest f2 = FileRequest(j,k);
+	char t1 [] {'1','.','c','s','v'};
+	char* bufferf = new char[sizeof(FileRequest) + sizeof(t1) + 1];
+	*(FileRequest*)bufferf = f2;
+	for(int i = 0 ; i < 5 ; i ++ ) {
+		*(char*)(bufferf + sizeof(FileRequest) + i ) = t1[i];
 	}
+	*(char*)(bufferf + sizeof(FileRequest) + sizeof(t1)) = '\0';
+	chan.cwrite( bufferf, sizeof(FileRequest) + sizeof(t1) + 1);
+	string line;
+	chan.cread (&line, sizeof(string));
+	//int lengthf;
+	//lengthf = chan.cread(lengthf);
+
+
+	cout << j << " , " << k << endl;
+	j += 256 + 1;
+	if ( filelen - j < 256 ){
+		k = filelen - j;
+	}
+}
+fclose(pFile);
 
 
 	// closing the channel
