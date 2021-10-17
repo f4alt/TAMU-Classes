@@ -158,8 +158,8 @@ int main(int argc, char *argv[]){
 		strcpy (buf2 + sizeof (FileRequest), filename.c_str());
 		cout << "buf2:" << buf2 << endl;
 		chan.cwrite (buf2, len);
-		int64 filechunk;
-		chan.cread (&filechunk, sizeof(int64));
+		string filechunk;
+		chan.cread (&filechunk, sizeof(string));
 
 		outfile << filechunk << "\n";
 	}
