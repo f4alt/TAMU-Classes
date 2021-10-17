@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
 		cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply << endl;
 	}
 
-	if (req_1000 == 1) {
+	// if (req_1000 == 1) {
 
 
 
