@@ -1,9 +1,11 @@
-#include "FIFOreqchannel.h"
 #include <sys/wait.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string>
+#include <iostream>
 
 #include "common.h"
+#include "FIFOreqchannel.h"
 
 using namespace std;
 
