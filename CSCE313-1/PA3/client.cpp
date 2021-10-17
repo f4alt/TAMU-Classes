@@ -144,16 +144,16 @@ int main(int argc, char *argv[]){
 
   int num_requests = ceil (double(filelen)/buffer_size);
 
-  FileRequest* fm = (FileRequest*) buf;
+  FileRequest* fc = (FileRequest*) buf2;
   if (num_requests == 1) { // edge case
-      fm->offset = 0;
-      fm->length = filelen;
+      fc->offset = 0;
+      fc->length = filelen;
   } else {
-      fm->length = buffer_size;
-      fm->offset = 0;
+      fc->length = buffer_size;
+      fc->offset = 0;
   }
   int64 last_req = filelen - buffer_size* (num_requests-1);
-  chan.cwrite(buf, size_total);
+  chan.cwrite(buf2, len);
   char* response = new char[buffer_size];
   chan.cread(response,buffer_size);
 
@@ -161,28 +161,27 @@ int main(int argc, char *argv[]){
   FILE* fp = fopen(outputfilepath.c_str(),"wb");
 
 	// send one call incase req only needs one
-  fwrite(response, 1, fm->length, fp);
+  fwrite(response, 1, fc->length, fp);
 
   for (int i = 1; i < num_requests; i++) {	// starting from i=1
       if (i == num_requests-1) {	// last call
-          fm->length = last_req;
+          fc->length = last_req;
           response = new char[last_req];
-          fm->offset += buffer_size;
-          chan.cwrite(buf, size_total);
+          fc->offset += buffer_size;
+          chan.cwrite(buf2, len);
           chan.cread(response,buffer_size);
-          fwrite(response, 1, fm->length, fp);
+          fwrite(response, 1, fc->length, fp);
 					// cout << "DONE" << endl;
       } else {
-          fm->offset +=buffer_size;
-          chan.cwrite(buf, size_total);
+          fc->offset +=buffer_size;
+          chan.cwrite(buf2, len);
           chan.cread(response,buffer_size);
-          fwrite(response, 1, fm->length, fp);
+          fwrite(response, 1, fc->length, fp);
       }
   }
 
 	// cleanup
   delete [] response;
-  delete [] buf;
 
 
 
