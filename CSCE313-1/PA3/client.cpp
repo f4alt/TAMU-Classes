@@ -148,7 +148,7 @@ int main(int argc, char *argv[]){
 	outfile.open(outfile_name);
 
 	// iterate through file til all data is moved
-	for (int i = 0; i < (filelen - buffer_size); i + buffer_size + 1) {
+	for (int i = 0; i < (filelen - buffer_size); i = i + buffer_size + 1) {
 		cout << "req , req+buf:" << i << "," << i+buffer_size << endl;
 		FileRequest fr(i, i+buffer_size);
 
