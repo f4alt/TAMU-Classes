@@ -206,6 +206,10 @@ int main(int argc, char *argv[]){
 		new_chan.cread (&reply3, sizeof(double));
 
 		cout << "reply3:" << reply3 << endl;
+
+		// closing the channel
+	    Request q1 (QUIT_REQ_TYPE);
+	    new_chan.cwrite (&q1, sizeof (Request));
 	}
 
 
