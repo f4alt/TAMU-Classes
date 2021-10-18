@@ -69,7 +69,7 @@ int main(int argc, char *argv[]){
 	FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
 
 	// ***********   req ONE data point   ***********
-	if (new_channel_flag != 1) {
+	if (new_channel_flag != 1 && req_1000_flag != 1) {
 		DataRequest d (person_num, time, ecg_num);
 		chan.cwrite (&d, sizeof (DataRequest)); // question
 		double reply;
