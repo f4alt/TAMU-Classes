@@ -16,10 +16,11 @@ int main(int argc, char *argv[]){
 	int ecg_num = 1;
 	int req_amt = 0;
 	int buffer_size = 256;
+	int req_1000_flag = 0;
 	int new_channel_flag = 0;
 	string filename = "";
 	// take all the arguments first because some of these may go to the server
-	while ((opt = getopt(argc, argv, "p:t:e:f:r:c")) != -1) {
+	while ((opt = getopt(argc, argv, "p:t:e:f:rc")) != -1) {
 		switch(opt) {
 			case 'f':
 				filename = optarg;
@@ -34,7 +35,9 @@ int main(int argc, char *argv[]){
 				ecg_num = stoi(optarg);
 				break;
 			case 'r':
-				req_amt = stoi(optarg);
+				req_1000_flag = 1;
+				req_amt = 1000;
+				// req_amt = stoi(optarg);
 				break;
 			case 'c':
 				new_channel_flag = 1;
@@ -66,16 +69,18 @@ int main(int argc, char *argv[]){
 	FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
 
 	// ***********   req ONE data point   ***********
-	DataRequest d (person_num, time, ecg_num);
-	chan.cwrite (&d, sizeof (DataRequest)); // question
-	double reply;
-	chan.cread (&reply, sizeof(double)); //answer
-	if (isValidResponse(&reply)){
-		cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply << endl;
+	if (new_channel_flag != 1) {
+		DataRequest d (person_num, time, ecg_num);
+		chan.cwrite (&d, sizeof (DataRequest)); // question
+		double reply;
+		chan.cread (&reply, sizeof(double)); //answer
+		if (isValidResponse(&reply)){
+			cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply << endl;
+		}
 	}
 
 	// ***********   req_amt data points and send to x1.csv   ***********
-	if (req_amt > 0) {
+	if (req_1000_flag == 1) {
 		// keeping track of time
 		struct timeval start, end;
 		gettimeofday(&start, NULL);
@@ -129,6 +134,10 @@ int main(int argc, char *argv[]){
 
 	// *********** Requesting files ***********
 	if (filename != "") {
+	struct timeval start1, end1;
+	gettimeofday(&start1, NULL);
+
+
 	/* this section shows how to get the length of a file
 	you have to obtain the entire file over multiple requests
 	(i.e., due to buffer space limitation) and assemble it
@@ -183,13 +192,22 @@ int main(int argc, char *argv[]){
           fwrite(response, 1, fc->length, fp);
       }
   }
+
+	gettimeofday(&end1, NULL); //https://www.geeksforgeeks.org/measure-execution-time-with-high-precision-in-c-c/
+
+  // Calculating total time taken by the program.
+  double time_taken;
+
+  time_taken = (end1.tv_sec - start1.tv_sec) * 1e6;
+  time_taken = (time_taken + (end1.tv_usec - start1.tv_usec)) * 1e-6;
+
+  cout << "Time taken by program is : " << fixed << time_taken << setprecision(6);
+  cout << " sec" << endl;
 }
 
 	// *********** new channel ***********
 	if (new_channel_flag == 1) {
-		// REQUEST_TYPE_PREFIX req_type = NEWCHAN_REQ_TYPE;
 		Request nc (NEWCHAN_REQ_TYPE);
-		// send req
 		chan.cwrite(&nc, sizeof(Request));
 		char buf3[buffer_size];
 		chan.cread(buf3, sizeof(buf3));
@@ -205,17 +223,17 @@ int main(int argc, char *argv[]){
 		double reply3;
 		new_chan.cread (&reply3, sizeof(double));
 
-		cout << "reply3:" << reply3 << endl;
+		cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply3 << endl;
 
 		// closing the channel
-	    Request q1 (QUIT_REQ_TYPE);
-	    new_chan.cwrite (&q1, sizeof (Request));
+	  Request q1 (QUIT_REQ_TYPE);
+	  new_chan.cwrite (&q1, sizeof (Request));
 	}
 
 
 	// closing the channel
-    Request q (QUIT_REQ_TYPE);
-    chan.cwrite (&q, sizeof (Request));
+  Request q (QUIT_REQ_TYPE);
+  chan.cwrite (&q, sizeof (Request));
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
 	cout << "Client process exited" << endl;
