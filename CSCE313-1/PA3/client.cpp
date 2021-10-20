@@ -18,7 +18,7 @@ int main(int argc, char *argv[]){
 	int buffer_size = 256;
 	int req_1000_flag = 0;
 	int new_channel_flag = 0;
-	vector<FIFORequestChannel> channels;
+	// vector<FIFORequestChannel> channels;
 	string filename = "";
 	// take all the arguments first because some of these may go to the server
 	while ((opt = getopt(argc, argv, "p:t:e:f:rcm:")) != -1) {
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
 		FIFORequestChannel new_chan (new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 
 		cout << "new channel created, name: " << new_chan_name << endl;
-		channels.push_back(new_chan);
+		// channels.push_back(new_chan);
 
 		// test use
 		DataRequest dr (person_num, time, ecg_num);
