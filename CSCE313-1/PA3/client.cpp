@@ -241,12 +241,13 @@ int main(int argc, char *argv[]){
 	// ***** handle channel closing *****
 	// close minion channels
 	Request q (QUIT_REQ_TYPE);
+	Request q1 (QUIT_REQ_TYPE);
 	// for (int i = 0; i < channels.size(); i++) {
 	// 	cout << "sending quit for " << channels.size() << " channels" << endl;
 	// 	// cout << "channels[i]:" << channels[i] << endl;
 	// 	channels[i].cwrite(&q, sizeof(Request));
 	// }
-	channels[0].cwrite(&q, sizeof (Request));
+	channels[0].cwrite(&q1, sizeof (Request));
 	// close control
   chan.cwrite (&q, sizeof (Request));
 	// client waiting for the server process, which is the child, to terminate
