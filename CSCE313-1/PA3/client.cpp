@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
 		EXITONERROR ("Could not create a child process for running the server");
 	}
 	if (!pid){ // The server runs in the child process
-		char* args[] = {"./server", "-m", (char*)(buffer_size), nullptr};
+		char* args[] = {"./server", "-m", nullptr};
 		if (execvp(args[0], args) < 0){
 			EXITONERROR ("Could not launch the server");
 		}
