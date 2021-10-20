@@ -18,6 +18,7 @@ int main(int argc, char *argv[]){
 	int buffer_size = 256;
 	int req_1000_flag = 0;
 	int new_channel_flag = 0;
+	vector<FIFORequestChannel> channels;
 	string filename = "";
 	// take all the arguments first because some of these may go to the server
 	while ((opt = getopt(argc, argv, "p:t:e:f:rc")) != -1) {
@@ -41,6 +42,7 @@ int main(int argc, char *argv[]){
 				break;
 			case 'c':
 				new_channel_flag = 1;
+				// channel_amt = stoi(optarg);
 				break;
 			case '?':
         if (isprint (optopt))
@@ -68,8 +70,30 @@ int main(int argc, char *argv[]){
 	}
 	FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
 
+	// *********** new channel ***********
+	if (new_channel_flag == 1) {
+		Request nc (NEWCHAN_REQ_TYPE);
+		chan.cwrite(&nc, sizeof(Request));
+		char buf3[buffer_size];
+		chan.cread(buf3, sizeof(buf3));
+		string new_chan_name = buf3;
+
+		FIFORequestChannel new_chan (new_chan_name, FIFORequestChannel::CLIENT_SIDE);
+
+		cout << "new channel created, name: " << new_chan_name << endl;
+		channels.push_back(new_chan);
+
+		// test use
+		DataRequest dr (person_num, time, ecg_num);
+		new_chan.cwrite (&dr, sizeof (DataRequest)); // question
+		double reply3;
+		new_chan.cread (&reply3, sizeof(double));
+
+		cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply3 << endl;
+	}
+
 	// ***********   req ONE data point   ***********
-	if (new_channel_flag != 1 && req_1000_flag != 1) {
+	if (new_channel_flag != 1 && req_1000_flag != 1 && filename == "") {
 		DataRequest d (person_num, time, ecg_num);
 		chan.cwrite (&d, sizeof (DataRequest)); // question
 		double reply;
@@ -205,34 +229,13 @@ int main(int argc, char *argv[]){
   cout << " sec" << endl;
 }
 
-	// *********** new channel ***********
-	if (new_channel_flag == 1) {
-		Request nc (NEWCHAN_REQ_TYPE);
-		chan.cwrite(&nc, sizeof(Request));
-		char buf3[buffer_size];
-		chan.cread(buf3, sizeof(buf3));
-		string new_chan_name = buf3;
-
-		FIFORequestChannel new_chan (new_chan_name, FIFORequestChannel::CLIENT_SIDE);
-
-		cout << "new channel created, name: " << new_chan_name << endl;
-
-		// test use
-		DataRequest dr (person_num, time, ecg_num);
-		new_chan.cwrite (&dr, sizeof (DataRequest)); // question
-		double reply3;
-		new_chan.cread (&reply3, sizeof(double));
-
-		cout << "For person " << person_num <<", at time " << time << ", the value of ecg "<< ecg_num <<" is " << reply3 << endl;
-
-		// closing the channel
-	  Request q1 (QUIT_REQ_TYPE);
-	  new_chan.cwrite (&q1, sizeof (Request));
+	// ***** handle channel closing *****
+	// close minion channels
+	Request q (QUIT_REQ_TYPE);
+	for (int i = 0; i < channels.size(); i++) {
+		channels[i].cwrite(&q, sizeof(Request));
 	}
-
-
-	// closing the channel
-  Request q (QUIT_REQ_TYPE);
+	// close control
   chan.cwrite (&q, sizeof (Request));
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
