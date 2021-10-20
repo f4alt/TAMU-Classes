@@ -21,7 +21,7 @@ int main(int argc, char *argv[]){
 	vector<FIFORequestChannel> channels;
 	string filename = "";
 	// take all the arguments first because some of these may go to the server
-	while ((opt = getopt(argc, argv, "p:t:e:f:rc")) != -1) {
+	while ((opt = getopt(argc, argv, "p:t:e:f:rcm:")) != -1) {
 		switch(opt) {
 			case 'f':
 				filename = optarg;
@@ -44,6 +44,9 @@ int main(int argc, char *argv[]){
 				new_channel_flag = 1;
 				// channel_amt = stoi(optarg);
 				break;
+			case 'm':
+				buffer_size = stoi(optarg);
+				break;
 			case '?':
         if (isprint (optopt))
           fprintf (stderr, "Unknown option `-%c'.\n", optopt);
@@ -63,7 +66,7 @@ int main(int argc, char *argv[]){
 		EXITONERROR ("Could not create a child process for running the server");
 	}
 	if (!pid){ // The server runs in the child process
-		char* args[] = {"./server", nullptr};
+		char* args[] = {"./server", "-m", (char*)(buffer_size), nullptr};
 		if (execvp(args[0], args) < 0){
 			EXITONERROR ("Could not launch the server");
 		}
@@ -233,6 +236,8 @@ int main(int argc, char *argv[]){
 	// close minion channels
 	Request q (QUIT_REQ_TYPE);
 	for (int i = 0; i < channels.size(); i++) {
+		cout << "sending quit for " << channels.size() << " channels" << endl;
+		// cout << "channels[i]:" << channels[i] << endl;
 		channels[i].cwrite(&q, sizeof(Request));
 	}
 	// close control
