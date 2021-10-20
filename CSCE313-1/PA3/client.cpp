@@ -240,7 +240,8 @@ int main(int argc, char *argv[]){
 	for (int i = 0; i < channels.size(); i++) {
 		cout << "sending quit for " << channels.size() << " channels" << endl;
 		// cout << "channels[i]:" << channels[i] << endl;
-		channels[i].cwrite(&q, sizeof(Request));
+		// channels[i].cwrite(&q, sizeof(Request));
+		new_chan.cwrite(&q, sizeof(Request));
 	}
 	// close control
   chan.cwrite (&q, sizeof (Request));
