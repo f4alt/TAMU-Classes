@@ -148,9 +148,9 @@ int main(int argc, char *argv[]){
 	FIFORequestChannel* wchans[p];
 	for (int i =0; i < w; i++) {
 		Request nc (NEWCHAN_REQ_TYPE);
-		chan->cwrite(&nc, sizeof(Request));
+		chan.cwrite(&nc, sizeof(Request));
 		char buf3[1024];
-		chan->cread(buf3, sizeof(buf3));
+		chan.cread(buf3, sizeof(buf3));
 		string new_chan_name = buf3;
 
 		// cout << "new channel created, name: " << new_chan_name << endl;
