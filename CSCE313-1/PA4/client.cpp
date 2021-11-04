@@ -174,6 +174,7 @@ int main(int argc, char *argv[]){
 		for (int i =0; i < p; i++) {
 			patient[i].join();
 		}
+		cout << "patients done" << endl;
 		// for (int i = 0; i < w; i++) {
 		// 	Request q (QUIT_REQ_TYPE);
 		// 	request_buffer.push((char*) &q, sizeof(q));
@@ -181,6 +182,7 @@ int main(int argc, char *argv[]){
 		for (int i =0; i < w; i++) {
 			workers[i].join();
 		}
+		cout << "workers done" << endl;
     gettimeofday (&end, 0);
 
     // print the results and time difference
