@@ -37,9 +37,8 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 	char buf[1024];
 	double resp = 0;
 	while (1) {
-		req_buf->pop(buf, 1024);
-		cout << "m:" << buf << endl;
-		REQUEST_TYPE_PREFIX m = ((Request*)buf)->getType();
+		vector<char> req = req_buf->pop();
+		Request* m = (Request*)req.data();
 
 		// if (m == DATA_REQ_TYPE) {
 		// 	chan->cwrite(&buf, sizeof(DataRequest));
