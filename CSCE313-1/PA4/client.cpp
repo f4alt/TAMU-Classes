@@ -41,9 +41,10 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 		char* m = (char*)req.data();
 
 		if (*(REQUEST_TYPE_PREFIX*)m == DATA_REQ_TYPE) {
-			chan->cwrite(&buf, sizeof(DataRequest));
+			DataRequest* dm = (DataRequest*)m;
+			chan->cwrite(&dm, sizeof(DataRequest));
 			chan->cread(&resp, sizeof(double));
-			hc->update(((DataRequest*)buf)->person, resp);
+			hc->update(((DataRequest*)dm)->person, resp);
 		} else if (*(REQUEST_TYPE_PREFIX*)m == FILE_REQ_TYPE) {
 
 		} else if (*(REQUEST_TYPE_PREFIX*)m == QUIT_REQ_TYPE) {
