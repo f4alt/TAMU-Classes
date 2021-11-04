@@ -42,7 +42,7 @@ public:
 	  // full = new Semaphore(0);
 	  // empty = new Semaphore(cap);
 		// slot_avail.notify_all();
-		fullSlots = 0;
+		fullSlots(0);
 		emptySlots = cap;
 		mutex = 1;
 	}
