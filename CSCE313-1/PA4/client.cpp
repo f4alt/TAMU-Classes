@@ -6,11 +6,11 @@
 #include <thread>
 using namespace std;
 
-FIFORequestChannel* create_channel(FIFORequestChannel chan, int buffer_size) {
+FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 	Request nc (NEWCHAN_REQ_TYPE);
-	chan.cwrite(&nc, sizeof(Request));
+	chan->cwrite(&nc, sizeof(Request));
 	char buf3[buffer_size];
-	chan.cread(buf3, sizeof(buf3));
+	chan->cread(buf3, sizeof(buf3));
 	string new_chan_name = buf3;
 
 	cout << "new channel created, name: " << new_chan_name << endl;
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]){
 
 	FIFORequestChannel* wchans[p];
 	for (int i =0; i < p; i++) {
-		wchans[i] = create_channel(chan, m);
+		wchans[i] = create_channel(&chan, m);
 	}
 
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]){
     Request q (QUIT_REQ_TYPE);
 		// clean up worker channels
 		for (int i =0; i < p; i++) {
-			wchan[i].cwrite(&q, sizeof(Request));
+			wchans[i]->cwrite(&q, sizeof(Request));
 			delete wchans[i];
 		}
 		// clean up control
