@@ -178,10 +178,10 @@ int main(int argc, char *argv[]){
 			patient[i].join();
 		}
 		cout << "patients joined" << endl;
-		// for (int i = 0; i < w; i++) {
-		// 	Request q (QUIT_REQ_TYPE);
-		// 	request_buffer.push((char*) &q, sizeof(q));
-		// }
+		for (int i = 0; i < w; i++) {
+			Request q (QUIT_REQ_TYPE);
+			request_buffer.push((char*) &q, sizeof(q));
+		}
 		for (int i =0; i < w; i++) {
 			workers[i].join();
 		}
