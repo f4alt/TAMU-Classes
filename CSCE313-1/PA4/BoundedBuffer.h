@@ -35,7 +35,7 @@ public:
 		// lock = new Semaphore(1);
 	  // full = new Semaphore(0);
 	  // empty = new Semaphore(cap);
-		slot_avail.notify_all();
+		// slot_avail.notify_all();
 	}
 	~BoundedBuffer(){
 		// delete lock;
