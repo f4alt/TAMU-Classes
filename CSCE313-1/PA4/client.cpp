@@ -55,10 +55,10 @@ int main(int argc, char *argv[]){
 	f: file name
 	h: number of histogram threads
 	*/
-	int n = 0;
-	int p = 1;
-	int w = 1;
-	int b = 10; // size of bounded buffer, note: this is different from another variable buffercapacity/m
+	int n = 1000;
+	int p = 10;
+	int w = 100;
+	int b = 20; // size of bounded buffer, note: this is different from another variable buffercapacity/m
 	int m = 256;
 	string filename = "";
 	int h = 1;
