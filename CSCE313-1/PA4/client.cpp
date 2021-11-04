@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
 	*/
 	int n = 1000;
 	int p = 10;
-	int w = 100;
+	int w = 10;
 	int b = 20; // size of bounded buffer, note: this is different from another variable buffercapacity/m
 	int m = 256;
 	string filename = "";
