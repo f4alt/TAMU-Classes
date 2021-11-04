@@ -27,7 +27,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 		// chan->cwrite(&d, sizeof(DataRequest));
 		// chan->cread(&resp, sizeof(double));
 		// hc->update(pat_num, resp);
-		req_buf->push((char *)&d, sizeof(DataRequest));
+		// req_buf->push((char *)&d, sizeof(DataRequest));
 		d.seconds += 0.004;
 	}
 }
