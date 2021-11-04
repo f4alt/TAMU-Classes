@@ -56,7 +56,7 @@ public:
 
 		//1. Perform necessary waiting (by calling wait on the right semaphores and mutexes),
 		// unique_lock<mutex> l (m);
-		emptySlots.P();
+		emptySlots->P();
 		m.lock();
 		// slot_avail.wait(l, [this]{return q.size() < cap;});
 		// empty->P();
@@ -65,7 +65,7 @@ public:
 		q.push(data);
 		// l.unlock();
 		m.unlock();
-		fullSlots.V();
+		fullSlots->V();
 		//3. Do necessary unlocking and notification
 		// data_avail.notify_one();
 		// lock->V();
@@ -78,13 +78,13 @@ public:
 		// data_avail.wait(l, [this]{return q.size() > 0;});
 		// full->P();
 		// lock->P();
-		fullSlots.P();
+		fullSlots->P();
 		m.lock();
 		//2. Pop the front item of the queue.
 		vector<char> d = q.front();
 		q.pop();
 		m.unlock();
-		emptySlots.V();
+		emptySlots->V();
 		//3. Unlock and notify using the right sync variables
 		// l.unlock();
 		// slot_avail.notify_one();
