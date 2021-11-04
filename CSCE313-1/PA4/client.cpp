@@ -26,7 +26,7 @@ void patient_thread_function(int n, int pat_num, FIFORequestChannel* chan, Histo
 		chan->cwrite(&d, sizeof(DataRequest));
 		chan->cread(&resp, sizeof(double));
 		hc->update(pat_num, resp);
-		d.seconds += .004;
+		d.seconds += 0.004;
 	}
 }
 
@@ -120,13 +120,13 @@ int main(int argc, char *argv[]){
 
 	// make h histograms and add to collection
 	for (int i =0; i < p; i++) {
-		Histogram* hist = new Histogram(10, -2.0, 2.0);
-		hc.add(hist);
+		Histogram* h = new Histogram(10, -2.0, 2.0);
+		hc.add(h);
 	}
 
-	FIFORequestChannel* worker_channels[p];
-	for (int i =0; i < w; i++) {
-		worker_channels[i] = create_channel(chan, m);
+	FIFORequestChannel* wchans[p];
+	for (int i =0; i < p; i++) {
+		wchans[i] = create_channel(chan, m);
 	}
 
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]){
     /* Start all threads here */
 		thread patient[p];
 		for (int i =0; i < p; i++) {
-			patient[i] = thread(patient_thread_function, n, i+1, worker_channels[i], &hc);
+			patient[i] = thread(patient_thread_function, n, i+1, wchans[i], &hc);
 		}
 
 
