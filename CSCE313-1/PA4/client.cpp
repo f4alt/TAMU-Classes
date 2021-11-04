@@ -19,21 +19,39 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 	return new_chan;
 }
 
-void patient_thread_function(int n, int pat_num, FIFORequestChannel* chan, HistogramCollection* hc) {
+void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 	DataRequest d(pat_num, 0.0, 1);
 	double resp = 0;
 
 	for (int i=0; i < n; i++) {
-		chan->cwrite(&d, sizeof(DataRequest));
-		chan->cread(&resp, sizeof(double));
-		hc->update(pat_num, resp);
+		// chan->cwrite(&d, sizeof(DataRequest));
+		// chan->cread(&resp, sizeof(double));
+		// hc->update(pat_num, resp);
+		req_buf->push((char *)&d, sizeof(DataRequest));
 		d.seconds += 0.004;
 	}
 }
 
 
-void worker_thread_function(){
+void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, HistogramCollection* hc){
+	char buf[1024];
+	double resp = 0;
+	while (1) {
+		req_buf->pop(buf, 1024);
+		REQUEST_TYPE_PREFIX m = ((Request*)buf)->getType();
 
+		if (m == DATA_REQ_TYPE) {
+			chan->cwrite(buf, sizeof(Request));
+			chan->cread(&resp, sizeof(double));
+			hc->update(((DataRequest*)buf)->person, resp);
+		} else if (m == FILE_REQ_TYPE) {
+
+		} else if (m == QUIT_REQ_TYPE) {
+			chan->cwrite(&m, sizeof(Request));
+			delete chan;
+			break;
+		}
+	}
 }
 
 
@@ -125,8 +143,9 @@ int main(int argc, char *argv[]){
 		hc.add(h);
 	}
 
+	// create w worker channels
 	FIFORequestChannel* wchans[p];
-	for (int i =0; i < p; i++) {
+	for (int i =0; i < w; i++) {
 		wchans[i] = create_channel(&chan, m);
 	}
 
@@ -137,9 +156,16 @@ int main(int argc, char *argv[]){
     gettimeofday (&start, 0);
 
     /* Start all threads here */
+
+		// start p patient threads
 		thread patient[p];
 		for (int i =0; i < p; i++) {
-			patient[i] = thread(patient_thread_function, n, i+1, wchans[i], &hc);
+			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
+		}
+
+		thread workers[w];
+		for (int i = 0; i < w; i++) {
+			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &hc);
 		}
 
 
@@ -159,10 +185,10 @@ int main(int argc, char *argv[]){
 		// CLEAN UP ALL CHANNELS
     Request q (QUIT_REQ_TYPE);
 		// clean up worker channels
-		for (int i =0; i < p; i++) {
-			wchans[i]->cwrite(&q, sizeof(Request));
-			delete wchans[i];
-		}
+		// for (int i =0; i < p; i++) {
+		// 	wchans[i]->cwrite(&q, sizeof(Request));
+		// 	delete wchans[i];
+		// }
 		// clean up control
     chan.cwrite (&q, sizeof (Request));
 	// client waiting for the server process, which is the child, to terminate

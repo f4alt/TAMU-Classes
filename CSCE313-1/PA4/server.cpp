@@ -30,7 +30,7 @@ vector<thread> channel_threads;
 
 
 void process_newchannel_request (FIFORequestChannel *_channel){
-	cout << "client req channel" << endl;
+	// cout << "client req channel" << endl;
 	nchannels++;
 	string new_channel_name = "data" + to_string(nchannels) + "_";
 	char buf [30];
