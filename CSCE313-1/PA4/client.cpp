@@ -41,17 +41,17 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 		cout << "m:" << buf << endl;
 		REQUEST_TYPE_PREFIX m = ((Request*)buf)->getType();
 
-		if (m == DATA_REQ_TYPE) {
-			chan->cwrite(&buf, sizeof(DataRequest));
-			chan->cread(&resp, sizeof(double));
-			hc->update(((DataRequest*)buf)->person, resp);
-		} else if (m == FILE_REQ_TYPE) {
-
-		} else if (m == QUIT_REQ_TYPE) {
-			chan->cwrite(&m, sizeof(Request));
-			delete chan;
-			break;
-		}
+		// if (m == DATA_REQ_TYPE) {
+		// 	chan->cwrite(&buf, sizeof(DataRequest));
+		// 	chan->cread(&resp, sizeof(double));
+		// 	hc->update(((DataRequest*)buf)->person, resp);
+		// } else if (m == FILE_REQ_TYPE) {
+		//
+		// } else if (m == QUIT_REQ_TYPE) {
+		// 	chan->cwrite(&m, sizeof(Request));
+		// 	delete chan;
+		// 	break;
+		// }
 	}
 }
 
