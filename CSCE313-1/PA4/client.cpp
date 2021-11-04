@@ -47,12 +47,12 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 			chan->cread(&resp, sizeof(double));
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
 			hc->update(((DataRequest*)r)->person, resp);
-		} else if (r->getType() == == FILE_REQ_TYPE) {
-			int flen = sizeof(FileRequest) + sizeof(filename) + 1;
+		} else if (r->getType() == FILE_REQ_TYPE) {
+			// int flen = sizeof(FileRequest) + sizeof(filename) + 1;
 			char buf[flen];
 			vector<char> v = vector<char>((char*)&buf, (char*)&buf + flen);
 			req_buf->push(v);
-		} else if (r->getType() == == QUIT_REQ_TYPE) {
+		} else if (r->getType() == QUIT_REQ_TYPE) {
 			chan->cwrite(&r, sizeof(Request));
 			delete chan;
 			break;
