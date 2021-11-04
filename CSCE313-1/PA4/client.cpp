@@ -149,6 +149,7 @@ int main(int argc, char *argv[]){
 	for (int i =0; i < w; i++) {
 		wchans[i] = create_channel(&chan, m);
 	}
+	cout << "created " << w << " worker channels" << endl;
 
 
 
@@ -163,18 +164,20 @@ int main(int argc, char *argv[]){
 		for (int i =0; i < p; i++) {
 			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
 		}
+		cout << "started " << p << " patient threads" << endl;
 
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
 			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &hc);
 		}
+		cout << "started " << w << " worker threads" << endl;
 
 
 		/* Join all threads here */
 		for (int i =0; i < p; i++) {
 			patient[i].join();
 		}
-		cout << "patients done" << endl;
+		cout << "patients joined" << endl;
 		// for (int i = 0; i < w; i++) {
 		// 	Request q (QUIT_REQ_TYPE);
 		// 	request_buffer.push((char*) &q, sizeof(q));
@@ -182,7 +185,7 @@ int main(int argc, char *argv[]){
 		for (int i =0; i < w; i++) {
 			workers[i].join();
 		}
-		cout << "workers done" << endl;
+		cout << "workers joined" << endl;
     gettimeofday (&end, 0);
 
     // print the results and time difference
