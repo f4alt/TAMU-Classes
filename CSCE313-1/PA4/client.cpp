@@ -173,10 +173,10 @@ int main(int argc, char *argv[]){
 		for (int i =0; i < p; i++) {
 			patient[i].join();
 		}
-		for (int i = 0; i < w; i++) {
-			Request q (QUIT_REQ_TYPE);
-			request_buffer.push((char*) &q, sizeof(q));
-		}
+		// for (int i = 0; i < w; i++) {
+		// 	Request q (QUIT_REQ_TYPE);
+		// 	request_buffer.push((char*) &q, sizeof(q));
+		// }
 		for (int i =0; i < w; i++) {
 			workers[i].join();
 		}
