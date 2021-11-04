@@ -47,32 +47,32 @@ public:
 		// follow the class lecture pseudocode
 
 		//1. Perform necessary waiting (by calling wait on the right semaphores and mutexes),
-		unique_lock<mutex> l (m);
-		slot_avail.wait(l, [this]{return q.size() < cap;});
+		// unique_lock<mutex> l (m);
+		// slot_avail.wait(l, [this]{return q.size() < cap;});
 		// empty->P();
 		// lock->P();
 		//2. Push the data onto the queue
 		vector<char> d (data, data + len);
 		q.push(d);
-		l.unlock();
+		// l.unlock();
 		//3. Do necessary unlocking and notification
-		data_avail.notify_one();
+		// data_avail.notify_one();
 		// lock->V();
 		// full->V();
 	}
 
 	vector<char> pop(){
 		//1. Wait using the correct sync variables
-		unique_lock<mutex> l (m);
-		data_avail.wait(l, [this]{return q.size() > 0;});
+		// unique_lock<mutex> l (m);
+		// data_avail.wait(l, [this]{return q.size() > 0;});
 		// full->P();
 		// lock->P();
 		//2. Pop the front item of the queue.
 		vector<char> d = q.front();
 		q.pop();
 		//3. Unlock and notify using the right sync variables
-		l.unlock();
-		slot_avail.notify_one();
+		// l.unlock();
+		// slot_avail.notify_one();
 		// lock->V();
 		// empty->V();
 		//4. Return the popped vector
