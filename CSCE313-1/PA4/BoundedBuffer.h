@@ -22,6 +22,8 @@ private:
 
 	// add necessary synchronization variables (e.g., sempahores, mutexes) and variables
 	mutex m;
+	condition_variable data_available;
+	condition_variable slot_available;
 
 
 public:
@@ -37,27 +39,33 @@ public:
 		// follow the class lecture pseudocode
 
 		//1. Perform necessary waiting (by calling wait on the right semaphores and mutexes),
-		m.lock();
-		//2. Push the data onto the queue
 		vector<char> d (data, data + len);
+		unique_lock<mutex> l(m);
+		slot_available.wait(l, [this]{return q.size() < cap;});
+		//2. Push the data onto the queue
 		q.push(d);
 		//3. Do necessary unlocking and notification
-		m.unlock();
+		l.unlock();
+
+		data_available.notify_one();
 
 
 	}
 
 	vector<char> pop(char* buf, int bufcap){
 		//1. Wait using the correct sync variables
+		unique_lock<mutex> l (m);
+		data_available.wait(l, [this]{return q.size() > 0;});
 		//2. Pop the front item of the queue.
-		m.lock();
 		vector<char> d = q.front();
 		q.pop();
-		m.unlock();
 		//3. Unlock and notify using the right sync variables
+		l.unlock();
 		//4. Return the popped vector
 		assert(d.size() <= bufcap);
 		memcpy(buf, d.data(), d.size());
+
+		slot_available.notify_one();
 	}
 };
 
