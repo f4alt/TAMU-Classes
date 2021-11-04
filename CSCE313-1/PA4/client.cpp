@@ -46,9 +46,12 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 			chan->cwrite(&dm, sizeof(DataRequest));
 			chan->cread(&resp, sizeof(double));
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
-			hc->update(((DataRequest*)dm)->person, resp);
+			hc->update(((DataRequest*)r)->person, resp);
 		} else if (r->getType() == == FILE_REQ_TYPE) {
-
+			int flen = sizeof(FileRequest) + sizeof(filename) + 1;
+			char buf[flen];
+			vector<char> v = vector<char>((char*)&buf, (char*)&buf + len);
+			req_buf->push(v);
 		} else if (r->getType() == == QUIT_REQ_TYPE) {
 			chan->cwrite(&r, sizeof(Request));
 			delete chan;
@@ -207,6 +210,10 @@ int main(int argc, char *argv[]){
 			workers[i].join();
 		}
 		cout << "workers joined" << endl;
+		for(int i=0; i < h; i++) {
+			hists[i].join();
+		}
+		cout << "hists joined" << endl;
     gettimeofday (&end, 0);
 
     // print the results and time difference
