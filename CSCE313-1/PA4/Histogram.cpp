@@ -6,7 +6,7 @@ using namespace std;
 #include "Histogram.h"
 
 Histogram::Histogram(int _nbins, double _start, double _end): nbins (_nbins), start(_start), end(_end){
-	//memset (hist, 0, nbins * sizeof (int));	
+	//memset (hist, 0, nbins * sizeof (int));
 	hist = vector<int> (nbins, 0);
 }
 Histogram::~Histogram(){
@@ -19,7 +19,9 @@ void Histogram::update (double value){
 		bin_index = nbins-1;
 
 	//cout << value << "-" << bin_index << endl;
+	m.lock();
 	hist [bin_index] ++;
+	m.unlock();
 }
 vector<int> Histogram::get_hist(){
 	return hist;
@@ -32,5 +34,5 @@ vector<double> Histogram::get_range (){
 	return r;
 }
 int Histogram::size(){
-	return nbins;		
+	return nbins;
 }
