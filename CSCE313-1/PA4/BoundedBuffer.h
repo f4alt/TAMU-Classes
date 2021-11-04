@@ -24,9 +24,9 @@ private:
 	// Semaphore* lock;
 	// Semaphore* full;
 	// Semaphore* empty;
-	// Semaphore full;
-	// Semaphore empty;
-	// Semaphore mutex;
+	Semaphore fullSlots;
+	Semaphore emptySlots;
+	Semaphore mutex;
 	// mutex m;
 	// condition_variable data_avail;
 	// condition_variable slot_avail;
@@ -42,6 +42,9 @@ public:
 	  // full = new Semaphore(0);
 	  // empty = new Semaphore(cap);
 		// slot_avail.notify_all();
+		fullSlots = 0;
+		emptySlots = cap;
+		mutex = 1;
 	}
 	~BoundedBuffer(){
 		// delete lock;
@@ -49,18 +52,21 @@ public:
 	  // delete empty;
 	}
 
-	void push(char* data, int len){
+	void push(vector<char> data){
 		// follow the class lecture pseudocode
 
 		//1. Perform necessary waiting (by calling wait on the right semaphores and mutexes),
 		// unique_lock<mutex> l (m);
+		emptySlots.P();
+		mutex.P();
 		// slot_avail.wait(l, [this]{return q.size() < cap;});
 		// empty->P();
 		// lock->P();
 		//2. Push the data onto the queue
-		vector<char> d (data, data + len);
-		q.push(d);
+		q.push(data);
 		// l.unlock();
+		mutex.V();
+		fullSlots.V();
 		//3. Do necessary unlocking and notification
 		// data_avail.notify_one();
 		// lock->V();
@@ -73,9 +79,13 @@ public:
 		// data_avail.wait(l, [this]{return q.size() > 0;});
 		// full->P();
 		// lock->P();
+		fullSlots.P();
+		mutex.P();
 		//2. Pop the front item of the queue.
 		vector<char> d = q.front();
 		q.pop();
+		mutex.V();
+		emptySlots.V();
 		//3. Unlock and notify using the right sync variables
 		// l.unlock();
 		// slot_avail.notify_one();

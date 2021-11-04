@@ -1,0 +1,13 @@
+1. hit all ranges - worst case just hit edge cases
+2. show for loop that pushes quit messages to request buffer
+3.
+4. code should run with w=500
+5. Show lock and unlock funct in code
+6. run code with b=10
+7. show getopt code
+8. > truncate -s 10000 BIMDC/10000.dat
+run diff between files
+9. add flages in make files for client and server - run without memory leaks
+10. show files after running to make sure there are no temp files
+11. atleast 5 sets of data in report
+12. 
