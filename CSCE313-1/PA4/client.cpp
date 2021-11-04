@@ -155,8 +155,15 @@ int main(int argc, char *argv[]){
     int usecs = (int)(end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)%((int) 1e6);
     cout << "Took " << secs << " seconds and " << usecs << " micro seconds" << endl;
 
-	// closing the channel
+
+		// CLEAN UP ALL CHANNELS
     Request q (QUIT_REQ_TYPE);
+		// clean up worker channels
+		for (int i =0; i < p; i++) {
+			wchan[i].cwrite(&q, sizeof(Request));
+			delete wchans[i];
+		}
+		// clean up control
     chan.cwrite (&q, sizeof (Request));
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
