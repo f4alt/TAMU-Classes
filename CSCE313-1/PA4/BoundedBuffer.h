@@ -41,7 +41,7 @@ public:
 		// slot_avail.notify_all();
 		fullSlots = new Semaphore(0);
 		emptySlots = new Semaphore(_cap);
-		m = 0;
+		// m = 0;
 	}
 	~BoundedBuffer(){
 		delete fullSlots;
