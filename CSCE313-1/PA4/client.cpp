@@ -27,7 +27,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 		// chan->cwrite(&d, sizeof(DataRequest));
 		// chan->cread(&resp, sizeof(double));
 		// hc->update(pat_num, resp);
-		// req_buf->push((char *)&d, sizeof(DataRequest));
+		req_buf->push((char *)&d, sizeof(DataRequest));
 		d.seconds += 0.004;
 	}
 }
@@ -36,23 +36,22 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, HistogramCollection* hc){
 	char buf[1024];
 	double resp = 0;
-	// while (1) {
-	// 	vector<char> req = req_buf->pop();
-	// 	Request* m = (Request*)req.data();
+	while (1) {
+		vector<char> req = req_buf->pop();
+		Request* m = (Request*)req.data();
 
-		// if (m == DATA_REQ_TYPE) {
-		// 	chan->cwrite(&buf, sizeof(DataRequest));
-		// 	chan->cread(&resp, sizeof(double));
-		// 	hc->update(((DataRequest*)buf)->person, resp);
-		// } else if (m == FILE_REQ_TYPE) {
-		//
-		// } else if (m == QUIT_REQ_TYPE) {
-			Request m (QUIT_REQ_TYPE);
+		if (m == DATA_REQ_TYPE) {
+			chan->cwrite(&buf, sizeof(DataRequest));
+			chan->cread(&resp, sizeof(double));
+			hc->update(((DataRequest*)buf)->person, resp);
+		} else if (m == FILE_REQ_TYPE) {
+
+		} else if (m == QUIT_REQ_TYPE) {
 			chan->cwrite(&m, sizeof(Request));
 			delete chan;
-		// 	break;
-		// }
-	// }
+			break;
+		}
+	}
 }
 
 
