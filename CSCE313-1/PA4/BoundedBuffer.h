@@ -24,14 +24,20 @@ private:
 	// Semaphore* lock;
 	// Semaphore* full;
 	// Semaphore* empty;
-	mutex m;
-	condition_variable data_avail;
-	condition_variable slot_avail;
+	// Semaphore full;
+	// Semaphore empty;
+	// Semaphore mutex;
+	// mutex m;
+	// condition_variable data_avail;
+	// condition_variable slot_avail;
 
 
 public:
 	BoundedBuffer(int _cap){
 		cap = _cap;
+		 // full = 0;
+		 // empty = cap;
+		 // mutex = 1;
 		// lock = new Semaphore(1);
 	  // full = new Semaphore(0);
 	  // empty = new Semaphore(cap);

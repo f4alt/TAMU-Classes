@@ -33,8 +33,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 }
 
 
-void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, HistogramCollection* hc){
-	char buf[1024];
+void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, BoundedBuffer* hist_buf, HistogramCollection* hc){
 	double resp = 0;
 	while (1) {
 		vector<char> req = req_buf->pop();
@@ -44,6 +43,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 			DataRequest* dm = (DataRequest*)m;
 			chan->cwrite(&dm, sizeof(DataRequest));
 			chan->cread(&resp, sizeof(double));
+			// hist_buf->push((char*)&dm, sizeof(DataRequest));
 			hc->update(((DataRequest*)dm)->person, resp);
 		} else if (*(REQUEST_TYPE_PREFIX*)m == FILE_REQ_TYPE) {
 
@@ -56,8 +56,20 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 }
 
 
-void histogram_thread_function (){
+void histogram_thread_function (FIFORequestChannel* chan, BoundedBuffer* hist_buf, HistogramCollection* hc){
+	double resp = 0;
+	while (1) {
+		vector<char> req = hist_buf->pop();
+		char* m = (char*)req.data();
 
+		if (*(REQUEST_TYPE_PREFIX*)m == DATA_REQ_TYPE) {
+			DataRequest* dm = (DataRequest*)m;
+			// hist_buf->push((char*)&dm, sizeof(DataRequest));
+			chan->cwrite(&dm, sizeof(DataRequest));
+			chan->cread(&resp, sizeof(double));
+			hc->update(((DataRequest*)dm)->person, resp);
+		}
+	}
 }
 
 
@@ -136,9 +148,10 @@ int main(int argc, char *argv[]){
 	}
 	FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
 	BoundedBuffer request_buffer(b);
+	BoundedBuffer histogram_buffer(b);
 	HistogramCollection hc;
 
-	// make h histograms and add to collection
+	// make p histograms and add to collection - ie 1 per person
 	for (int i =0; i < p; i++) {
 		Histogram* h = new Histogram(10, -2.0, 2.0);
 		hc.add(h);
@@ -168,9 +181,15 @@ int main(int argc, char *argv[]){
 
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
-			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &hc);
+			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &histogram_buffer, &hc);
 		}
 		cout << "started " << w << " worker threads" << endl;
+
+		thread hists[h];
+		for (int i =0; i < h; i++) {
+			hists[i] = thread(histogram_thread_function, &chan, &histogram_buffer, &hc);
+		}
+		cout << "started " << h << " hists threads" << endl;
 
 
 		/* Join all threads here */
