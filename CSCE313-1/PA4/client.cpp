@@ -13,7 +13,7 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 	chan->cread(buf3, sizeof(buf3));
 	string new_chan_name = buf3;
 
-	cout << "new channel created, name: " << new_chan_name << endl;
+	// cout << "new channel created, name: " << new_chan_name << endl;
 	FIFORequestChannel* new_chan = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 
 	return new_chan;
