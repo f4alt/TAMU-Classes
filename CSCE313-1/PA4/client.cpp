@@ -13,7 +13,7 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 	chan->cread(buf3, sizeof(buf3));
 	string new_chan_name = buf3;
 
-	cout << "new channel created, name: " << new_chan_name << endl;
+	// cout << "new channel created, name: " << new_chan_name << endl;
 	FIFORequestChannel* new_chan = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 
 	return new_chan;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]){
 	h: number of histogram threads
 	*/
 	int n = 1000;
-	int p = 10;
+	int p = 20;
 	int w = 10;
 	int b = 20; // size of bounded buffer, note: this is different from another variable buffercapacity/m
 	int m = 256;
@@ -147,16 +147,7 @@ int main(int argc, char *argv[]){
 	// create w worker channels
 	FIFORequestChannel* wchans[p];
 	for (int i =0; i < w; i++) {
-		Request nc (NEWCHAN_REQ_TYPE);
-		chan.cwrite(&nc, sizeof(Request));
-		char buf3[1024];
-		chan.cread(buf3, sizeof(buf3));
-		string new_chan_name = buf3;
-
-		// cout << "new channel created, name: " << new_chan_name << endl;
-		// FIFORequestChannel* new_chan = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
-		wchans[i] = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
-		// wchans[i] = create_channel(&chan, m);
+		wchans[i] = create_channel(&chan, m);
 	}
 	cout << "created " << w << " worker channels" << endl;
 
