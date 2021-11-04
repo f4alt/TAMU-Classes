@@ -27,7 +27,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 		// chan->cwrite(&d, sizeof(DataRequest));
 		// chan->cread(&resp, sizeof(double));
 		// hc->update(pat_num, resp);
-		vector<char> v = vector<char>((char*)&r, (char*)&r + sizeof(DataRequest));
+		vector<char> v = vector<char>((char*)&d, (char*)&d + sizeof(DataRequest));
 		req_buf->push(v);
 		d.seconds += 0.004;
 	}
@@ -38,11 +38,11 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 	double resp = 0;
 	while (1) {
 		vector<char> req = req_buf->pop();
-		char* m = req.data();
+		char* data = req.data();
 		Request* r = (Request*)data;
 
 		if (r->getType() == DATA_REQ_TYPE) {
-			DataRequest* dm = (DataRequest*)m;
+			DataRequest* dm = (DataRequest*)r;
 			chan->cwrite(&dm, sizeof(DataRequest));
 			chan->cread(&resp, sizeof(double));
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
@@ -50,7 +50,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		} else if (r->getType() == == FILE_REQ_TYPE) {
 			int flen = sizeof(FileRequest) + sizeof(filename) + 1;
 			char buf[flen];
-			vector<char> v = vector<char>((char*)&buf, (char*)&buf + len);
+			vector<char> v = vector<char>((char*)&buf, (char*)&buf + flen);
 			req_buf->push(v);
 		} else if (r->getType() == == QUIT_REQ_TYPE) {
 			chan->cwrite(&r, sizeof(Request));
@@ -204,7 +204,8 @@ int main(int argc, char *argv[]){
 		cout << "patients joined" << endl;
 		for (int i = 0; i < w; i++) {
 			Request q (QUIT_REQ_TYPE);
-			request_buffer.push((char*) &q, sizeof(q));
+			vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
+			request_buffer.push(v);
 		}
 		for (int i =0; i < w; i++) {
 			workers[i].join();

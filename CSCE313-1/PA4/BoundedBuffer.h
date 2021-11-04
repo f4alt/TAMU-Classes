@@ -24,12 +24,9 @@ private:
 	// Semaphore* lock;
 	// Semaphore* full;
 	// Semaphore* empty;
-	Semaphore fullSlots;
+	Semaphore* fullSlots;
 	Semaphore* emptySlots;
 	Semaphore* mutex;
-	// mutex m;
-	// condition_variable data_avail;
-	// condition_variable slot_avail;
 
 
 public:
@@ -42,7 +39,7 @@ public:
 	  // full = new Semaphore(0);
 	  // empty = new Semaphore(cap);
 		// slot_avail.notify_all();
-		fullSlots(0);
+		fullSlots = 0;
 		emptySlots = cap;
 		mutex = 1;
 	}
