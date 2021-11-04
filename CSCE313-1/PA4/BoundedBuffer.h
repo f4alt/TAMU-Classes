@@ -26,7 +26,7 @@ private:
 	// Semaphore* empty;
 	Semaphore* fullSlots;
 	Semaphore* emptySlots;
-	Semaphore* mutex;
+	mutex mutex = 1;
 
 
 public:
@@ -39,11 +39,13 @@ public:
 	  // full = new Semaphore(0);
 	  // empty = new Semaphore(cap);
 		// slot_avail.notify_all();
-		fullSlots = 0;
-		emptySlots = cap;
-		mutex = 1;
+		fullSlots = new Semaphore(0);
+		emptySlots = new Semaphore(_cap);
+		mutex = 0;
 	}
 	~BoundedBuffer(){
+		delete fullSlots;
+		delete emptySlots;
 		// delete lock;
 	  // delete full;
 	  // delete empty;
@@ -55,14 +57,14 @@ public:
 		//1. Perform necessary waiting (by calling wait on the right semaphores and mutexes),
 		// unique_lock<mutex> l (m);
 		emptySlots.P();
-		mutex.P();
+		mutex.lock();
 		// slot_avail.wait(l, [this]{return q.size() < cap;});
 		// empty->P();
 		// lock->P();
 		//2. Push the data onto the queue
 		q.push(data);
 		// l.unlock();
-		mutex.V();
+		mutex.unlock();
 		fullSlots.V();
 		//3. Do necessary unlocking and notification
 		// data_avail.notify_one();
@@ -77,11 +79,11 @@ public:
 		// full->P();
 		// lock->P();
 		fullSlots.P();
-		mutex.P();
+		mutex.lock();
 		//2. Pop the front item of the queue.
 		vector<char> d = q.front();
 		q.pop();
-		mutex.V();
+		mutex.unlock();
 		emptySlots.V();
 		//3. Unlock and notify using the right sync variables
 		// l.unlock();
