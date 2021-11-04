@@ -24,9 +24,9 @@ private:
 	// Semaphore* lock;
 	// Semaphore* full;
 	// Semaphore* empty;
-	Semaphore fullSlots;
-	Semaphore emptySlots;
-	Semaphore mutex;
+	Semaphore* fullSlots;
+	Semaphore* emptySlots;
+	Semaphore* mutex;
 	// mutex m;
 	// condition_variable data_avail;
 	// condition_variable slot_avail;
