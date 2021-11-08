@@ -14,7 +14,7 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 	string new_chan_name = buf3;
 
 	// cout << "new channel created, name: " << new_chan_name << endl;
-	FIFORequestChannel* new_chan = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
+	FIFORequestChannel* new_chan = FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 
 	return new_chan;
 }
@@ -64,7 +64,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		} else if (r->getType() == QUIT_REQ_TYPE) {
 			// cout << "quit req" << endl;
 			chan->cwrite(&r, sizeof(Request));
-			delete &chan;
+			delete chan;
 			break;
 		}
 	}
