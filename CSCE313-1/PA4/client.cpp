@@ -40,7 +40,8 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 }
 
 
-void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, BoundedBuffer* hist_buf, HistogramCollection* hc){
+// void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, BoundedBuffer* hist_buf, HistogramCollection* hc){
+void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, HistogramCollection* hc){
 	double resp = 0;
 	while (1) {
 		vector<char> req = req_buf->pop();
@@ -208,13 +209,14 @@ int main(int argc, char *argv[]){
 
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
-			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &histogram_buffer, &hc);
+			// workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &histogram_buffer, &hc);
+				workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &hc);
 		}
 		cout << "started " << w << " worker thread(s)" << endl;
 
 		thread hists[h];
 		for (int i =0; i < h; i++) {
-			hists[i] = thread(histogram_thread_function, &chan, &histogram_buffer, &hc);
+			// hists[i] = thread(histogram_thread_function, &chan, &histogram_buffer, &hc);
 		}
 		cout << "started " << h << " hists thread(s)" << endl;
 
