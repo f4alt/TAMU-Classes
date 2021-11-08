@@ -64,7 +64,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		} else if (r->getType() == QUIT_REQ_TYPE) {
 			cout << "quit req" << endl;
 			chan->cwrite(&r, sizeof(Request));
-			delete chan;
+			// delete chan;
 			break;
 		}
 	}
@@ -220,9 +220,9 @@ int main(int argc, char *argv[]){
 
 			// request_buffer.push((char*)&q, sizeof(Request));
 		}
-		// for (int i =0; i < w; i++) {
-		// 	workers[i].join();
-		// }
+		for (int i =0; i < w; i++) {
+			workers[i].join();
+		}
 		cout << "workers joined" << endl;
 		for(int i=0; i < h; i++) {
 			hists[i].join();
