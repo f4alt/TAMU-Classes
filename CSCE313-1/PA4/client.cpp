@@ -42,8 +42,8 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		Request* r = (Request*)data;
 
 		if (r->getType() == DATA_REQ_TYPE) {
-			DataRequest* dm = (DataRequest*)r;
-			chan->cwrite(&dm, sizeof(DataRequest));
+			// DataRequest* dm = (DataRequest*)r;
+			chan->cwrite(&r, sizeof(Request));
 			chan->cread(&resp, sizeof(double));
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
 			hc->update(((DataRequest*)r)->person, resp);
