@@ -32,7 +32,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 		// vector<char> v = vector<char>((char*)&d, (char*)&d + sizeof(DataRequest));
 		// req_buf->push(v);
 
-		req_buf->push((char*)d, sizeof(DataRequest));
+		req_buf->push((char*)&d, sizeof(DataRequest));
 		d.seconds += 0.004;
 	}
 }
