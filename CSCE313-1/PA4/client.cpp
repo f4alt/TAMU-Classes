@@ -20,7 +20,7 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 }
 
 void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
-	DataRequest d(pat_num, 0.0, 1);
+	DataRequest d(pat_num, 1, 1);
 	// double resp = 0;
 
 	for (int i=0; i < n; i++) {
