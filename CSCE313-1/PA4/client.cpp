@@ -222,8 +222,6 @@ int main(int argc, char *argv[]){
 		}
 		for (int i =0; i < w; i++) {
 			workers[i].join();
-
-			delete workers[i];
 		}
 		cout << "workers joined" << endl;
 		for(int i=0; i < h; i++) {
@@ -248,6 +246,10 @@ int main(int argc, char *argv[]){
 		// }
 		// clean up control
     chan.cwrite (&q, sizeof (Request));
+
+		for (int i =0; i < w; i++) {
+			delete wchans[i];
+		}
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
 	cout << "Client process exited" << endl;
