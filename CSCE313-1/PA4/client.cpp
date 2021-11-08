@@ -180,9 +180,9 @@ int main(int argc, char *argv[]){
 		// wchans[i] = create_channel(&chan, m);
 
 		Request nc (NEWCHAN_REQ_TYPE);
-		chan->cwrite(&nc, sizeof(Request));
-		char buf3[buffer_size];
-		chan->cread(buf3, sizeof(buf3));
+		chan.cwrite(&nc, sizeof(Request));
+		char buf3[m];
+		chan.cread(buf3, sizeof(buf3));
 		string new_chan_name = buf3;
 
 		// cout << "new channel created, name: " << new_chan_name << endl;
