@@ -63,18 +63,18 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 
 void histogram_thread_function (FIFORequestChannel* chan, BoundedBuffer* hist_buf, HistogramCollection* hc){
 	double resp = 0;
-	while (1) {
-		vector<char> req = hist_buf->pop();
-		char* m = (char*)req.data();
-
-		if (*(REQUEST_TYPE_PREFIX*)m == DATA_REQ_TYPE) {
-			DataRequest* dm = (DataRequest*)m;
-			// hist_buf->push((char*)&dm, sizeof(DataRequest));
-			chan->cwrite(&dm, sizeof(DataRequest));
-			chan->cread(&resp, sizeof(double));
-			hc->update(((DataRequest*)dm)->person, resp);
-		}
-	}
+	// while (1) {
+	// 	vector<char> req = hist_buf->pop();
+	// 	char* m = (char*)req.data();
+	//
+	// 	if (*(REQUEST_TYPE_PREFIX*)m == DATA_REQ_TYPE) {
+	// 		DataRequest* dm = (DataRequest*)m;
+	// 		// hist_buf->push((char*)&dm, sizeof(DataRequest));
+	// 		chan->cwrite(&dm, sizeof(DataRequest));
+	// 		chan->cread(&resp, sizeof(double));
+	// 		hc->update(((DataRequest*)dm)->person, resp);
+	// 	}
+	// }
 }
 
 
