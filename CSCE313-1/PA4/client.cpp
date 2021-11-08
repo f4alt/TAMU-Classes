@@ -213,8 +213,10 @@ int main(int argc, char *argv[]){
 		cout << "patients joined" << endl;
 		for (int i = 0; i < w; i++) {
 			Request q (QUIT_REQ_TYPE);
-			vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
-			request_buffer.push(v, sizeof(Request));
+			// vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
+			// request_buffer.push(v);
+
+			request_buffer.push(&q, sizeof(Request));
 		}
 		for (int i =0; i < w; i++) {
 			workers[i].join();
