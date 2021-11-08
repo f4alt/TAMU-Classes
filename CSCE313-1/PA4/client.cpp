@@ -211,17 +211,17 @@ int main(int argc, char *argv[]){
 			patient[i].join();
 		}
 		cout << "patients joined" << endl;
+		Request q (QUIT_REQ_TYPE);
 		for (int i = 0; i < w; i++) {
-			Request q (QUIT_REQ_TYPE);
+
 			vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
 			request_buffer.push(v);
 
-			workers[i].join();
 			// request_buffer.push((char*)&q, sizeof(Request));
 		}
-		// for (int i =0; i < w; i++) {
-		// 	workers[i].join();
-		// }
+		for (int i =0; i < w; i++) {
+			workers[i].join();
+		}
 		cout << "workers joined" << endl;
 		for(int i=0; i < h; i++) {
 			hists[i].join();
