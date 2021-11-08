@@ -66,7 +66,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		} else if (r->getType() == QUIT_REQ_TYPE) {
 			cout << "quit req" << endl;
 			chan->cwrite(&r, sizeof(Request));
-			// delete chan;
+			delete chan;
 			break;
 		}
 	}
