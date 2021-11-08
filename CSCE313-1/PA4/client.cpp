@@ -54,7 +54,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 			chan->cwrite(&r, sizeof(DataRequest));
 			// cout << "why are we reading here" << endl;
 			chan->cread(&resp, sizeof(double));
-			cout << "updating person:" << (DataRequest*)r->person << endl;
+			cout << "updating person:" << ((DataRequest*)r)->person << endl;
 			hc->update(((DataRequest*)r)->person, resp);
 
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
