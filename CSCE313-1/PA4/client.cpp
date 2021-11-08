@@ -20,7 +20,7 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 }
 
 void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
-	DataRequest d(pat_num, 1, 1);
+	DataRequest d(pat_num, 0.0, 1);
 	// double resp = 0;
 
 	for (int i=0; i < n; i++) {
@@ -216,11 +216,12 @@ int main(int argc, char *argv[]){
 			vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
 			request_buffer.push(v);
 
+			workers[i].join();
 			// request_buffer.push((char*)&q, sizeof(Request));
 		}
-		for (int i =0; i < w; i++) {
-			workers[i].join();
-		}
+		// for (int i =0; i < w; i++) {
+		// 	workers[i].join();
+		// }
 		cout << "workers joined" << endl;
 		for(int i=0; i < h; i++) {
 			hists[i].join();
