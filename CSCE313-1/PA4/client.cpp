@@ -220,9 +220,9 @@ int main(int argc, char *argv[]){
 
 			// request_buffer.push((char*)&q, sizeof(Request));
 		}
-		for (int i =0; i < w; i++) {
-			workers[i].join();
-		}
+		// for (int i =0; i < w; i++) {
+		// 	workers[i].join();
+		// }
 		cout << "workers joined" << endl;
 		for(int i=0; i < h; i++) {
 			hists[i].join();
