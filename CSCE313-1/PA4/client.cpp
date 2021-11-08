@@ -38,8 +38,9 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 	double resp = 0;
 	while (1) {
 		vector<char> req = req_buf->pop();
-		char* data = req.data();
-		Request* r = (Request*)data;
+		// char* data = req.data();
+		// Request* r = (Request*)data;
+		Request* r = (Request*)req.data();
 
 		if (r->getType() == DATA_REQ_TYPE) {
 			DataRequest* dm = (DataRequest*)r;
