@@ -219,6 +219,7 @@ int main(int argc, char *argv[]){
 
 
 		/* Join all threads here */
+		Request q (QUIT_REQ_TYPE);
 		for (int i = 0; i < w; i++) {
 
 			// vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
@@ -234,7 +235,6 @@ int main(int argc, char *argv[]){
 			patient[i].join();
 		}
 		cout << "patients joined" << endl;
-		Request q (QUIT_REQ_TYPE);
 
 		for(int i=0; i < h; i++) {
 			hists[i].join();
