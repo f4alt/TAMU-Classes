@@ -48,6 +48,7 @@ public:
 	~BoundedBuffer(){
 		delete fullSlots;
 		delete emptySlots;
+		delete mutex;
 		// delete lock;
 	  // delete full;
 	  // delete empty;

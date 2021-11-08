@@ -42,8 +42,9 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 
 void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, BoundedBuffer* hist_buf, HistogramCollection* hc){
 	double resp = 0;
+	vector<char> req = req_buf->pop();
 	while (1) {
-		vector<char> req = req_buf->pop();
+
 		// char* data = req.data();
 		// Request* r = (Request*)data;
 		Request* r = (Request*)req.data();
