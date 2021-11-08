@@ -219,11 +219,6 @@ int main(int argc, char *argv[]){
 
 
 		/* Join all threads here */
-		for (int i =0; i < p; i++) {
-			patient[i].join();
-		}
-		cout << "patients joined" << endl;
-		Request q (QUIT_REQ_TYPE);
 		for (int i = 0; i < w; i++) {
 
 			// vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
@@ -231,6 +226,12 @@ int main(int argc, char *argv[]){
 
 			request_buffer.push((char*)&q, sizeof(Request));
 		}
+		for (int i =0; i < p; i++) {
+			patient[i].join();
+		}
+		cout << "patients joined" << endl;
+		Request q (QUIT_REQ_TYPE);
+
 		for (int i =0; i < w; i++) {
 			workers[i].join();
 		}
