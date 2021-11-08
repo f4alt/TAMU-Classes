@@ -47,8 +47,9 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 			DataRequest* dm = (DataRequest*)r;
 			// chan->cwrite(&dm, sizeof(DataRequest));
 			// chan->cread(&resp, sizeof(double));
+			// hc->update(((DataRequest*)r)->person, resp);
+
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
-			hc->update(((DataRequest*)r)->person, resp);
 		} else if (r->getType() == FILE_REQ_TYPE) {
 			cout << "file req" << endl;
 			// int flen = sizeof(FileRequest) + sizeof(filename) + 1;
