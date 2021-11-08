@@ -173,7 +173,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// create w worker channels
-	FIFORequestChannel wchans[p];
+	FIFORequestChannel* wchans[p];
 	for (int i =0; i < w; i++) {
 		wchans[i] = create_channel(&chan, m);
 	}
