@@ -42,8 +42,8 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		Request* r = (Request*)data;
 
 		if (r->getType() == DATA_REQ_TYPE) {
-			// DataRequest* dm = (DataRequest*)r;
-			chan->cwrite(&r, sizeof(Request));
+			DataRequest* dm = (DataRequest*)r;
+			chan->cwrite(&dm, sizeof(DataRequest));
 			chan->cread(&resp, sizeof(double));
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
 			hc->update(((DataRequest*)r)->person, resp);
@@ -53,6 +53,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 			// vector<char> v = vector<char>((char*)&buf, (char*)&buf + flen);
 			// req_buf->push(v);
 		} else if (r->getType() == QUIT_REQ_TYPE) {
+			cout << "sending quit" << endl;
 			chan->cwrite(&r, sizeof(Request));
 			delete chan;
 			break;
