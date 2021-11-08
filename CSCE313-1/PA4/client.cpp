@@ -105,7 +105,7 @@ int main(int argc, char *argv[]){
 	h: number of histogram threads
 	*/
 	int n = 1000;
-	int p = 10;
+	int p = 1;
 	int w = 10;
 	int b = 20; // size of bounded buffer, note: this is different from another variable buffercapacity/m
 	int m = 256;
