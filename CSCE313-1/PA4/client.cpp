@@ -6,7 +6,7 @@
 #include <thread>
 using namespace std;
 
-FIFORequestChannel create_channel(FIFORequestChannel* chan, int buffer_size) {
+FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 	Request nc (NEWCHAN_REQ_TYPE);
 	chan->cwrite(&nc, sizeof(Request));
 	char buf3[buffer_size];
@@ -14,11 +14,11 @@ FIFORequestChannel create_channel(FIFORequestChannel* chan, int buffer_size) {
 	string new_chan_name = buf3;
 
 	// cout << "new channel created, name: " << new_chan_name << endl;
-	// FIFORequestChannel* new_chan = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
-	//
-	// return new_chan;
+	FIFORequestChannel* new_chan = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 
-	return FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
+	return new_chan;
+
+	// return FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 }
 
 void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
@@ -177,7 +177,16 @@ int main(int argc, char *argv[]){
 	// create w worker channels
 	FIFORequestChannel* wchans[p];
 	for (int i =0; i < w; i++) {
-		wchans[i] = create_channel(&chan, m);
+		// wchans[i] = create_channel(&chan, m);
+
+		Request nc (NEWCHAN_REQ_TYPE);
+		chan->cwrite(&nc, sizeof(Request));
+		char buf3[buffer_size];
+		chan->cread(buf3, sizeof(buf3));
+		string new_chan_name = buf3;
+
+		// cout << "new channel created, name: " << new_chan_name << endl;
+		wchans[i] = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 	}
 	cout << "created " << w << " worker channels" << endl;
 
