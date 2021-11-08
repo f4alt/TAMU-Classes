@@ -51,7 +51,8 @@ public:
 	  // delete empty;
 	}
 
-	void push(vector<char> data){
+	// void push(vector<char> data){
+	void push(char* data, int len) {
 		// follow the class lecture pseudocode
 
 		//1. Perform necessary waiting (by calling wait on the right semaphores and mutexes),
@@ -62,7 +63,8 @@ public:
 		// empty->P();
 		// lock->P();
 		//2. Push the data onto the queue
-		q.push(data);
+		vector<char> v(data, data + len);
+		q.push(v);
 		// l.unlock();
 		m.unlock();
 		fullSlots->V();
