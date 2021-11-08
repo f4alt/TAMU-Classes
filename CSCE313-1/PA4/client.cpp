@@ -43,10 +43,10 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		Request* r = (Request*)req.data();
 
 		if (r->getType() == DATA_REQ_TYPE) {
-			cout << "data req" << endl;
+			// cout << "data req" << endl;
 			DataRequest* dm = (DataRequest*)r;
-			chan->cwrite(&dm, sizeof(DataRequest));
-			chan->cread(&resp, sizeof(double));
+			// chan->cwrite(&dm, sizeof(DataRequest));
+			// chan->cread(&resp, sizeof(double));
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
 			hc->update(((DataRequest*)r)->person, resp);
 		} else if (r->getType() == FILE_REQ_TYPE) {
