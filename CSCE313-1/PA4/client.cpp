@@ -42,9 +42,8 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 
 void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, BoundedBuffer* hist_buf, HistogramCollection* hc){
 	double resp = 0;
-	vector<char> req = req_buf->pop();
 	while (1) {
-
+		vector<char> req = req_buf->pop();
 		// char* data = req.data();
 		// Request* r = (Request*)data;
 		Request* r = (Request*)req.data();
@@ -58,13 +57,13 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 			hc->update(((DataRequest*)r)->person, resp);
 
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
-		} else if (r->getType() == FILE_REQ_TYPE) {
+		}  if (r->getType() == FILE_REQ_TYPE) {
 			cout << "file req" << endl;
 			// int flen = sizeof(FileRequest) + sizeof(filename) + 1;
 			// char buf[flen];
 			// vector<char> v = vector<char>((char*)&buf, (char*)&buf + flen);
 			// req_buf->push(v);
-		} else if (r->getType() == QUIT_REQ_TYPE) {
+		}  if (r->getType() == QUIT_REQ_TYPE) {
 			cout << "quit req" << endl;
 			chan->cwrite(&r, sizeof(Request));
 			delete chan;
