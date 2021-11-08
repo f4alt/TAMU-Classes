@@ -219,6 +219,10 @@ int main(int argc, char *argv[]){
 
 
 		/* Join all threads here */
+		for (int i =0; i < p; i++) {
+			patient[i].join();
+		}
+		cout << "patients joined" << endl;
 		Request q (QUIT_REQ_TYPE);
 		for (int i = 0; i < w; i++) {
 
@@ -231,11 +235,6 @@ int main(int argc, char *argv[]){
 			workers[i].join();
 		}
 		cout << "workers joined" << endl;
-		for (int i =0; i < p; i++) {
-			patient[i].join();
-		}
-		cout << "patients joined" << endl;
-
 		for(int i=0; i < h; i++) {
 			hists[i].join();
 		}
