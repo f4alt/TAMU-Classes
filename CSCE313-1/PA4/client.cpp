@@ -222,6 +222,8 @@ int main(int argc, char *argv[]){
 		}
 		for (int i =0; i < w; i++) {
 			workers[i].join();
+
+			delete workers[i];
 		}
 		cout << "workers joined" << endl;
 		for(int i=0; i < h; i++) {
