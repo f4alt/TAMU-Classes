@@ -177,16 +177,16 @@ int main(int argc, char *argv[]){
 	// create w worker channels
 	FIFORequestChannel* wchans[p];
 	for (int i =0; i < w; i++) {
-		// wchans[i] = create_channel(&chan, m);
+		wchans[i] = create_channel(&chan, m);
 
-		Request nc (NEWCHAN_REQ_TYPE);
-		chan.cwrite(&nc, sizeof(Request));
-		char buf3[m];
-		chan.cread(buf3, sizeof(buf3));
-		string new_chan_name = buf3;
-
-		// cout << "new channel created, name: " << new_chan_name << endl;
-		wchans[i] = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
+		// Request nc (NEWCHAN_REQ_TYPE);
+		// chan.cwrite(&nc, sizeof(Request));
+		// char buf3[m];
+		// chan.cread(buf3, sizeof(buf3));
+		// string new_chan_name = buf3;
+		//
+		// // cout << "new channel created, name: " << new_chan_name << endl;
+		// wchans[i] = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 	}
 	cout << "created " << w << " worker channels" << endl;
 
