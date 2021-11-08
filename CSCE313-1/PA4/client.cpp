@@ -182,19 +182,19 @@ int main(int argc, char *argv[]){
 		for (int i =0; i < p; i++) {
 			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
 		}
-		cout << "started " << p << " patient threads" << endl;
+		cout << "started " << p << " patient thread(s)" << endl;
 
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
 			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &histogram_buffer, &hc);
 		}
-		cout << "started " << w << " worker threads" << endl;
+		cout << "started " << w << " worker thread(s)" << endl;
 
 		thread hists[h];
 		for (int i =0; i < h; i++) {
 			hists[i] = thread(histogram_thread_function, &chan, &histogram_buffer, &hc);
 		}
-		cout << "started " << h << " hists threads" << endl;
+		cout << "started " << h << " hists thread(s)" << endl;
 
 
 		/* Join all threads here */
