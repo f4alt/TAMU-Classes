@@ -29,10 +29,10 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 		// hc->update(pat_num, resp);
 
 
-		// vector<char> v = vector<char>((char*)&d, (char*)&d + sizeof(DataRequest));
-		// req_buf->push(v);
+		vector<char> v = vector<char>((char*)&d, (char*)&d + sizeof(DataRequest));
+		req_buf->push(v);
 
-		req_buf->push((char*)&d, sizeof(DataRequest));
+		// req_buf->push((char*)&d, sizeof(DataRequest));
 		d.seconds += 0.004;
 	}
 }
@@ -213,10 +213,10 @@ int main(int argc, char *argv[]){
 		cout << "patients joined" << endl;
 		for (int i = 0; i < w; i++) {
 			Request q (QUIT_REQ_TYPE);
-			// vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
-			// request_buffer.push(v);
+			vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
+			request_buffer.push(v);
 
-			request_buffer.push((char*)&q, sizeof(Request));
+			// request_buffer.push((char*)&q, sizeof(Request));
 		}
 		for (int i =0; i < w; i++) {
 			workers[i].join();
