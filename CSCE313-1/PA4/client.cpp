@@ -64,7 +64,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Bo
 		} else if (r->getType() == QUIT_REQ_TYPE) {
 			cout << "quit req" << endl;
 			chan->cwrite(&r, sizeof(Request));
-			// delete chan;
+			delete chan;
 			break;
 		}
 	}
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// create w worker channels
-	FIFORequestChannel* wchans[p];
+	FIFORequestChannel wchans[p];
 	for (int i =0; i < w; i++) {
 		wchans[i] = create_channel(&chan, m);
 	}
