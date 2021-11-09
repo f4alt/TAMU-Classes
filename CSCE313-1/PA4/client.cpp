@@ -160,6 +160,7 @@ int main(int argc, char *argv[]){
 	cout << "m:" << m << endl;
 	cout << "f:" << filename << endl;
 	cout << "h:" << h << endl;
+	cout << "-------" << endl;
 
 
 	int pid = fork ();
@@ -188,7 +189,7 @@ int main(int argc, char *argv[]){
 	// create w worker channels
 	FIFORequestChannel* wchans[p];
 	for (int i =0; i < w; i++) {
-		wchans[i] = create_channel(&chan, m);
+		// wchans[i] = create_channel(&chan, m);
 
 		// Request nc (NEWCHAN_REQ_TYPE);
 		// chan.cwrite(&nc, sizeof(Request));
