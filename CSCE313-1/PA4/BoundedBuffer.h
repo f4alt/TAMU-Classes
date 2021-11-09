@@ -54,7 +54,7 @@ public:
 	  // delete empty;
 	}
 
-	void push(vector<char> data){
+	void push(cgar* data, int len){
 	// void push(char* data, int len) {
 		// follow the class lecture pseudocode
 
@@ -67,10 +67,10 @@ public:
 		// empty->P();
 		// lock->P();
 		//2. Push the data onto the queue
-		// vector<char> v(data, data + len);
-		// q.push(v);
+		vector<char> v(data, data + len);
+		q.push(v);
 
-		q.push(data);
+		// q.push(data);
 		// l.unlock();
 		// m.unlock();
 		mutex->V();
