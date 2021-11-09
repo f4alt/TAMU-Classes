@@ -281,14 +281,14 @@ int main(int argc, char *argv[]){
     /* Start all threads here */
 
 		// INSTEAD OF PATIENT, WE CALL FILE THREAD - SET THIS WITH FLAG LATER
-		
-		thread patient[p];
-		for (int i=0; i < p; i++) {
-			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
+		if (!file_req_flag) {
+			thread patient[p];
+			for (int i=0; i < p; i++) {
+				patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
+			}
+		} else {
+			thread filethread (file_thread_function, filename, &request_buffer, &chan, m);
 		}
-
-
-		// thread filethread (file_thread_function, filename, &request_buffer, &chan, m);
 
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
@@ -297,13 +297,14 @@ int main(int argc, char *argv[]){
 
 		/* Join all threads here */
 		// INSTEAD - FIX HERE TOO
-
-		for (int i = 0; i < p; i++) {
-			patient[i].join();
+		if (!file_req_flag) {
+			for (int i = 0; i < p; i++) {
+				patient[i].join();
+			}
+		} else {
+			filethread.join();
+			cout << "file thread joined" << endl;
 		}
-
-		// filethread.join();
-		// cout << "file thread joined" << endl;
 
 		for (int i =0; i<w; i++) {
 			Request q (QUIT_REQ_TYPE);
