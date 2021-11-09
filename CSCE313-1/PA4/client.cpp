@@ -23,11 +23,12 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 
 void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 	DataRequest d(pat_num, 0.0, 1);
-	// double resp = 0;
+	double resp = 0;
 
 	for (int i=0; i < n; i++) {
-		// chan->cwrite(&d, sizeof(DataRequest));
-		// chan->cread(&resp, sizeof(double));
+		chan->cwrite(&d, sizeof(DataRequest));
+		chan->cread(&resp, sizeof(double));
+		cout << "resp check | patient:" << d.person << " seconds:" << d.seconds << " resp:" << resp << endl;
 		// hc->update(pat_num, resp);
 
 
@@ -185,6 +186,7 @@ int main(int argc, char *argv[]){
 		Histogram* h = new Histogram(10, -2.0, 2.0);
 		hc.add(h);
 	}
+	cout << p << " histograms in collection" << endl;
 
 	// create w worker channels
 	FIFORequestChannel* wchans[p];
