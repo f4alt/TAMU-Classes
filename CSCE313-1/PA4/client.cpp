@@ -250,7 +250,7 @@ int main(int argc, char *argv[]){
 		}
 		cout << "workers joined" << endl;
 		for(int i=0; i < h; i++) {
-			hists[i].join();
+			// hists[i].join();
 		}
 		cout << "hists joined" << endl;
     gettimeofday (&end, 0);
