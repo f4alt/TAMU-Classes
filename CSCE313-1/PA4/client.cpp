@@ -21,7 +21,7 @@ FIFORequestChannel* create_channel(FIFORequestChannel* chan, int buffer_size) {
 	// return FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 }
 
-void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
+void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf, FIFORequestChannel* chan) {
 	DataRequest d(pat_num, 0.0, 1);
 	double resp = 0;
 
@@ -215,7 +215,7 @@ int main(int argc, char *argv[]){
 		// start p patient threads
 		thread patient[p];
 		for (int i =0; i < p; i++) {
-			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
+			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer, chan);
 		}
 		cout << "started " << p << " patient thread(s)" << endl;
 
