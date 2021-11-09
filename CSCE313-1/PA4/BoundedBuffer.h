@@ -54,7 +54,7 @@ public:
 	  // delete empty;
 	}
 
-	void push(cgar* data, int len){
+	void push(char* data, int len){
 	// void push(char* data, int len) {
 		// follow the class lecture pseudocode
 
