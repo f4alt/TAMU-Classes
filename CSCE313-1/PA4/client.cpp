@@ -158,7 +158,7 @@ int main(int argc, char *argv[]){
 	cout << "w:" << w << endl;
 	cout << "b:" << b << endl;
 	cout << "m:" << m << endl;
-	cout << "f:" << f << endl;
+	cout << "f:" << filename << endl;
 	cout << "h:" << h << endl;
 
 
