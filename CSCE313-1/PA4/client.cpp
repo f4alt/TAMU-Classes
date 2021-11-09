@@ -61,13 +61,13 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 		Request* r = (Request*)req.data();
 
 		if (r->getType() == DATA_REQ_TYPE) {
-			cout << "data req" << endl;
-			DataRequest* dm = (DataRequest*)r;
-			chan->cwrite(&dm, sizeof(DataRequest));
-			// cout << "why are we reading here" << endl;
-			chan->cread(&resp, sizeof(double));
-			cout << "updating person:" << ((DataRequest*)dm)->person << endl;
-			hc->update(((DataRequest*)dm)->person, resp);
+			// cout << "data req" << endl;
+			// DataRequest* dm = (DataRequest*)r;
+			// chan->cwrite(&dm, sizeof(DataRequest));
+			// // cout << "why are we reading here" << endl;
+			// chan->cread(&resp, sizeof(double));
+			// cout << "updating person:" << ((DataRequest*)dm)->person << endl;
+			// hc->update(((DataRequest*)dm)->person, resp);
 
 			// hist_buf->push((char*)&dm, sizeof(DataRequest));
 		}  if (r->getType() == FILE_REQ_TYPE) {
@@ -80,7 +80,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 			cout << "quit req" << endl;
 			// Request q (QUIT_REQ_TYPE);
 			chan->cwrite(&q, sizeof(Request));
-			// delete chan;
+			delete chan;
 			break;
 		}
 	}
