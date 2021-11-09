@@ -263,7 +263,7 @@ int main(int argc, char *argv[]){
 
 
 		// CLEAN UP ALL CHANNELS
-    // Request q (QUIT_REQ_TYPE);
+    Request q (QUIT_REQ_TYPE);
 		// clean up worker channels
 		// for (int i =0; i < p; i++) {
 		// 	wchans[i]->cwrite(&q, sizeof(Request));
