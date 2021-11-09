@@ -36,12 +36,12 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf, FIFOReq
 		req_buf->push(v);
 
 		vector<char> req_check = req_buf->pop();
-		Request* r = (Request*)req_check;
-		// DataRequest* dm = (DataRequest*)r;
-		chan->cwrite(&r, sizeof(Request));
+		Request* r = (Request*)req_check.data();
+		DataRequest* dm = (DataRequest*)r;
+		chan->cwrite(&dm, sizeof(DataRequest));
 		// cout << "why are we reading here" << endl;
 		chan->cread(&resp, sizeof(double));
-		cout << "resp check | patient:" << d.person << " seconds:" << d.seconds << " resp:" << resp << endl;
+		cout << "resp check | patient:" << dm.person << " seconds:" << dm.seconds << " resp:" << resp << endl;
 		// cout << "req check for person:" << ((DataRequest*)dm)->person << " | i:" << i << endl;
 
 		// req_buf->push((char*)&d, sizeof(DataRequest));
