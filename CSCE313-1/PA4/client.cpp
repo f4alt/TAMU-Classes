@@ -53,6 +53,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf, FIFOReq
 // void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, BoundedBuffer* hist_buf, HistogramCollection* hc){
 void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, HistogramCollection* hc){
 	double resp = 0;
+	Request q(QUIT_REQ_TYPE);
 	while (1) {
 		vector<char> req = req_buf->pop();
 		// char* data = req.data();
@@ -77,7 +78,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 			// req_buf->push(v);
 		}  if (r->getType() == QUIT_REQ_TYPE) {
 			cout << "quit req" << endl;
-			Request q (QUIT_REQ_TYPE);
+			// Request q (QUIT_REQ_TYPE);
 			chan->cwrite(&q, sizeof(Request));
 			delete chan;
 			break;
