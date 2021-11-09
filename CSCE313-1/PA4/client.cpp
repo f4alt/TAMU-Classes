@@ -281,8 +281,9 @@ int main(int argc, char *argv[]){
     /* Start all threads here */
 
 		// INSTEAD OF PATIENT, WE CALL FILE THREAD - SET THIS WITH FLAG LATER
+		thread patient[p];
 		if (!file_req_flag) {
-			thread patient[p];
+
 			for (int i=0; i < p; i++) {
 				patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
 			}
