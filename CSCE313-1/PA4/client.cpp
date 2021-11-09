@@ -31,7 +31,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf) {
 		// hc->update(pat_num, resp);
 
 
-		vector<char> v = vector<char>((char*)&d, (char*)&d + sizeof(DataRequest));
+		vector<char> v = vector<char>((char*)&d, (char*)&d + sizeof(d));
 		req_buf->push(v);
 
 		// req_buf->push((char*)&d, sizeof(DataRequest));
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]){
 		chan.cread(buf3, sizeof(buf3));
 		string new_chan_name = buf3;
 
-		cout << "new channel created, name: " << new_chan_name << endl;
+		// cout << "new channel created, name: " << new_chan_name << endl;
 		wchans[i] = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 	}
 	cout << "created " << w << " worker channels" << endl;
@@ -220,6 +220,7 @@ int main(int argc, char *argv[]){
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
 			// workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &histogram_buffer, &hc);
+			//void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, HistogramCollection* hc){
 				workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &hc);
 		}
 		cout << "started " << w << " worker thread(s)" << endl;
