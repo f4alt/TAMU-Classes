@@ -152,6 +152,15 @@ int main(int argc, char *argv[]){
 		}
 	}
 
+	// verify user inputs
+	cout << "n:" << n << endl;
+	cout << "p:" << p << endl;
+	cout << "w:" << w << endl;
+	cout << "b:" << b << endl;
+	cout << "m:" << m << endl;
+	cout << "f:" << f << endl;
+	cout << "h:" << h << endl;
+
 
 	int pid = fork ();
 	if (pid < 0){
