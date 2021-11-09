@@ -225,7 +225,7 @@ int main(int argc, char *argv[]){
 		}
 		cout << "started " << w << " worker thread(s)" << endl;
 
-		thread hists[h];
+		// thread hists[h];
 		for (int i =0; i < h; i++) {
 			// hists[i] = thread(histogram_thread_function, &chan, &histogram_buffer, &hc);
 		}
