@@ -41,7 +41,7 @@ void patient_thread_function(int n, int pat_num, BoundedBuffer* req_buf, FIFOReq
 		chan->cwrite(&dm, sizeof(DataRequest));
 		// cout << "why are we reading here" << endl;
 		chan->cread(&resp, sizeof(double));
-		cout << "resp check | patient:" << dm.person << " seconds:" << dm.seconds << " resp:" << resp << endl;
+		cout << "resp check | patient:" << dm->person << " seconds:" << dm->seconds << " resp:" << resp << endl;
 		// cout << "req check for person:" << ((DataRequest*)dm)->person << " | i:" << i << endl;
 
 		// req_buf->push((char*)&d, sizeof(DataRequest));
