@@ -244,10 +244,10 @@ int main(int argc, char *argv[]){
 		for (int i = 0; i < w; i++) {
 			Request q (QUIT_REQ_TYPE);
 
-			// vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
-			// request_buffer.push(v);
+			vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
+			request_buffer.push(v);
 
-			request_buffer.push((char*)&q, sizeof(Request));
+			// request_buffer.push((char*)&q, sizeof(Request));
 		}
 		for (int i =0; i < w; i++) {
 			workers[i].join();
