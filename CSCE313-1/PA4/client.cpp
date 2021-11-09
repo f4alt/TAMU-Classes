@@ -237,8 +237,8 @@ int main(int argc, char *argv[]){
 			patient[i].join();
 		}
 		cout << "patients joined" << endl;
-		Request q (QUIT_REQ_TYPE);
 		for (int i = 0; i < w; i++) {
+			Request q (QUIT_REQ_TYPE);
 
 			// vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
 			// request_buffer.push(v);
