@@ -215,7 +215,7 @@ int main(int argc, char *argv[]){
 		// start p patient threads
 		thread patient[p];
 		for (int i =0; i < p; i++) {
-			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer, chan);
+			patient[i] = thread(patient_thread_function, n, i+1, &request_buffer, &chan);
 		}
 		cout << "started " << p << " patient thread(s)" << endl;
 
