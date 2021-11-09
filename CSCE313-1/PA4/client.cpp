@@ -53,6 +53,7 @@ void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFOReque
 	// cout << "FILENAME IN THREAD FUNCT: " << fm->getFileName() << endl;
 	while (remlen > 0) {
 		fm->length = min(remlen, (__int64_t) mb);
+		cout << "FILENAME IN THREAD FUNCT: " << fm->getFileName() << endl;
 		vector<char> v  = vector<char>((char*)fm, (char*)fm + sizeof(FileRequest));
 		request_buffer->push(v);
 		// cout << "pushing" << endl;
@@ -139,7 +140,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 			chan->cread(&resp, sizeof(double));
 			hc->update(((DataRequest*)r)->person, resp);
 		} else if (r->getType() == FILE_REQ_TYPE) {
-			cout << "file type req" << endl;
+			// cout << "file type req" << endl;
 			FileRequest* fm = (FileRequest*)r;
 			// string fname = (char*)(fm + 1);
 			// string fname = fm->getFileName();
