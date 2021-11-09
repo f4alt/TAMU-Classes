@@ -197,7 +197,7 @@ int main(int argc, char *argv[]){
 		chan.cread(buf3, sizeof(buf3));
 		string new_chan_name = buf3;
 
-		// cout << "new channel created, name: " << new_chan_name << endl;
+		cout << "new channel created, name: " << new_chan_name << endl;
 		wchans[i] = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
 	}
 	cout << "created " << w << " worker channels" << endl;
