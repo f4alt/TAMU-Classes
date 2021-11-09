@@ -60,7 +60,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, Hi
 		Request* r = (Request*)req.data();
 
 		if (r->getType() == DATA_REQ_TYPE) {
-			// cout << "data req" << endl;
+			cout << "data req" << endl;
 			DataRequest* dm = (DataRequest*)r;
 			chan->cwrite(&dm, sizeof(DataRequest));
 			// cout << "why are we reading here" << endl;
