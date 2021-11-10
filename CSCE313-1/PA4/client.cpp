@@ -229,7 +229,7 @@ int main(int argc, char *argv[]){
 	HistogramCollection hc;
 
 	// extra credit: setup SIGALRM handler to print histogram every 2 seconds
-	if (!ec_flag) {
+	if (ec_flag) {
 		hc_access = static_cast<hist_coll_access *>(malloc(sizeof(hist_coll_access)));
 	  memset(hc_access, 0, sizeof(hist_coll_access));
 	  hc_access->hc = &hc;
