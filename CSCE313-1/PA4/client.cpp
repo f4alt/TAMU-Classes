@@ -36,7 +36,7 @@ void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFOReque
 	FileRequest fr (0,0);
 	int len = sizeof (FileRequest) + fname.size()+1;
 	char buf2 [len];
-	memcpy (buf2, &fr, sizeof (FileRequest));
+	memcpy (&buf2, &fr, sizeof (FileRequest));
 	strcpy (buf2 + sizeof (FileRequest), fname.c_str());
 	chan->cwrite (buf2, len);
 	int64 filelen;
@@ -54,7 +54,7 @@ void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFOReque
 	while (remlen > 0) {
 		fm->length = min(remlen, (__int64_t) mb);
 		// cout << "FILENAME IN THREAD FUNCT: " << fm->getFileName() << endl;
-		vector<char> v  = vector<char>((char*)fm, (char*)fm + sizeof(FileRequest));
+		vector<char> v  = vector<char>((char*)&buf, (char*)&buf + sizeof(FileRequest) + fname.size() + 1);
 		request_buffer->push(v);
 		// cout << "pushing" << endl;
 		fm->offset += fm->length;
