@@ -6,6 +6,12 @@
 #include <thread>
 using namespace std;
 
+
+struct hist_upd_args {
+	int person;
+	double resp;
+};
+
 FIFORequestChannel* create_channel(FIFORequestChannel* chan) {
 	Request nc (NEWCHAN_REQ_TYPE);
 	chan->cwrite(&nc, sizeof(Request));
@@ -60,72 +66,11 @@ void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFOReque
 		fm->offset += fm->length;
 		remlen -= fm->length;
 	}
-
-	// ----------------------
-
-	// FileRequest fm (0,0);
-	// cout << "fname:" << fname << endl;
-	// int len = sizeof (FileRequest) + fname.size()+1;
-	// char buf2 [len];
-	// memcpy (buf2, &fm, sizeof (FileRequest));
-	// strcpy (buf2 + sizeof (FileRequest), fname.c_str());
-	// chan->cwrite (buf2, len);
-	// int64 filelen;
-	// chan->cread (&filelen, sizeof(int64));
-	// // if (isValidResponse(&filelen)){
-	// 	cout << "File length is: " << filelen << " bytes" << endl;
-	// // }
-	//
-  // int num_requests = ceil (double(filelen)/mb);
-	//
-  // FileRequest* fc = (FileRequest*) buf2;
-  // if (num_requests == 1) { // edge case
-  //     fc->offset = 0;
-  //     fc->length = filelen;
-  // } else {
-  //     fc->length = mb;
-  //     fc->offset = 0;
-  // }
-  // int64 last_req = filelen - mb* (num_requests-1);
-  // chan->cwrite(buf2, len);
-	// char response[mb];
-  // chan->cread(response,mb);
-	//
-  // string outputfilepath = string("recv/") + fname;
-  // FILE* fp = fopen(outputfilepath.c_str(),"wb");
-	// fseek(fp, filelen, SEEK_SET);
-	//
-	// // send one call incase req only needs one
-  // // fwrite(response, 1, fc->length, fp);
-	// vector<char> v = vector<char>((char*)&response, (char*)&response + sizeof(FileRequest));
-	// request_buffer->push(v);
-	//
-  // for (int i = 1; i < num_requests; i++) {	// starting from i=1
-  //     if (i == num_requests-1) {	// last call
-  //         fc->length = last_req;
-	// 				char last_res[last_req];
-  //         fc->offset += mb;
-  //         chan->cwrite(buf2, len);
-  //         chan->cread(last_res,mb);
-  //         // fwrite(last_res, 1, fc->length, fp);
-	// 				FileRequest fr
-	// 				vector<char> v = vector<char>((char*)&last_res, (char*)&last_res + sizeof(FileRequest));
-	// 				request_buffer->push(v);
-	// 				cout << "DONE" << endl;
-  //     } else {
-  //         fc->offset +=mb;
-  //         chan->cwrite(buf2, len);
-  //         chan->cread(response,mb);
-  //         // fwrite(response, 1, fc->length, fp);
-	// 				vector<char> v = vector<char>((char*)&response, (char*)&response + sizeof(FileRequest));
-	// 				request_buffer->push(v);
-  //     }
-  // }
 }
 
 
-// void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* req_buf, BoundedBuffer* hist_buf, HistogramCollection* hc){
-void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buffer, HistogramCollection* hc, int mb){
+// void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buffer, HistogramCollection* hc, int mb){
+void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buffer, BoundedBuffer* response_buffer, int mb){
 	vector<char> msg;
 	double resp = 0;
 
@@ -136,9 +81,14 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 
 		if (r->getType() == DATA_REQ_TYPE) {
 			// cout << "data req" << endl;
+			// THIS WORKS
 			chan->cwrite((char*)r, sizeof(DataRequest));
 			chan->cread(&resp, sizeof(double));
-			hc->update(((DataRequest*)r)->person, resp);
+			struct hist_upd_args temp = { ((DataRequest*)r)->person, resp };
+			// hc->update(((DataRequest*)r)->person, resp);
+			vector<char> v = vector<char>((char*)&temp, (char*)&temp + sizeof(hist_upd_args));
+			response_buffer->push(v);
+
 		} else if (r->getType() == FILE_REQ_TYPE) {
 			// cout << "file type req" << endl;
 			FileRequest* fm = (FileRequest*)r;
@@ -166,7 +116,20 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 }
 
 
-void histogram_thread_function () {
+void histogram_thread_function (FIFORequestChannel* chan, BoundedBuffer* response_buffer, HistogramCollection* hc) {
+	vector<char> msg;
+	// struct hist_upd_args resp;
+	// double resp = 0;
+
+	while(1) {
+		msg = response_buffer->pop();
+		hist_upd_args* r = (hist_upd_args*)msg.data();
+
+		if (r.person > 0) {
+			hc->update(r.person, r.resp);
+		} else if (r.person == -1) {		// when sending person = -1, quit thread
+			break;
+		}
 
 }
 
@@ -264,6 +227,7 @@ int main(int argc, char *argv[]){
 	}
 	FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
 	BoundedBuffer request_buffer(b);
+	BoundedBuffer response_buffer(b);
 	HistogramCollection hc;
 
 	// create one histogram per patient and add to collection
@@ -285,14 +249,20 @@ int main(int argc, char *argv[]){
 
     /* Start all threads here */
 
-		// INSTEAD OF PATIENT, WE CALL FILE THREAD - SET THIS WITH FLAG LATER
+		// INSTEAD OF PATIENT THREADS, WE CREATE FILE THREAD
 		thread patient[p];
+		thread histograms[h];
 		thread filethread;
 		if (!file_req_flag) {
 			for (int i=0; i < p; i++) {
 				patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
 			}
 			cout << "created " << p << " patient thread(s)" << endl;
+
+			for (int i=0; i < h; i++) {
+				histograms[i] = thread(histogram_thread_function, &response_buffer);
+			}
+			cout << "created " << h << " histogram thread(s)" << endl;
 		} else {
 			filethread = thread(file_thread_function, filename, &request_buffer, &chan, m);
 			cout << "created 1 file thread" << endl;
@@ -305,12 +275,16 @@ int main(int argc, char *argv[]){
 		cout << "created " << w << " worker threads(s)" << endl;
 
 		/* Join all threads here */
-		// INSTEAD - FIX HERE TOO
 		if (!file_req_flag) {
 			for (int i = 0; i < p; i++) {
 				patient[i].join();
 			}
 			cout << "patients joined" << endl;
+
+			for (int i = 0; i < h; i++) {
+				histograms[i].join();
+			}
+			cout << "hisgograms joined" << endl;
 		} else {
 			filethread.join();
 			cout << "file thread joined" << endl;
@@ -329,7 +303,9 @@ int main(int argc, char *argv[]){
     gettimeofday (&end, 0);
 
     // print the results and time difference
-	hc.print ();
+		if (!file_req_flag) {
+			hc.print ();
+		}
     int secs = (end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)/(int) 1e6;
     int usecs = (int)(end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)%((int) 1e6);
     cout << "Took " << secs << " seconds and " << usecs << " micro seconds" << endl;
@@ -339,12 +315,6 @@ int main(int argc, char *argv[]){
 		Request q (QUIT_REQ_TYPE);
     chan.cwrite (&q, sizeof (Request));
 		cout << "channels cleaned up" << endl;
-
-		// cleanup memory
-		// for (int i = 0; i < p; i++) {
-		// 	Histogram* h = new Histogram(10, -2.0, 2.0);
-		// 	hc.add(h);
-		// }
 
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
