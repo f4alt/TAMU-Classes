@@ -144,6 +144,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 			FileRequest* fm = (FileRequest*)r;
 			// string fname = (char*)(fm + 1);
 			string fname = fm->getFileName();
+			cout << fm->offset << " " << fm->length << endl;
 			// string fname = ((FileRequest*)r)->getFileName();
 			cout << "filename: " << fname << endl;
 			int sz = sizeof(FileRequest) + fname.size() + 1;
