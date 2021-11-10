@@ -116,7 +116,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 }
 
 
-void histogram_thread_function (FIFORequestChannel* chan, BoundedBuffer* response_buffer, HistogramCollection* hc) {
+void histogram_thread_function (BoundedBuffer* response_buffer, HistogramCollection* hc) {
 	vector<char> msg;
 	// struct hist_upd_args resp;
 	// double resp = 0;
@@ -125,11 +125,12 @@ void histogram_thread_function (FIFORequestChannel* chan, BoundedBuffer* respons
 		msg = response_buffer->pop();
 		hist_upd_args* r = (hist_upd_args*)msg.data();
 
-		if (r.person > 0) {
-			hc->update(r.person, r.resp);
-		} else if (r.person == -1) {		// when sending person = -1, quit thread
+		if (r->person > 0) {
+			hc->update(r->person, r->resp);
+		} else if (r->person == -1) {		// when sending person = -1, quit thread
 			break;
 		}
+	}
 
 }
 
@@ -260,7 +261,7 @@ int main(int argc, char *argv[]){
 			cout << "created " << p << " patient thread(s)" << endl;
 
 			for (int i=0; i < h; i++) {
-				histograms[i] = thread(histogram_thread_function, &response_buffer);
+				histograms[i] = thread(histogram_thread_function, &response_buffer, &hc);
 			}
 			cout << "created " << h << " histogram thread(s)" << endl;
 		} else {
@@ -270,7 +271,7 @@ int main(int argc, char *argv[]){
 
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
-			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &hc, m);
+			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &response_buffer, m);
 		}
 		cout << "created " << w << " worker threads(s)" << endl;
 
