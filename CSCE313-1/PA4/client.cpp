@@ -140,6 +140,7 @@ int main(int argc, char *argv[]){
 	int opt;
 	double t = 0.0;
 	int file_req_flag = 0;
+	int ec_flag = 1;
 	/* we need
 	n: number of data points
 	p: number of patients (starting from 1)
@@ -158,7 +159,7 @@ int main(int argc, char *argv[]){
 	int h = 1;
 
 	// take all the arguments first because some of these may go to the server
-	while ((opt = getopt(argc, argv, "n:p:w:b:m:f:h:")) != -1) {
+	while ((opt = getopt(argc, argv, "n:p:w:b:m:f:h:e")) != -1) {
 		switch(opt) {
 			case 'n':
 				n = stoi(optarg);
@@ -181,6 +182,9 @@ int main(int argc, char *argv[]){
 				break;
 			case 'h':
 				h = stoi(optarg);
+				break;
+			case 'e':
+				ec_flag = 0;
 				break;
 			case '?':
         if (isprint (optopt))
@@ -225,12 +229,14 @@ int main(int argc, char *argv[]){
 	HistogramCollection hc;
 
 	// extra credit: setup SIGALRM handler to print histogram every 2 seconds
-	hc_access = static_cast<hist_coll_access *>(malloc(sizeof(hist_coll_access)));
-  memset(hc_access, 0, sizeof(hist_coll_access));
-  hc_access->hc = &hc;
+	if (!ec_flag) {
+		hc_access = static_cast<hist_coll_access *>(malloc(sizeof(hist_coll_access)));
+	  memset(hc_access, 0, sizeof(hist_coll_access));
+	  hc_access->hc = &hc;
 
-  signal(SIGALRM, alarm_handler);
-  alarm(2);
+	  signal(SIGALRM, alarm_handler);
+	  alarm(2);
+	}
 
 	// create one histogram per patient and add to collection
 	for (int i = 0; i < p; i++) {
@@ -324,8 +330,6 @@ int main(int argc, char *argv[]){
 
     // print the results and time difference
 		if (!file_req_flag) {
-			// technically this shouldn't be needed bc we have an alarm handler, 
-			// but for very fast runs (<2 sec) the alarm doese not trigger
 			hc.print ();
 		}
     int secs = (end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)/(int) 1e6;
