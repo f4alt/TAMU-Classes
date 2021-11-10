@@ -125,7 +125,8 @@ void histogram_thread_function (BoundedBuffer* response_buffer, HistogramCollect
 
 static void alarm_handler(int signum) {
 	// clear screen and move cursor to top
-	cout << "\033[2J\033[H" << flush;
+	// cout << "\033[2J\033[H" << flush;
+	system("clear");
 
   // print the histogram with current progress
   hc_access->hc->print();
@@ -230,8 +231,8 @@ int main(int argc, char *argv[]){
 
 	// extra credit: setup SIGALRM handler to print histogram every 2 seconds
 	if (ec_flag) {
-		hc_access = static_cast<hist_coll_access *>(malloc(sizeof(hist_coll_access)));
-	  memset(hc_access, 0, sizeof(hist_coll_access));
+		// hc_access = static_cast<hist_coll_access *>(malloc(sizeof(hist_coll_access)));
+	  // memset(hc_access, 0, sizeof(hist_coll_access));
 	  hc_access->hc = &hc;
 
 	  signal(SIGALRM, alarm_handler);
