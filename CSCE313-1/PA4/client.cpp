@@ -324,7 +324,7 @@ int main(int argc, char *argv[]){
 		for (int i=0; i<w; i++) {
 			workers[i].join();
 		}
-		cout << "worker channels joined" << endl;
+		cout << "workers joined" << endl;
 
     gettimeofday (&end, 0);
 
