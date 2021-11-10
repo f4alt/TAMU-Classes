@@ -125,12 +125,12 @@ void histogram_thread_function (BoundedBuffer* response_buffer, HistogramCollect
 
 static void alarm_handler(int signum) {
 	// clear screen and move cursor to top
-	std::cout << "\033[2J\033[H" << std::flush;
+	cout << "\033[2J\033[H" << flush;
 
-  // print the histogram
+  // print the histogram with current progress
   hc_access->hc->print();
 
-  // set alarm again
+  // reset alarm
   alarm(2);
 }
 
