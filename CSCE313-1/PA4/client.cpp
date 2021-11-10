@@ -239,6 +239,7 @@ int main(int argc, char *argv[]){
 	}
 
 	// verify user inputs
+	cout << " -- verify user inputs -- " << endl;
 	cout << "n:" << n << endl;
 	cout << "p:" << p << endl;
 	cout << "w:" << w << endl;
@@ -270,12 +271,14 @@ int main(int argc, char *argv[]){
 		Histogram* h = new Histogram(10, -2.0, 2.0);
 		hc.add(h);
 	}
+	cout << "created " << p << " histogram(s)" << endl;
 
 	// make worker channels
 	FIFORequestChannel* wchans[w];
 	for (int i = 0; i < w; i++) {
 		wchans[i] = create_channel(&chan);
 	}
+	cout << "created " << w << " worker channel(s)" << endl;
 
 	struct timeval start, end;
     gettimeofday (&start, 0);
@@ -289,14 +292,17 @@ int main(int argc, char *argv[]){
 			for (int i=0; i < p; i++) {
 				patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
 			}
+			cout << "created " << p << " patient thread(s)" << endl;
 		} else {
 			filethread = thread(file_thread_function, filename, &request_buffer, &chan, m);
+			cout << "created 1 file thread" << endl;
 		}
 
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
 			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &hc, m);
 		}
+		cout << "created " << w << " worker threads(s)" << endl;
 
 		/* Join all threads here */
 		// INSTEAD - FIX HERE TOO
@@ -318,6 +324,7 @@ int main(int argc, char *argv[]){
 		for (int i=0; i<w; i++) {
 			workers[i].join();
 		}
+		cout << "worker channels joined" << endl;
 
     gettimeofday (&end, 0);
 
@@ -330,10 +337,11 @@ int main(int argc, char *argv[]){
 
 		// CLEAN UP CHANNELS
 		Request q (QUIT_REQ_TYPE);
-		for (int i = 0; i < p; i++) {
-			wchans[i]->cwrite(&q, sizeof(Request));
-		}
+		// for (int i = 0; i < p; i++) {
+		// 	wchans[i]->cwrite(&q, sizeof(Request));
+		// }
     chan.cwrite (&q, sizeof (Request));
+		cout << "channels cleaned up" << endl;
 
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
