@@ -229,7 +229,7 @@ int main(int argc, char *argv[]){
 
     hc_access->hc = &hc;
 
-    signal(SIGALRM, AlarmHandler);
+    signal(SIGALRM, alarm_handler);
     alarm(2);
 
 	// create one histogram per patient and add to collection
