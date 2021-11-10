@@ -12,6 +12,11 @@ struct hist_upd_args {
 	double resp;
 };
 
+struct hist_coll_access {
+	HistogramCollection* hc;
+};
+hist_coll_access* hc_access;
+
 FIFORequestChannel* create_channel(FIFORequestChannel* chan) {
 	Request nc (NEWCHAN_REQ_TYPE);
 	chan->cwrite(&nc, sizeof(Request));
@@ -118,12 +123,16 @@ void histogram_thread_function (BoundedBuffer* response_buffer, HistogramCollect
 
 }
 
-// static void alarm_handler(int sig, siginfo_t* info, void* ucontext) {
-// 	counter_map_t& counters = *(counter_map_t*)info->si_ptr;
-// 	system("clear");
-//
-// 	std::cout << make_histogram_table(counters) << endl;
-// }
+static void alarm_handler(int signum) {
+	// clear screen and move cursor to top
+	std::cout << "\033[2J\033[H" << std::flush;
+
+  // print the histogram
+  hc_access->hc->print();
+
+  // set alarm again
+  alarm(2);
+}
 
 
 int main(int argc, char *argv[]){
@@ -214,6 +223,14 @@ int main(int argc, char *argv[]){
 	BoundedBuffer request_buffer(b);
 	BoundedBuffer response_buffer(b);
 	HistogramCollection hc;
+
+	hc_access = static_cast<hist_coll_access *>(malloc(sizeof(hist_coll_access)));
+    memset(hc_access, 0, sizeof(hist_coll_access));
+
+    hc_access->hc = &hc;
+
+    signal(SIGALRM, AlarmHandler);
+    alarm(2);
 
 	// create one histogram per patient and add to collection
 	for (int i = 0; i < p; i++) {
@@ -307,7 +324,7 @@ int main(int argc, char *argv[]){
 
     // print the results and time difference
 		if (!file_req_flag) {
-			hc.print ();
+			// hc.print ();
 		}
     int secs = (end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)/(int) 1e6;
     int usecs = (int)(end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)%((int) 1e6);
