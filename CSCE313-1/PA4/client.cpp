@@ -224,13 +224,13 @@ int main(int argc, char *argv[]){
 	BoundedBuffer response_buffer(b);
 	HistogramCollection hc;
 
+	// extra credit: setup SIGALRM handler to print histogram every 2 seconds
 	hc_access = static_cast<hist_coll_access *>(malloc(sizeof(hist_coll_access)));
-    memset(hc_access, 0, sizeof(hist_coll_access));
+  memset(hc_access, 0, sizeof(hist_coll_access));
+  hc_access->hc = &hc;
 
-    hc_access->hc = &hc;
-
-    signal(SIGALRM, alarm_handler);
-    alarm(2);
+  signal(SIGALRM, alarm_handler);
+  alarm(2);
 
 	// create one histogram per patient and add to collection
 	for (int i = 0; i < p; i++) {
@@ -324,7 +324,9 @@ int main(int argc, char *argv[]){
 
     // print the results and time difference
 		if (!file_req_flag) {
-			// hc.print ();
+			// technically this shouldn't be needed bc we have an alarm handler, 
+			// but for very fast runs (<2 sec) the alarm doese not trigger
+			hc.print ();
 		}
     int secs = (end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)/(int) 1e6;
     int usecs = (int)(end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec)%((int) 1e6);
