@@ -56,20 +56,15 @@ void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFOReque
 	FileRequest* fm = (FileRequest*) buf2;
 	__int64_t remlen = filelen;
 
-	// cout << "FILENAME IN THREAD FUNCT: " << fm->getFileName() << endl;
 	while (remlen > 0) {
 		fm->length = min(remlen, (__int64_t) mb);
-		// cout << "FILENAME IN THREAD FUNCT: " << fm->getFileName() << endl;
 		vector<char> v  = vector<char>((char*)&buf2, (char*)&buf2 + sizeof(FileRequest) + fname.size() + 1);
 		request_buffer->push(v);
-		// cout << "pushing" << endl;
 		fm->offset += fm->length;
 		remlen -= fm->length;
 	}
 }
 
-
-// void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buffer, HistogramCollection* hc, int mb){
 void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buffer, BoundedBuffer* response_buffer, int mb){
 	vector<char> msg;
 	double resp = 0;
@@ -80,29 +75,20 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 		Request* r = (Request*)msg.data();
 
 		if (r->getType() == DATA_REQ_TYPE) {
-			// cout << "data req" << endl;
-			// THIS WORKS
 			chan->cwrite((char*)r, sizeof(DataRequest));
 			chan->cread(&resp, sizeof(double));
-			struct hist_upd_args temp = { ((DataRequest*)r)->person, resp };
-			// hc->update(((DataRequest*)r)->person, resp);
-			vector<char> v = vector<char>((char*)&temp, (char*)&temp + sizeof(hist_upd_args));
+			hist_upd_args upd_hist = { ((DataRequest*)r)->person, resp };
+			vector<char> v = vector<char>((char*)&upd_hist, (char*)&upd_hist + sizeof(hist_upd_args));
 			response_buffer->push(v);
-
 		} else if (r->getType() == FILE_REQ_TYPE) {
 			// cout << "file type req" << endl;
 			FileRequest* fm = (FileRequest*)r;
-			// string fname = (char*)(fm + 1);
 			string fname = fm->getFileName();
-			// cout << fm->offset << " " << fm->length << endl;
-			// string fname = ((FileRequest*)r)->getFileName();
-			// cout << "filename: " << fname << endl;
 			int sz = sizeof(FileRequest) + fname.size() + 1;
 			chan->cwrite((char*)r, sz);
 			chan->cread(recvbuf, mb);
 
 			string recvfname = "recv/" + fname;
-			// string recvfname = "recv/10.csv";
 			FILE* fp = fopen(recvfname.c_str(), "r+");
 			fseek(fp, fm->offset, SEEK_SET);
 			fwrite(recvbuf, 1, fm->length, fp);
@@ -118,8 +104,6 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 
 void histogram_thread_function (BoundedBuffer* response_buffer, HistogramCollection* hc) {
 	vector<char> msg;
-	// struct hist_upd_args resp;
-	// double resp = 0;
 
 	while(1) {
 		msg = response_buffer->pop();
@@ -127,7 +111,7 @@ void histogram_thread_function (BoundedBuffer* response_buffer, HistogramCollect
 
 		if (r->person > 0) {
 			hc->update(r->person, r->resp);
-		} else if (r->person == -1) {		// when sending person = -1, quit thread
+		} else if (r->person == -1) {		// sending person = -1 == quit message
 			break;
 		}
 	}
@@ -255,20 +239,24 @@ int main(int argc, char *argv[]){
 		thread histograms[h];
 		thread filethread;
 		if (!file_req_flag) {
+			// create p patient threads
 			for (int i=0; i < p; i++) {
 				patient[i] = thread(patient_thread_function, n, i+1, &request_buffer);
 			}
 			cout << "created " << p << " patient thread(s)" << endl;
 
+			// create h histogram threads
 			for (int i=0; i < h; i++) {
 				histograms[i] = thread(histogram_thread_function, &response_buffer, &hc);
 			}
 			cout << "created " << h << " histogram thread(s)" << endl;
 		} else {
+			// create file thread
 			filethread = thread(file_thread_function, filename, &request_buffer, &chan, m);
 			cout << "created 1 file thread" << endl;
 		}
 
+		// create w worker threads
 		thread workers[w];
 		for (int i = 0; i < w; i++) {
 			workers[i] = thread(worker_thread_function, wchans[i], &request_buffer, &response_buffer, m);
@@ -277,32 +265,38 @@ int main(int argc, char *argv[]){
 
 		/* Join all threads here */
 		if (!file_req_flag) {
+			// join patientes
 			for (int i = 0; i < p; i++) {
 				patient[i].join();
 			}
 			cout << "patients joined" << endl;
 		} else {
+			// join filethread
 			filethread.join();
 			cout << "file thread joined" << endl;
 		}
 
 		for (int i =0; i<w; i++) {
+			// set quit messages to worker channels
 			Request q (QUIT_REQ_TYPE);
 			vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(Request));
 			request_buffer.push(v);
 		}
 		for (int i=0; i<w; i++) {
+			// join worker threads
 			workers[i].join();
 		}
 		cout << "workers joined" << endl;
 
 		if (!file_req_flag) {
+			// send quit message to histogram threads
 			hist_upd_args q = { -1, -1 };
 			for (int i=0; i < h; i++) {
 				vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(hist_upd_args));
 				response_buffer.push(v);
 			}
-			
+
+			// join histogram threads
 			for (int i = 0; i < h; i++) {
 				histograms[i].join();
 			}
@@ -323,7 +317,7 @@ int main(int argc, char *argv[]){
 		// quit main channel
 		Request q (QUIT_REQ_TYPE);
     chan.cwrite (&q, sizeof (Request));
-		cout << "channels cleaned up" << endl;
+		cout << "all channels cleaned up" << endl;
 
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
