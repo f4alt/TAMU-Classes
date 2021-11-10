@@ -31,7 +31,7 @@ void patient_thread_function(int n, int pno, BoundedBuffer* request_buffer) {
 void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFORequestChannel* chan, int mb) {
 	string recvfname = "recv/" + fname;
 
-	cout << "recvfname:" << recvfname << endl;
+	// cout << "recvfname:" << recvfname << endl;
 
 	FileRequest fr (0,0);
 	int len = sizeof (FileRequest) + fname.size()+1;
@@ -144,9 +144,9 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 			FileRequest* fm = (FileRequest*)r;
 			// string fname = (char*)(fm + 1);
 			string fname = fm->getFileName();
-			cout << fm->offset << " " << fm->length << endl;
+			// cout << fm->offset << " " << fm->length << endl;
 			// string fname = ((FileRequest*)r)->getFileName();
-			cout << "filename: " << fname << endl;
+			// cout << "filename: " << fname << endl;
 			int sz = sizeof(FileRequest) + fname.size() + 1;
 			chan->cwrite((char*)r, sz);
 			chan->cread(recvbuf, mb);
@@ -335,13 +335,16 @@ int main(int argc, char *argv[]){
     cout << "Took " << secs << " seconds and " << usecs << " micro seconds" << endl;
 
 
-		// CLEAN UP CHANNELS
+		// quit main channel
 		Request q (QUIT_REQ_TYPE);
-		// for (int i = 0; i < p; i++) {
-		// 	wchans[i]->cwrite(&q, sizeof(Request));
-		// }
     chan.cwrite (&q, sizeof (Request));
 		cout << "channels cleaned up" << endl;
+
+		// cleanup memory
+		// for (int i = 0; i < p; i++) {
+		// 	Histogram* h = new Histogram(10, -2.0, 2.0);
+		// 	hc.add(h);
+		// }
 
 	// client waiting for the server process, which is the child, to terminate
 	wait(0);
