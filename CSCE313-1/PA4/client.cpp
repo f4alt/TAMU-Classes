@@ -140,7 +140,7 @@ void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buf
 			chan->cread(&resp, sizeof(double));
 			hc->update(((DataRequest*)r)->person, resp);
 		} else if (r->getType() == FILE_REQ_TYPE) {
-			cout << "file type req" << endl;
+			// cout << "file type req" << endl;
 			FileRequest* fm = (FileRequest*)r;
 			// string fname = (char*)(fm + 1);
 			string fname = fm->getFileName();
