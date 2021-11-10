@@ -281,11 +281,6 @@ int main(int argc, char *argv[]){
 				patient[i].join();
 			}
 			cout << "patients joined" << endl;
-
-			for (int i = 0; i < h; i++) {
-				histograms[i].join();
-			}
-			cout << "hisgograms joined" << endl;
 		} else {
 			filethread.join();
 			cout << "file thread joined" << endl;
@@ -300,6 +295,19 @@ int main(int argc, char *argv[]){
 			workers[i].join();
 		}
 		cout << "workers joined" << endl;
+
+		if (!file_req_flag) {
+			hist_upd_args q = { -1, -1 };
+			for (int i=0; i < h; i++) {
+				vector<char> v = vector<char>((char*)&q, (char*)&q + sizeof(hist_upd_args));
+				response_buffer.push(v);
+			}
+			
+			for (int i = 0; i < h; i++) {
+				histograms[i].join();
+			}
+			cout << "histograms joined" << endl;
+		}
 
     gettimeofday (&end, 0);
 
