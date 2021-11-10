@@ -124,9 +124,11 @@ void histogram_thread_function (BoundedBuffer* response_buffer, HistogramCollect
 }
 
 static void alarm_handler(int signum) {
-	// clear screen and move cursor to top
-	// cout << "\033[2J\033[H" << flush;
-	system("clear");
+	// clear screen
+	// system("clear");
+	// this is a prettier way to print and update, but it keeps
+	// old histograms if you scroll
+	cout << "\033[2J\033[H" << flush;
 
   // print the histogram with current progress
   hc_access->hc->print();
