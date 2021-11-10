@@ -19,6 +19,7 @@ Semaphore consumerdone (1);
 Semaphore producerdone (0);
 Semaphore mtx (1); // will use as mutex
 int ncdone = 0; // number of consumers done consuming
+int npdone = 0; // number of produces done producing
 
 // each producer gets an id, which is pno
 void producer_function (int pno){
@@ -29,17 +30,25 @@ void producer_function (int pno){
 
 		// after wait is done, do the produce operation
 		// you should not need to change this block
-		//mtx.P();
+		mtx.P();
 		buffer ++;
 		cout << "Producer [" << pno << "] left buffer=" << buffer << endl;
-		//mtx.V();
+		mtx.V();
 
 
 		// now do whatever that would indicate that the producers are done
 		// in this case, the single producer is waking up all NC consumers
 		// this will have to change when you have NP producers
-		for (int i=0; i<NC; i++)
-			producerdone.V();
+		// for (int i=0; i<NC; i++)
+		// 	producerdone.V();
+    // -- following the same logic as consumer --
+    mtx.P();
+    npdone ++;
+    if (npdone == NP) {   // all producers accounted for, wake up consumer
+      producerdone.V();
+      npdone = 0;
+    }
+    mtx.V();
 	}
 }
 // each consumer gets an id cno
