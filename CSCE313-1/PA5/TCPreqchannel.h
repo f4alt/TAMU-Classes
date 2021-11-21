@@ -3,6 +3,8 @@
 #define _TCPreqchannel_H_
 
 #include "common.h"
+#include <sys/socket.h>
+#include <netdb.h>
 
 class TCPRequestChannel
 {
@@ -12,6 +14,8 @@ private:
 
 public:
 	TCPRequestChannel(const string host_name, const string port);
+
+	TCPRequestChannel(int);
 
 	~TCPRequestChannel();
 	/* Destructor of the local copy of the bus. By default, the Server Side deletes any IPC

@@ -19,7 +19,7 @@ TCPRequestChannel::TCPRequestChannel(const string host_name, const string port) 
 	    hints.ai_socktype = SOCK_STREAM;
 	    hints.ai_flags = AI_PASSIVE; // use my IP
 
-	    if ((rv = getaddrinfo(NULL, port, &hints, &serv)) != 0) {
+	    if ((rv = getaddrinfo(NULL, port.c_str(), &hints, &serv)) != 0) {
 	        cerr  << "getaddrinfo: " << gai_strerror(rv) << endl;
 	        exit (-1);
 	    }
@@ -48,7 +48,7 @@ TCPRequestChannel::TCPRequestChannel(const string host_name, const string port) 
 			hints.ai_socktype = SOCK_STREAM;
 			int status;
 			//getaddrinfo("www.example.com", "3490", &hints, &res);
-			if ((status = getaddrinfo (host_name, port, &hints, &res)) != 0) {
+			if ((status = getaddrinfo (host_name.c_str(), port.c_str(), &hints, &res)) != 0) {
 	        cerr << "getaddrinfo: " << gai_strerror(status) << endl;
 	        exit (-1);
 	    }
@@ -68,6 +68,10 @@ TCPRequestChannel::TCPRequestChannel(const string host_name, const string port) 
 			//
 			cout << "Connected " << endl;
 		}
+}
+
+TCPRequestChannel::TCPRequestChannel (int fd) {
+	sockfd = fd;
 }
 
 TCPRequestChannel::~TCPRequestChannel(){

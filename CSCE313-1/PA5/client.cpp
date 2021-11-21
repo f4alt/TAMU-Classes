@@ -1,5 +1,5 @@
 #include "common.h"
-#include "FIFOreqchannel.h"
+#include "TCPreqchannel.h"
 #include "BoundedBuffer.h"
 #include "HistogramCollection.h"
 #include <sys/wait.h>
@@ -17,18 +17,18 @@ struct hist_coll_access {
 };
 hist_coll_access* hc_access;
 
-FIFORequestChannel* create_channel(FIFORequestChannel* chan) {
-	Request nc (NEWCHAN_REQ_TYPE);
-	chan->cwrite(&nc, sizeof(Request));
-	char buf3[1024];
-	chan->cread(buf3, sizeof(buf3));
-	string new_chan_name = buf3;
-
-	// cout << "new channel created, name: " << new_chan_name << endl;
-	FIFORequestChannel* new_chan = new FIFORequestChannel(new_chan_name, FIFORequestChannel::CLIENT_SIDE);
-
-	return new_chan;
-}
+// TCPRequestChannel* create_channel(TCPRequestChannel* chan) {
+// 	Request nc (NEWCHAN_REQ_TYPE);
+// 	chan->cwrite(&nc, sizeof(Request));
+// 	char buf3[1024];
+// 	chan->cread(buf3, sizeof(buf3));
+// 	string new_chan_name = buf3;
+//
+// 	// cout << "new channel created, name: " << new_chan_name << endl;
+// 	TCPRequestChannel* new_chan = new TCPRequestChannel(new_chan_name, TCPRequestChannel::CLIENT_SIDE);
+//
+// 	return new_chan;
+// }
 
 void patient_thread_function(int n, int pno, BoundedBuffer* request_buffer) {
 	DataRequest d(pno, 0.0, 1);
@@ -39,7 +39,7 @@ void patient_thread_function(int n, int pno, BoundedBuffer* request_buffer) {
 	}
 }
 
-void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFORequestChannel* chan, int mb) {
+void file_thread_function(string fname, BoundedBuffer* request_buffer, TCPRequestChannel* chan, int mb) {
 	string recvfname = "recv/" + fname;
 
 	// cout << "recvfname:" << recvfname << endl;
@@ -70,7 +70,7 @@ void file_thread_function(string fname, BoundedBuffer* request_buffer, FIFOReque
 	}
 }
 
-void worker_thread_function(FIFORequestChannel* chan, BoundedBuffer* request_buffer, BoundedBuffer* response_buffer, int mb){
+void worker_thread_function(TCPRequestChannel* chan, BoundedBuffer* request_buffer, BoundedBuffer* response_buffer, int mb){
 	vector<char> msg;
 	double resp = 0;
 
@@ -155,14 +155,16 @@ int main(int argc, char *argv[]){
 	*/
 	int n = 1000;
 	int p = 1;
-	int w = 10;
-	int b = 20; // size of bounded buffer, note: this is different from another variable buffercapacity/m
+	int w = 200;
+	int b = 500; // size of bounded buffer, note: this is different from another variable buffercapacity/m
 	int m = 256;
 	string filename = "";
-	int h = 1;
+	int h = 5;
+	string host;
+	string port;
 
 	// take all the arguments first because some of these may go to the server
-	while ((opt = getopt(argc, argv, "n:p:w:b:m:f:h:e")) != -1) {
+	while ((opt = getopt(argc, argv, "n:p:w:b:m:f:h:p:e")) != -1) {
 		switch(opt) {
 			case 'n':
 				n = stoi(optarg);
@@ -184,7 +186,10 @@ int main(int argc, char *argv[]){
 				file_req_flag = 1;
 				break;
 			case 'h':
-				h = stoi(optarg);
+				host = optarg;
+				break;
+			case 'r':
+				port = optarg;
 				break;
 			case 'e':
 				ec_flag = 0;
@@ -214,19 +219,19 @@ int main(int argc, char *argv[]){
 	cout << "-------" << endl;
 
 
-	int pid = fork ();
-	if (pid < 0){
-		EXITONERROR ("Could not create a child process for running the server");
-	}
-	if (!pid){ // The server runs in the child process
-		char buffer_size_string[7 + sizeof(char)];
-		sprintf(buffer_size_string, "%d", m);
-		char* args[] = {"./server", "-m", buffer_size_string, nullptr};
-		if (execvp(args[0], args) < 0){
-			EXITONERROR ("Could not launch the server");
-		}
-	}
-	FIFORequestChannel chan ("control", FIFORequestChannel::CLIENT_SIDE);
+	// int pid = fork ();
+	// if (pid < 0){
+	// 	EXITONERROR ("Could not create a child process for running the server");
+	// }
+	// if (!pid){ // The server runs in the child process
+	// 	char buffer_size_string[7 + sizeof(char)];
+	// 	sprintf(buffer_size_string, "%d", m);
+	// 	char* args[] = {"./server", "-m", buffer_size_string, nullptr};
+	// 	if (execvp(args[0], args) < 0){
+	// 		EXITONERROR ("Could not launch the server");
+	// 	}
+	// }
+	// TCPRequestChannel chan ("control", TCPRequestChannel::CLIENT_SIDE);
 	BoundedBuffer request_buffer(b);
 	BoundedBuffer response_buffer(b);
 	HistogramCollection hc;
@@ -249,9 +254,9 @@ int main(int argc, char *argv[]){
 	cout << "created " << p << " histogram(s)" << endl;
 
 	// make worker channels
-	FIFORequestChannel* wchans[w];
+	TCPRequestChannel* wchans[w];
 	for (int i = 0; i < w; i++) {
-		wchans[i] = create_channel(&chan);
+		wchans[i] = new TCPRequestChannel(host, port);
 	}
 	cout << "created " << w << " worker channel(s)" << endl;
 
@@ -278,7 +283,7 @@ int main(int argc, char *argv[]){
 			cout << "created " << h << " histogram thread(s)" << endl;
 		} else {
 			// create file thread
-			filethread = thread(file_thread_function, filename, &request_buffer, &chan, m);
+			// filethread = thread(file_thread_function, filename, &request_buffer, &chan, m);
 			cout << "created 1 file thread" << endl;
 		}
 
@@ -341,8 +346,8 @@ int main(int argc, char *argv[]){
 
 
 		// quit main channel
-		Request q (QUIT_REQ_TYPE);
-    chan.cwrite (&q, sizeof (Request));
+		// Request q (QUIT_REQ_TYPE);
+    // chan.cwrite (&q, sizeof (Request));
 		cout << "all channels cleaned up" << endl;
 
 	// client waiting for the server process, which is the child, to terminate

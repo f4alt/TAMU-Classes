@@ -13,7 +13,7 @@
 #include <vector>
 #include <math.h>
 #include <unistd.h>
-#include "FIFOreqchannel.h"
+#include "TCPreqchannel.h"
 using namespace std;
 
 
@@ -23,23 +23,23 @@ char* buffer = NULL; // buffer used by the server, allocated in the main
 
 int nchannels = 0;
 pthread_mutex_t newchannel_lock;
-void handle_process_loop(FIFORequestChannel *_channel);
+void handle_process_loop(TCPRequestChannel *_channel);
 char ival;
 vector<string> all_data [NUM_PERSONS];
 vector<thread> channel_threads;
 
 
-void process_newchannel_request (FIFORequestChannel *_channel){
-	// cout << "client req channel" << endl;
-	nchannels++;
-	string new_channel_name = "data" + to_string(nchannels) + "_";
-	char buf [30];
-	strcpy (buf, new_channel_name.c_str());
-	_channel->cwrite(buf, new_channel_name.size()+1);
-
-	FIFORequestChannel *data_channel = new FIFORequestChannel (new_channel_name, FIFORequestChannel::SERVER_SIDE);
-	channel_threads.push_back(thread (handle_process_loop, data_channel));
-}
+// void process_newchannel_request (TCPRequestChannel *_channel){
+// 	// cout << "client req channel" << endl;
+// 	nchannels++;
+// 	string new_channel_name = "data" + to_string(nchannels) + "_";
+// 	char buf [30];
+// 	strcpy (buf, new_channel_name.c_str());
+// 	_channel->cwrite(buf, new_channel_name.size()+1);
+//
+// 	TCPRequestChannel *data_channel = new TCPRequestChannel (new_channel_name, TCPRequestChannel::SERVER_SIDE);
+// 	channel_threads.push_back(thread (handle_process_loop, data_channel));
+// }
 
 void populate_file_data (int person){
 	//cout << "populating for person " << person << endl;
@@ -74,7 +74,7 @@ double get_data_from_memory (int person, double seconds, int ecgno){
 		return ecg2;
 }
 
-void process_file_request (FIFORequestChannel* rc, Request* request){
+void process_file_request (TCPRequestChannel* rc, Request* request){
 
 	FileRequest f = *(FileRequest *) request;
 	string filename = (char*) request + sizeof (FileRequest);
@@ -128,7 +128,7 @@ void process_file_request (FIFORequestChannel* rc, Request* request){
 	close (fd);
 }
 
-void process_data_request (FIFORequestChannel* rc, Request* r){
+void process_data_request (TCPRequestChannel* rc, Request* r){
 	DataRequest* d = (DataRequest* ) r;
 
 	if (d->person < 1 || d->person > 15 || d->seconds < 0 || d->seconds >= 60.0 || d->ecgno <1 || d->ecgno > 2){
@@ -141,13 +141,13 @@ void process_data_request (FIFORequestChannel* rc, Request* r){
 	rc->cwrite(&data, sizeof (double));
 }
 
-void process_unknown_request(FIFORequestChannel *rc){
+void process_unknown_request(TCPRequestChannel *rc){
 	Request resp (UNKNOWN_REQ_TYPE);
 	rc->cwrite (&resp, sizeof (Request));
 }
 
 
-void process_request(FIFORequestChannel *rc, Request* r){
+void process_request(TCPRequestChannel *rc, Request* r){
 	if (r->getType() == DATA_REQ_TYPE){
 		usleep (rand () % 5000);
 		process_data_request (rc, r);
@@ -155,13 +155,13 @@ void process_request(FIFORequestChannel *rc, Request* r){
 	else if (r->getType() == FILE_REQ_TYPE){
 		process_file_request (rc, r);
 	}else if (r->getType() == NEWCHAN_REQ_TYPE){
-		process_newchannel_request(rc);
+		// process_newchannel_request(rc);
 	}else{
 		process_unknown_request(rc);
 	}
 }
 
-void handle_process_loop(FIFORequestChannel *channel){
+void handle_process_loop(TCPRequestChannel *channel){
 	/* creating a buffer per client to process incoming requests
 	and prepare a response */
 	char* buffer = new char [buffercapacity];
@@ -192,10 +192,14 @@ void handle_process_loop(FIFORequestChannel *channel){
 int main(int argc, char *argv[]){
 	buffercapacity = MAX_MESSAGE;
 	int opt;
-	while ((opt = getopt(argc, argv, "m:")) != -1) {
+	string port;
+	while ((opt = getopt(argc, argv, "m:r:")) != -1) {
 		switch (opt) {
 			case 'm':
 				buffercapacity = atoi (optarg);
+				break;
+			case 'r':
+				port = optarg;
 				break;
 		}
 	}
@@ -203,11 +207,26 @@ int main(int argc, char *argv[]){
 	for (int i=0; i<NUM_PERSONS; i++){
 		populate_file_data(i+1);
 	}
+	struct sockaddr_storage client_addr; // connector's address information
+  socklen_t sin_size;
 
-	FIFORequestChannel* control_channel = new FIFORequestChannel ("control", FIFORequestChannel::SERVER_SIDE);
-	handle_process_loop (control_channel);
-	for (int i=0; i<channel_threads.size(); i++){
-		channel_threads[i].join();
-	}
+	TCPRequestChannel* main_channel = new TCPRequestChannel ("", port);
+	while(1) {  // main accept() loop
+      sin_size = sizeof client_addr;
+      int client_socket = accept (main_channel->getfd(), (struct sockaddr *)&client_addr, &sin_size);
+			// client socket = IP?
+      if (client_socket == -1) {
+          perror("accept");
+          continue;
+      }
+			TCPRequestChannel* client_channel = new TCPRequestChannel(client_socket);
+      thread t (handle_process_loop, client_channel);
+      t.detach ();
+  }
+
+	// handle_process_loop (control_channel);
+	// for (int i=0; i<channel_threads.size(); i++){
+	// 	channel_threads[i].join();
+	// }
 	cout << "Server process exited" << endl;
 }
