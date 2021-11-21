@@ -214,7 +214,7 @@ int main(int argc, char *argv[]){
 	while(1) {  // main accept() loop
       sin_size = sizeof client_addr;
       int client_socket = accept (main_channel->getfd(), (struct sockaddr *)&client_addr, &sin_size);
-			cout << "client connected with " << client_addr << endl;
+			cout << "client connected" << endl;
 			// client socket = IP?
       if (client_socket == -1) {
           perror("accept");
