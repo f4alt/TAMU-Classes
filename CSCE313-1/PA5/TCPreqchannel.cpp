@@ -27,7 +27,7 @@ TCPRequestChannel::TCPRequestChannel(const string host_name, const string port) 
 	        perror("server: socket");
 			exit (-1);
 	    }
-	    if (bind(sockfd, serv->ai_addr, serv->ai_addrlen) == -1) {
+	    if (::bind(sockfd, serv->ai_addr, serv->ai_addrlen) == -1) {
 			close(sockfd);
 			perror("server: bind");
 			exit (-1);
