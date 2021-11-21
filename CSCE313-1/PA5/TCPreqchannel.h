@@ -15,6 +15,7 @@ private:
 public:
 	TCPRequestChannel(const string host_name, const string port);
 
+	// we need an alternative constructor for when we create on socket fd
 	TCPRequestChannel(int);
 
 	~TCPRequestChannel();
