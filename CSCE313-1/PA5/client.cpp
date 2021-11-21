@@ -232,6 +232,7 @@ int main(int argc, char *argv[]){
 	// 	}
 	// }
 	// TCPRequestChannel chan ("control", TCPRequestChannel::CLIENT_SIDE);
+	TCPRequestChannel* file_req_chan = new TCPRequestChannel(host, port);
 	BoundedBuffer request_buffer(b);
 	BoundedBuffer response_buffer(b);
 	HistogramCollection hc;
@@ -269,6 +270,7 @@ int main(int argc, char *argv[]){
 		thread patient[p];
 		thread histograms[h];
 		thread filethread;
+
 		if (!file_req_flag) {
 			// create p patient threads
 			for (int i=0; i < p; i++) {
@@ -283,7 +285,7 @@ int main(int argc, char *argv[]){
 			cout << "created " << h << " histogram thread(s)" << endl;
 		} else {
 			// create file thread
-			// filethread = thread(file_thread_function, filename, &request_buffer, &chan, m);
+			filethread = thread(file_thread_function, filename, &request_buffer, file_req_chan, m);
 			cout << "created 1 file thread" << endl;
 		}
 
@@ -305,6 +307,8 @@ int main(int argc, char *argv[]){
 			// join filethread
 			filethread.join();
 			cout << "file thread joined" << endl;
+			// Request q (QUIT_REQ_TYPE);
+	    // file_req_chan.cwrite (&q, sizeof (Request));
 		}
 
 		for (int i =0; i<w; i++) {
@@ -346,8 +350,8 @@ int main(int argc, char *argv[]){
 
 
 		// quit main channel
-		// Request q (QUIT_REQ_TYPE);
-    // chan.cwrite (&q, sizeof (Request));
+		Request q (QUIT_REQ_TYPE);
+    file_req_chan->cwrite (&q, sizeof (Request));
 		cout << "all channels cleaned up" << endl;
 
 	// client waiting for the server process, which is the child, to terminate
