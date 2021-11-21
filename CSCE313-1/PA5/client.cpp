@@ -164,7 +164,7 @@ int main(int argc, char *argv[]){
 	string port;
 
 	// take all the arguments first because some of these may go to the server
-	while ((opt = getopt(argc, argv, "n:p:w:b:m:f:h:p:e")) != -1) {
+	while ((opt = getopt(argc, argv, "n:p:w:b:m:f:h:r:e")) != -1) {
 		switch(opt) {
 			case 'n':
 				n = stoi(optarg);
