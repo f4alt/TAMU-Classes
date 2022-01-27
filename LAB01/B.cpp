@@ -13,6 +13,7 @@ int main() {
     cin >> inputs[i];
   }
 
+  // sort inputs
   for(int i=0;i<total;i++)
 	{
 		for(int j=i+1;j<total;j++)
@@ -26,42 +27,37 @@ int main() {
 		}
 	}
 
-  int length =0;
-  int real = inputs[0];
+  // sanity check
+  // cout << "sanity check" << endl;
+  // for (int i=0; i < total; i++) {
+  //   cout << inputs[i] << " " << endl;
+  // }
+
+
+  int temp_stop;
+  int sequence = 0;
   for (int i=0; i < total; i++) {
-    for (int j=0; j<total; j++) {
-
-      // cout << "test:" << inputs[i] << " | " << inputs[i] +1 << endl;
-      if (inputs[i] == (inputs[j] -1)) {
-        // cout << "length++" << endl;
-        length ++;
+    // cout << "curr: " << inputs[i] << endl;
+    if ((i+2) < total && inputs[i] == inputs[i+2] -2) {
+      cout << inputs[i] << "-";
+      temp_stop = inputs[i+2];
+      sequence = 1;
+      i += 2;
+    } else {
+      cout << inputs[i] << " ";
+    }
+    while (sequence) {
+      if ((i+1) < total && inputs[i] == inputs[i+1] -1) {
+        temp_stop = inputs[i+1];
+        i++;
       } else {
-        if (length > 0) {
-          cout << real << "-" << real+length << " ";
-        } else {
-          cout << real << " ";
-          real = inputs[i+1];
-          length = 0;
-        }
-
-
+        cout << temp_stop << " ";
+        sequence = 0;
       }
     }
   }
 
+  cout << endl;
 
-  // for (int i=0; i<total; i++) {
-  //   if (inputs[i] == 0) {
-  //     length++;
-  //   } else {
-  //     if (length > 0) {
-  //       cout << real << "-" << real+length << " ";
-  //     } else {
-  //       cout << real;
-  //     }
-  //     real = inputs[i];
-  //   }
-  // }
-
-  return 1;
+  return 0;
 }

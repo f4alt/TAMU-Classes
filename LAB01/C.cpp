@@ -1,52 +1,32 @@
-// #include <iostream>
-// using namespace std;
-// int main()
-// {
-// int n_A, n_B, reverse=0, rem;
-//
-//
-// cin>>n_A << n_B;
-//   while(n_A!=0)
-//   {
-//      rem=n_A%10;
-//      reverse=reverse*10+rem;
-//      n_A/=10;
-//   }
-//  cout<<"Reversed Number: "<<reverse<<endl;
-// return 0;
-// }
-
-
-#include <iostream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
 int main() {
-  int in_A, in_B;
-  int larger;
-  int reversed_A=0, reversed_B=0;
-  int remainder;
+  queue<int> requests;
+  int upcoming, max, curr;
+  int needed=0;
 
-  cin >> in_A;
-  cin >> in_B;
+  cin >> upcoming >> max;
 
-  for (int i=0; i < 3; i++) {
-      remainder = in_A%10;
-      reversed_A = reversed_A*10 + remainder;
-      in_A /= 10;
+  for (int i=0; i < upcoming; i++) {
+    cin >> curr;
+    if (curr > 1000) {
+      // needed++;
+      // cout << "adding 1 to queue" << endl;
+      if (requests.front() < 1000) {
+        requests.pop();
+
+        // cout << "front is done" << endl;
+      } else {
+        // cout << "updating front, inc needed" << endl;
+        requests.front() -= 1000;
+        needed++;
+      }
+      requests.push(curr);
+    }
   }
 
-  for (int i=0; i < 3; i++) {
-      remainder = in_B%10;
-      reversed_B = reversed_B*10 + remainder;
-      in_B /= 10;
-  }
-
-  if ((reversed_A) > (reversed_B)) {
-    larger = (reversed_A);
-  } else {
-    larger = (reversed_B);
-  }
-
-  cout << larger;
+  float ans = ceil((float)needed / (float)max);
+  cout << ans << endl;
 }
