@@ -2,8 +2,11 @@
 
 using namespace std;
 
+// A
+
 int main() {
-  string input;
+
+
 
 
   return 0;

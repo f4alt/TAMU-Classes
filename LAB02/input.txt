@@ -1,0 +1,7 @@
+3
+1
+a: lower class
+1
+a: middle class
+1
+a: upper class

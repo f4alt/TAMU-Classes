@@ -16,6 +16,7 @@ int main() {
     if (qnty == 0) {
       break;
     }
+
     for (int i=0; i < qnty; i++) {
       cin >> temp;
 
@@ -27,7 +28,7 @@ int main() {
         }
       }
 
-      if (doubles > fav_doubles) {
+      if (doubles > fav_doubles || qnty == 1) {
         fav_doubles = doubles;
         fav = temp;
         // cout << "fav:" << fav << " doubles:" << fav_doubles;

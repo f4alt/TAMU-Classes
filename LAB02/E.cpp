@@ -12,25 +12,37 @@ int main() {
   cin >> input;
 
 
-  for (int i=0; i < input.size(); i++) {
-    for (int j=0; j < depth; j++) {
-      cout << "*";
-    }
-
-    if (input[i] == '{') {
-      depth += 2;
-      // cout << "depth:" << depth;
-      cout << "{";
-      special_char = true;
-    }
-    if (input [i] == '}') {
-      depth -= 2;
-      cout << "}";
-      special_char = true;
-    }
-
-    cout << "\n";
-  }
+  // for (int i=0; i < input.size(); i++) {
+  //   cout << input[i];
+  //
+  //   if (input [i] == '}') {
+  //     depth -= 2;
+  //     cout << "\n";
+  //     special_char = true;
+  //   }
+  //
+  //   if (special_char) {
+  //     for (int j=0; j < depth; j++) {
+  //       cout << "*";
+  //     }
+  //     special_char = false;
+  //   } else {
+  //     cout << input[i];
+  //   }
+  //
+  //   if (input[i] == '{') {
+  //     depth += 2;
+  //     // cout << "depth:" << depth;
+  //     cout << "\n";
+  //     special_char = true;
+  //   }
+  //
+  //   if (input[i] == ',') {
+  //     cout << "\n";
+  //     special_char = true;
+  //   }
+  //
+  // }
 
   // cout << "{" << endl;
 //   for(int i=0; i < input.size(); i++) {
@@ -78,7 +90,7 @@ int main() {
 //       } else {
 //         cout << ",\n";
 //         special_char = true;
-//         skip_com = false;
+//         // skip_com = false;
 //       }
 //     }
 //
@@ -93,5 +105,5 @@ int main() {
 //   }
 //   // cout << "}" << endl;
 //   cout << endl;
-//
+// //
 }
