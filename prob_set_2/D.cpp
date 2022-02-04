@@ -2,13 +2,13 @@
 
 using namespace std;
 
-// A
+// D
 
 int main() {
   int loop, len, d_count;
   bool reverse = false;
   string action, list;
-
+  // int input*;
 
   std::ios::sync_with_stdio(false);
   cin.tie(NULL);
@@ -19,7 +19,7 @@ int main() {
   for (int i=0; i < loop; i++) {
     cin >> action >> len >> list;
 
-    int input[len] = {-1};
+    int input[len];
 
     for (int i=0; i < len; i++) {
       input[i] = list[2*i+1] - 48;
@@ -28,6 +28,7 @@ int main() {
 
     // r_count=0;
     d_count=0;
+    reverse = false;
 
     for (int i=0; i < action.size(); i++) {
       if (action[i] == 'R' && i+1 < action.size()-1 && action[i+1] != 'R') {
@@ -41,11 +42,22 @@ int main() {
         }
         if (reverse) {
           for (int i=len-1; i > 0; i--) {
-            cout << i << endl;
-            if (action[i] == -1) {
+            // cout << i << endl;
+            if (input[i] == -1) {
               continue;
             } else {
-              action[i] = -1;
+              input[i] = -1;
+              break;
+            }
+          }
+        } else {
+          // cout << "here" << endl;
+          for (int i=0; len-1; i++) {
+            // cout << i << endl;
+            if (input[i] == -1) {
+              continue;
+            } else {
+              input[i] = -1;
               break;
             }
           }
@@ -54,17 +66,25 @@ int main() {
     }
     // simplify requests
     // r_count = r_count % 2;
+    //
+    string output = "[";
 
-    cout << "[";
+    // cout << "[";
     for (int i=0; i < len; i++) {
       if (input[i] != -1) {
-        cout << input[i];
+        output.append(to_string(input[i]));
+        output.append(",");
+        // cout << input[i];
       }
-      if (i != len-1) {
-        cout << ",";
-      }
+      // if (input[i] != -1 && i != len-1) {
+      //   cout << ",";
+      // }
     }
-    cout << "]\n";
+    output.erase(output.size()-1);
+    output.append("]\n");
+
+    cout << output;
+    // cout << "]\n";
 
 
     // cout << "do something" << endl;
