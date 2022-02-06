@@ -22,6 +22,8 @@ int main() {
     int input[len];
 
     for (int i=0; i < len; i++) {
+      
+    for (int i=0; i < len; i++) {
       input[i] = list[2*i+1] - 48;
       // cout << input[i] << " | " << list[2*i+1] << endl;
     }
