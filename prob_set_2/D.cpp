@@ -6,8 +6,8 @@ using namespace std;
 
 int main() {
   int loop, len, d_count;
-  bool reverse = false;
-  string action, list;
+  bool reverse = false, error=false;
+  string action, list_str;
   // int input*;
 
   std::ios::sync_with_stdio(false);
@@ -17,78 +17,72 @@ int main() {
   cin >> loop;
 
   for (int i=0; i < loop; i++) {
-    cin >> action >> len >> list;
+    cin >> action >> len >> list_str;
 
-    int input[len];
-
-    for (int i=0; i < len; i++) {
-      input[i] = list[2*i+1] - 48;
-      // cout << input[i] << " | " << list[2*i+1] << endl;
-    }
-
-    // r_count=0;
+    // reset loop variables
+    std::list<string> input;
     d_count=0;
     reverse = false;
+    error = false;
+
+    // get rid of first and last []
+    list_str.erase(list_str.begin());
+    list_str.erase(list_str.size()-1);
+
+    // string stream input to comma deliminate
+    stringstream s_stream(list_str);
+    while (s_stream.good()) {
+      string substr;
+      getline(s_stream, substr, ',');
+      if (substr != "") {
+        input.push_back(substr);
+      }
+    }
 
     for (int i=0; i < action.size(); i++) {
-      if (action[i] == 'R' && i+1 < action.size()-1 && action[i+1] != 'R') {
+      if (error) {
+        break;
+      }
+      if (action[i] == 'R') {
         reverse = !reverse;
-        // cout << "reversing" << endl;
       } else if (action[i] == 'D') {
         d_count++;
         if (d_count > len) {
           cout << "error" << endl;
+          error = true;
           break;
         }
         if (reverse) {
-          for (int i=len-1; i > 0; i--) {
-            // cout << i << endl;
-            if (input[i] == -1) {
-              continue;
-            } else {
-              input[i] = -1;
-              break;
-            }
-          }
+          input.pop_back();
         } else {
-          // cout << "here" << endl;
-          for (int i=0; len-1; i++) {
-            // cout << i << endl;
-            if (input[i] == -1) {
-              continue;
-            } else {
-              input[i] = -1;
-              break;
-            }
-          }
+          input.pop_front();
         }
       }
     }
-    // simplify requests
-    // r_count = r_count % 2;
-    //
+
     string output = "[";
 
-    // cout << "[";
-    for (int i=0; i < len; i++) {
-      if (input[i] != -1) {
-        output.append(to_string(input[i]));
+    if (reverse) {
+      while (!input.empty()) {
+        output.append(input.back());
         output.append(",");
-        // cout << input[i];
+        input.pop_back();
       }
-      // if (input[i] != -1 && i != len-1) {
-      //   cout << ",";
-      // }
+    } else {
+      while (!input.empty()) {
+        output.append(input.front());
+        output.append(",");
+        input.pop_front();
+      }
     }
     output.erase(output.size()-1);
     output.append("]\n");
 
-    cout << output;
-    // cout << "]\n";
-
-
-    // cout << "do something" << endl;
-    // cout << "RCOUNT:" << r_count << " | " << d_count << endl;
+    if (d_count == len) {
+      cout << "[]\n";
+    } else if (!error) {
+      cout << output;
+    }
   }
 
 
