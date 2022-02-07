@@ -23,6 +23,7 @@ struct boundbox {
 struct triangle {
 	std::vector<vertex> vertices;
 	boundbox bb;
+	std::vector<double> norm;
 };
 
 
@@ -36,7 +37,8 @@ public:
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }
 	void setBoundingBox(triangle* tri);
-	bool calculateBarycentric(triangle* tri, int px, int py, float* ret);
+	bool calculateBarycentric_RGB(triangle* tri, int px, int py, float* ret);
+	bool calculateBarycentric_Z(triangle* tri, int px, int py, float* ret, std::vector<float>* zBuf);
 
 private:
 	int width;

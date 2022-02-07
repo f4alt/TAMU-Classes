@@ -48,8 +48,8 @@ int main(int argc, char **argv)
 	vector<float> norBuf; // list of vertex normals
 	vector<float> texBuf; // list of vertex texture coords
 	vector<triangle*> sorted_buf;
-	// vector<float> z_buf;
-	float zmax = -FLT_MAX;
+
+	// float zmax = -FLT_MAX;
 	float world_dim[6] = {FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX};
 	int color_iterator =0;
 	tinyobj::attrib_t attrib;
@@ -127,7 +127,10 @@ int main(int argc, char **argv)
 															posBuf[i+2],
 															RANDOM_COLORS[color_iterator%7][0]*255,
 															RANDOM_COLORS[color_iterator%7][1]*255,
-															RANDOM_COLORS[color_iterator%7][2]*255
+															RANDOM_COLORS[color_iterator%7][2]*255,
+															// norBuf[i  ],
+															// norBuf[i+1],
+															// norBuf[i+2]
 															});
 		color_iterator++;
 		temp->vertices.push_back({posBuf[i+3] * scale + tx,
@@ -135,7 +138,10 @@ int main(int argc, char **argv)
 															posBuf[i+5],
 															RANDOM_COLORS[color_iterator%7][0]*255,
 															RANDOM_COLORS[color_iterator%7][1]*255,
-															RANDOM_COLORS[color_iterator%7][2]*255
+															RANDOM_COLORS[color_iterator%7][2]*255,
+															// norBuf[i+3],
+															// norBuf[i+4],
+															// norBuf[i+5]
 															});
 		color_iterator++;
 		temp->vertices.push_back({posBuf[i+6] * scale + tx,
@@ -143,9 +149,18 @@ int main(int argc, char **argv)
 															posBuf[i+8],
 															RANDOM_COLORS[color_iterator%7][0]*255,
 															RANDOM_COLORS[color_iterator%7][1]*255,
-															RANDOM_COLORS[color_iterator%7][2]*255
+															RANDOM_COLORS[color_iterator%7][2]*255,
+															// norBuf[i+6],
+															// norBuf[i+7],
+															// norBuf[i+8]
 															});
 		color_iterator++;
+
+		if (!norBuf.empty()) {
+			temp->norm.push_back((norBuf[i  ] + norBuf[i+3] + norBuf[i+6]) / 3);
+			temp->norm.push_back((norBuf[i+1] + norBuf[i+4] + norBuf[i+7]) / 3);
+			temp->norm.push_back((norBuf[i+2] + norBuf[i+5] + norBuf[i+8]) / 3);
+		}
 		sorted_buf.push_back(temp);
 		// z_buf.push_back(posBuf[i+2]);
 	}
@@ -153,6 +168,8 @@ int main(int argc, char **argv)
 	world_dim[1] = world_dim[1] * scale + tx;
 	world_dim[2] = world_dim[2] * scale + ty;
 	world_dim[3] = world_dim[3] * scale + ty;
+
+	vector<float>* z_buf = new vector<float>(width * height, -FLT_MAX);
 	// cout << world_dim[0] << "," << world_dim[1] << " | " << world_dim[2] << "," << world_dim[3] << endl;
 
 	switch (task) {
@@ -178,7 +195,7 @@ int main(int argc, char **argv)
 				float ret[3] = {0, 0, 0};
 				for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
 					for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
-						if (image->calculateBarycentric(tri, x, y, ret)) {
+						if (image->calculateBarycentric_RGB(tri, x, y, ret)) {
 							image->setPixel(x, y, RANDOM_COLORS[color_iterator%7][0]*255, RANDOM_COLORS[color_iterator%7][1]*255, RANDOM_COLORS[color_iterator%7][2]*255);
 						}
 					}
@@ -194,7 +211,7 @@ int main(int argc, char **argv)
 				float ret[3] = {0, 0, 0};
 				for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
 					for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
-						if (image->calculateBarycentric(tri, x, y, ret)) {
+						if (image->calculateBarycentric_RGB(tri, x, y, ret)) {
 							image->setPixel(x, y, ret[0], ret[1], ret[2]);
 						}
 					}
@@ -204,49 +221,77 @@ int main(int argc, char **argv)
 		}
 		case 4:
 		{
-			// triangle* world_tri = new triangle();
-			// world_tri->vertices.push_back({world_dim[0], world_dim[2], 0, 0, 0, 255});
-			// world_tri->vertices.push_back({world_dim[1], world_dim[3], 0, 255, 0, 0});
-			// world_tri->vertices.push_back({world_dim[0], world_dim[3], 0, 255, 0, 0});
-			// // vertex v0 = {0, 0, 0, 0, 0, 0};
-			// // vertex v1 = {world_dim[1] - world_dim[0], world_dim[3] - world_dim[1], 0, 0, 0, 0};
-			// // vertex v2 = {0, world_dim[3] - world_dim[1], 0, 0, 0, 0};
-			// // world_tri.push_back
-			// image->setBoundingBox(world_tri);
-			// cout << world_tri->bb.xmin << endl;
-			// cout << world_tri->bb.xmax << endl;
-			// cout << world_tri->bb.ymin << endl;
-			// cout << world_tri->bb.ymax << endl;
-			// float ret[3] = {255, 255, 255};
-			// for (auto tri : sorted_buf) {
-				// for (int x = world_dim[0]; x < world_dim[1]; x++) {
-				// 	for (int y = world_dim[2]; y < world_dim[3]; y++) {
-						// if (image->calculateBarycentric(world_tri, x, y, ret)) {
-							// image->setPixel(x, y, ret[0], ret[1], ret[2]);
-						// }
-				// 	}
-				// }
-			// }
-			break;
-		}
-		case 5:
-		{
-			for (auto tri : sorted_buf) {
-				zmax = -FLT_MAX;
+			float ret[3] = {0, 0, 0};
+			float ratio;
+			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
-				float ret[3] = {0, 0, 0};
-				for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
-					for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
-						if (image->calculateBarycentric(tri, x, y, ret)) {
-							if (tri->vertices[0].z > zmax) {
-								image->setPixel(x, y, ret[0], ret[1], ret[2]);
-								zmax = tri->vertices[0].z;
-							}
+				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
+					ratio = (y - world_dim[2]) / (world_dim[3] - world_dim[2]);
+					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+						if (image->calculateBarycentric_RGB(tri, x, y, ret)) {
+							image->setPixel(x, y, 255*ratio, 0, 255*(1-ratio));
 						}
 					}
 				}
 			}
-	}
+			break;
+		}
+		case 5:
+		{
+			float ret[3] = {0, 0, 0};
+			// cout << world_dim[4] << " | " << world_dim[5] << endl;
+			for (auto tri: sorted_buf) {
+				image->setBoundingBox(tri);
+				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
+					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
+							// cout << (ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]) << endl;
+							image->setPixel(x, y, 255*((ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4])), 0, 0);
+							// image->setPixel(x, y, RANDOM_COLORS[color_iterator%7][0]*255, RANDOM_COLORS[color_iterator%7][1]*255, RANDOM_COLORS[color_iterator%7][2]*255);
+						}
+					}
+				}
+				// color_iterator++;
+			}
+			break;
+		}
+		case 6:
+		{
+			float ret[3] = {0, 0, 0};
+			for (auto tri: sorted_buf) {
+				image->setBoundingBox(tri);
+				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
+					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
+							// image->setPixel_Norm(x, y, tri);
+							image->setPixel(x, y, 255* (tri->norm[0] * .5 + .5), 255* (tri->norm[1] * .5 + .5), 255* (tri->norm[2] * .5 + .5));
+						// 	// cout << (ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]) << endl;
+						// 	image->setPixel(x, y, 255*(ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]), 0, 0);
+						}
+						// image->calculateNorm(x, y, ret, &norBuf);
+						// image->setPixel_Norm(x, y, ret[0], ret[1], ret[2]);
+					}
+				}
+			}
+			break;
+		}
+		case 7:
+		{
+			float ret[3] = {0, 0, 0};
+			for (auto tri: sorted_buf) {
+				image->setBoundingBox(tri);
+				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
+					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
+							// cout << tri->norm[0] * 1/sqrt(3) + tri->norm[1] * 1/sqrt(3) + tri->norm[2] * 1/sqrt(3) << endl;
+							double lighting = max(tri->norm[0] * 1/sqrt(3) + tri->norm[1] * 1/sqrt(3) + tri->norm[2] * 1/sqrt(3), 0.0);
+							image->setPixel(x, y, 255*lighting, 255*lighting, 255*lighting);
+						}
+					}
+				}
+			}
+			break;
+		}
 	}
 
 	// Write image to file
