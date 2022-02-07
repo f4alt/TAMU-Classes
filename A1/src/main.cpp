@@ -260,8 +260,8 @@ int main(int argc, char **argv)
 			float ret[3] = {0, 0, 0};
 			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
-				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
-					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
+					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
 						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
 							// image->setPixel_Norm(x, y, tri);
 							image->setPixel(x, y, 255* (tri->norm[0] * .5 + .5), 255* (tri->norm[1] * .5 + .5), 255* (tri->norm[2] * .5 + .5));
@@ -280,8 +280,8 @@ int main(int argc, char **argv)
 			float ret[3] = {0, 0, 0};
 			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
-				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
-					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
+					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
 						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
 							// cout << tri->norm[0] * 1/sqrt(3) + tri->norm[1] * 1/sqrt(3) + tri->norm[2] * 1/sqrt(3) << endl;
 							double lighting = max(tri->norm[0] * 1/sqrt(3) + tri->norm[1] * 1/sqrt(3) + tri->norm[2] * 1/sqrt(3), 0.0);

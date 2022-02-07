@@ -11,7 +11,7 @@ Image::Image(int w, int h) :
 	width(w),
 	height(h),
 	comp(3),
-	pixels(width*height*comp, 0)
+	pixels(width*height*comp, 255)
 {
 }
 
@@ -75,10 +75,14 @@ void Image::setBoundingBox(triangle* tri1) {
 			tri1->bb.ymax = tri1->vertices[i].y;
 		}
 	}
-	// cout << tri1.bb.xmin << endl;
-	// cout << tri1.bb.xmax << endl;
-	// cout << tri1.bb.ymin << endl;
-	// cout << tri1.bb.ymax << endl;
+	// cout << tri1->bb.xmin << ",";
+	// cout << tri1->bb.xmax << " | ";
+	// cout << tri1->bb.ymin << ",";
+	// cout << tri1->bb.ymax << " - ";
+	// cout << floor(tri1->bb.xmin) << ",";
+	// cout << ceil(tri1->bb.xmax) << " | ";
+	// cout << floor(tri1->bb.ymin) << ",";
+	// cout << ceil(tri1->bb.ymax) << endl;
 }
 
 bool Image::calculateBarycentric_RGB(triangle* tri, int x, int y, float* ret) {
@@ -88,13 +92,13 @@ bool Image::calculateBarycentric_RGB(triangle* tri, int x, int y, float* ret) {
 	// 2 - 0
 	vertex v1 = {tri->vertices[2].x - tri->vertices[0].x, tri->vertices[2].y - tri->vertices[0].y, tri->vertices[2].z - tri->vertices[0].z, 0, 0, 0};
 	// point - 0
-	vertex v2 = {x - tri->vertices[0].x, y - tri->vertices[0].y, z - tri->vertices[0].z, 0, 0, 0};
+	vertex v2 = {(float)x - tri->vertices[0].x, (float)y - tri->vertices[0].y, z - tri->vertices[0].z, 0, 0, 0};
 	// calculate dot products
-	float d00 = v0.x * v0.x + v0.y * v0.y + v0.z * v0.z;
-	float d01 = v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
-	float d11 = v1.x * v1.x + v1.y * v1.y + v1.z * v1.z;
-	float d20 = v2.x * v0.x + v2.y * v0.y + v2.z * v0.z;
-	float d21 = v2.x * v1.x + v2.y * v1.y + v2.z * v1.z;
+	float d00 = v0.x * v0.x + v0.y * v0.y;
+	float d01 = v0.x * v1.x + v0.y * v1.y;
+	float d11 = v1.x * v1.x + v1.y * v1.y;
+	float d20 = v2.x * v0.x + v2.y * v0.y;
+	float d21 = v2.x * v1.x + v2.y * v1.y;
 	float denom = d00 * d11 - d01 * d01;
 	// calculate weights
 	float v = (d11 * d20 - d01 * d21) / denom;
@@ -117,17 +121,21 @@ bool Image::calculateBarycentric_RGB(triangle* tri, int x, int y, float* ret) {
 }
 
 bool Image::calculateBarycentric_Z(triangle* tri, int x, int y, float* ret, vector<float>* zBuf) {
-	vertex v0 = {tri->vertices[1].x - tri->vertices[0].x, tri->vertices[1].y - tri->vertices[0].y, tri->vertices[1].z - tri->vertices[0].z, 0, 0, 0};
+	if (x < 0 || x >= width || y < 0 || y >= height) {
+		return false;
+	}
+	// 1 - 0
+	vertex v0 = {tri->vertices[1].x - tri->vertices[0].x, tri->vertices[1].y - tri->vertices[0].y, 0, 0, 0, 0};
 	// 2 - 0
-	vertex v1 = {tri->vertices[2].x - tri->vertices[0].x, tri->vertices[2].y - tri->vertices[0].y, tri->vertices[2].z - tri->vertices[0].z, 0, 0, 0};
+	vertex v1 = {tri->vertices[2].x - tri->vertices[0].x, tri->vertices[2].y - tri->vertices[0].y, 0, 0, 0, 0};
 	// point - 0
-	vertex v2 = {x - tri->vertices[0].x, y - tri->vertices[0].y, 0 - tri->vertices[0].z, 0, 0, 0};
+	vertex v2 = {(float)x - tri->vertices[0].x, (float)y - tri->vertices[0].y, 0 - tri->vertices[0].z, 0, 0, 0};
 	// calculate dot products
-	float d00 = v0.x * v0.x + v0.y * v0.y + v0.z * v0.z;
-	float d01 = v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
-	float d11 = v1.x * v1.x + v1.y * v1.y + v1.z * v1.z;
-	float d20 = v2.x * v0.x + v2.y * v0.y + v2.z * v0.z;
-	float d21 = v2.x * v1.x + v2.y * v1.y + v2.z * v1.z;
+	float d00 = v0.x * v0.x + v0.y * v0.y;
+	float d01 = v0.x * v1.x + v0.y * v1.y;
+	float d11 = v1.x * v1.x + v1.y * v1.y;
+	float d20 = v2.x * v0.x + v2.y * v0.y;
+	float d21 = v2.x * v1.x + v2.y * v1.y;
 	float denom = d00 * d11 - d01 * d01;
 	// calculate weights
 	float v = (d11 * d20 - d01 * d21) / denom;
@@ -136,6 +144,10 @@ bool Image::calculateBarycentric_Z(triangle* tri, int x, int y, float* ret, vect
 	// calculate z coord
 	float z = u * tri->vertices[0].z + v * tri->vertices[1].z + w * tri->vertices[2].z / (u + v + w);
 
+	// cout << tri->vertices[0].x << "," << tri->vertices[1].x << "," << tri->vertices[2].x << " | ";
+	// cout << tri->vertices[0].y << "," << tri->vertices[1].y << "," << tri->vertices[2].y << " || ";
+	// cout << x << "," << y << " ||| ";
+	// cout << u << "," << v << "," << w << endl;
 	// cout << z << endl;
 
 	// Since the origin (0, 0) of the image is the upper left corner, we need
@@ -146,7 +158,7 @@ bool Image::calculateBarycentric_Z(triangle* tri, int x, int y, float* ret, vect
 	// Multiply by 3 to get the index for the rgb components.
 	assert(index >= 0);
 	assert(index < (int)zBuf->size());
-	if (u >= 0 && v >= 0 && w >= 0 && z >= zBuf->at(index)) {
+	if (u >= 0.0 && v >= 0.0 && w >= 0.0 && z >= zBuf->at(index)) {
 		zBuf->at(index) = z;
 		ret[0] = z;
 		return true;
