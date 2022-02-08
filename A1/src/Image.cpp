@@ -11,7 +11,7 @@ Image::Image(int w, int h) :
 	width(w),
 	height(h),
 	comp(3),
-	pixels(width*height*comp, 255)
+	pixels(width*height*comp, 0)
 {
 }
 
@@ -144,6 +144,10 @@ bool Image::calculateBarycentric_Z(triangle* tri, int x, int y, float* ret, vect
 	// calculate z coord
 	float z = u * tri->vertices[0].z + v * tri->vertices[1].z + w * tri->vertices[2].z / (u + v + w);
 
+	ret[0] = u;
+	ret[1] = v;
+	ret[2] = w;
+
 	// cout << tri->vertices[0].x << "," << tri->vertices[1].x << "," << tri->vertices[2].x << " | ";
 	// cout << tri->vertices[0].y << "," << tri->vertices[1].y << "," << tri->vertices[2].y << " || ";
 	// cout << x << "," << y << " ||| ";
@@ -158,9 +162,9 @@ bool Image::calculateBarycentric_Z(triangle* tri, int x, int y, float* ret, vect
 	// Multiply by 3 to get the index for the rgb components.
 	assert(index >= 0);
 	assert(index < (int)zBuf->size());
-	if (u >= 0.0 && v >= 0.0 && w >= 0.0 && z >= zBuf->at(index)) {
+	if (u >= -0.000001 && v >= -0.000001 && w >= -0.000001 && z >= zBuf->at(index)) {
 		zBuf->at(index) = z;
-		ret[0] = z;
+		ret[3] = z;
 		return true;
 	} else {
 		return false;

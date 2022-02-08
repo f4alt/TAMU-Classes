@@ -157,9 +157,18 @@ int main(int argc, char **argv)
 		color_iterator++;
 
 		if (!norBuf.empty()) {
-			temp->norm.push_back((norBuf[i  ] + norBuf[i+3] + norBuf[i+6]) / 3);
-			temp->norm.push_back((norBuf[i+1] + norBuf[i+4] + norBuf[i+7]) / 3);
-			temp->norm.push_back((norBuf[i+2] + norBuf[i+5] + norBuf[i+8]) / 3);
+			// temp->norm.push_back((norBuf[i  ] + norBuf[i+3] + norBuf[i+6]) / 3.0);
+			// temp->norm.push_back((norBuf[i+1] + norBuf[i+4] + norBuf[i+7]) / 3.0);
+			// temp->norm.push_back((norBuf[i+2] + norBuf[i+5] + norBuf[i+8]) / 3.0);
+			temp->norm.push_back(norBuf[i]);
+			temp->norm.push_back(norBuf[i+1]);
+			temp->norm.push_back(norBuf[i+2]);
+			temp->norm.push_back(norBuf[i+3]);
+			temp->norm.push_back(norBuf[i+4]);
+			temp->norm.push_back(norBuf[i+5]);
+			temp->norm.push_back(norBuf[i+6]);
+			temp->norm.push_back(norBuf[i+7]);
+			temp->norm.push_back(norBuf[i+8]);
 		}
 		sorted_buf.push_back(temp);
 		// z_buf.push_back(posBuf[i+2]);
@@ -225,9 +234,11 @@ int main(int argc, char **argv)
 			float ratio;
 			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
-				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
+				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
 					ratio = (y - world_dim[2]) / (world_dim[3] - world_dim[2]);
-					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
+				// for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
+					// for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
 						if (image->calculateBarycentric_RGB(tri, x, y, ret)) {
 							image->setPixel(x, y, 255*ratio, 0, 255*(1-ratio));
 						}
@@ -238,15 +249,15 @@ int main(int argc, char **argv)
 		}
 		case 5:
 		{
-			float ret[3] = {0, 0, 0};
+			float ret[4] = {0, 0, 0, 0};
 			// cout << world_dim[4] << " | " << world_dim[5] << endl;
 			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
-				for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
-					for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
+				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
+					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
 						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
 							// cout << (ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]) << endl;
-							image->setPixel(x, y, 255*((ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4])), 0, 0);
+							image->setPixel(x, y, 255*((ret[3] - world_dim[4]) / (world_dim[5] - world_dim[4])), 0, 0);
 							// image->setPixel(x, y, RANDOM_COLORS[color_iterator%7][0]*255, RANDOM_COLORS[color_iterator%7][1]*255, RANDOM_COLORS[color_iterator%7][2]*255);
 						}
 					}
@@ -257,14 +268,16 @@ int main(int argc, char **argv)
 		}
 		case 6:
 		{
-			float ret[3] = {0, 0, 0};
+			float ret[4] = {0, 0, 0, 0};
 			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
-				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
+				for (int y = floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
 					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
 						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
-							// image->setPixel_Norm(x, y, tri);
-							image->setPixel(x, y, 255* (tri->norm[0] * .5 + .5), 255* (tri->norm[1] * .5 + .5), 255* (tri->norm[2] * .5 + .5));
+							float x_norm = (tri->norm[0] * ret[0] + tri->norm[3] * ret[1] + tri->norm[6] * ret[2]) / (ret[0] + ret[1] + ret[2]);
+							float y_norm = (tri->norm[1] * ret[0] + tri->norm[4] * ret[1] + tri->norm[7] * ret[2]) / (ret[0] + ret[1] + ret[2]);
+							float z_norm = (tri->norm[2] * ret[0] + tri->norm[5] * ret[1] + tri->norm[8] * ret[2]) / (ret[0] + ret[1] + ret[2]);
+							image->setPixel(x, y, 255* (x_norm * .5 + .5), 255* (y_norm * .5 + .5), 255* (z_norm * .5 + .5));
 						// 	// cout << (ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]) << endl;
 						// 	image->setPixel(x, y, 255*(ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]), 0, 0);
 						}
@@ -283,8 +296,11 @@ int main(int argc, char **argv)
 				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
 					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
 						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
+							float x_norm = (tri->norm[0] * ret[0] + tri->norm[3] * ret[1] + tri->norm[6] * ret[2]) / (ret[0] + ret[1] + ret[2]);
+							float y_norm = (tri->norm[1] * ret[0] + tri->norm[4] * ret[1] + tri->norm[7] * ret[2]) / (ret[0] + ret[1] + ret[2]);
+							float z_norm = (tri->norm[2] * ret[0] + tri->norm[5] * ret[1] + tri->norm[8] * ret[2]) / (ret[0] + ret[1] + ret[2]);
 							// cout << tri->norm[0] * 1/sqrt(3) + tri->norm[1] * 1/sqrt(3) + tri->norm[2] * 1/sqrt(3) << endl;
-							double lighting = max(tri->norm[0] * 1/sqrt(3) + tri->norm[1] * 1/sqrt(3) + tri->norm[2] * 1/sqrt(3), 0.0);
+							double lighting = max(x_norm * 1/sqrt(3) + y_norm * 1/sqrt(3) + z_norm * 1/sqrt(3), 0.0);
 							image->setPixel(x, y, 255*lighting, 255*lighting, 255*lighting);
 						}
 					}

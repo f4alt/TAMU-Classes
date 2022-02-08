@@ -23,7 +23,7 @@ struct boundbox {
 struct triangle {
 	std::vector<vertex> vertices;
 	boundbox bb;
-	std::vector<double> norm;
+	std::vector<float> norm;
 };
 
 
