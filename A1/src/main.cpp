@@ -234,7 +234,7 @@ int main(int argc, char **argv)
 			float ratio;
 			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
-				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
+				for (int y = floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
 					ratio = (y - world_dim[2]) / (world_dim[3] - world_dim[2]);
 					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
 				// for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {

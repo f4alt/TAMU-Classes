@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <climits>
+#include <cfloat>
 
 struct vertex {
 	float x, y, z;
@@ -12,12 +13,12 @@ struct vertex {
 };
 
 struct boundbox {
-	float xmin=INT_MAX,
-	xmax=-1,
-	ymin=INT_MAX,
-	ymax=-1,
-	zmin=INT_MAX,
-	zmax=-1;
+	float xmin=FLT_MAX,
+	xmax=-FLT_MAX,
+	ymin=FLT_MAX,
+	ymax=-FLT_MAX,
+	zmin=FLT_MAX,
+	zmax=-FLT_MAX;
 };
 
 struct triangle {
