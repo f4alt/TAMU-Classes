@@ -121,13 +121,14 @@ bool Image::calculateBarycentric_RGB(triangle* tri, int x, int y, float* ret) {
 }
 
 // barycentric interpolation using z buffer.
-// returns u, v, w weights as well as z height from camera
+// returns true if point is valid
+// updates u, v, w weights 0 as well as z height from camera in ret
 bool Image::calculateBarycentric_Z(triangle* tri, int x, int y, float* ret, vector<float>* zBuf) {
 	// break condition since we're using floor and ceil of floats
 	if (x < 0 || x >= width || y < 0 || y >= height) {
 		return false;
 	}
-	// vector conversion for quicker calculations
+	// precomputation vector conversion for quicker calculations
 	// 1 - 0
 	vertex v0 = {tri->vertices[1].x - tri->vertices[0].x, tri->vertices[1].y - tri->vertices[0].y, 0, 0, 0, 0};
 	// 2 - 0
