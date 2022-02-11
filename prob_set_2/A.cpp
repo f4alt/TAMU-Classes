@@ -18,7 +18,7 @@ int main() {
   vector<long long> inputs;
   priority_queue<long long> inputs_pq;
   priority_queue<long long> inputs_pq_asc;
-  int possiblities[7777] = {0};
+  int possiblities[7777] = {-1};
   // vector<long long> possiblities (4294967295, 0);
   // possiblities.resize(4294967296)
   // inputs
@@ -38,7 +38,7 @@ int main() {
         max_num = it->first;
       }
     } else {
-      freq.insert({temp, 1});
+      freq.insert(make_pair(temp, 1));
     }
     if (temp < 7778) {
       possiblities[temp]++;
@@ -54,8 +54,9 @@ int main() {
   switch (t) {
     case 1: {
         while (!inputs_pq.empty()) {
+          // cout << inputs_pq.top() << " | " << possiblities[inputs_pq.top()] << endl;
           if (inputs_pq.top() < 7778) {
-            if (possiblities[inputs_pq.top()] > 0) {
+            if (possiblities[7777 - inputs_pq.top()] > 0) {
               cout << "Yes" << endl;
               return 0;
             }
@@ -66,15 +67,6 @@ int main() {
         break;
       }
     case 2: {
-      // if (inputs.size() > 1) {
-      //   for (int i=0; i < inputs.size()-1; i++) {
-      //     if (inputs[i] == inputs[i+1]) {
-      //       cout << "Contains duplicate" << endl;
-      //       return 0;
-      //     }
-      //   }
-      // }
-      // cout << "Unique" << endl;
       if (unique) {
         cout << "Unique" << endl;
       } else {
@@ -83,18 +75,6 @@ int main() {
       break;
     }
     case 3: {
-      // for (int i=0; i < inputs.size()-1; i++) {
-      //   if (inputs[i] == inputs[i+1]) {
-      //     qnty++;
-      //     // cout << "in[i]:" << inputs[i] << " | inc:" << qnty << endl;
-      //   } else {
-      //     qnty = 1;
-      //   }
-      //   if (qnty > N/2) {
-      //     cout << inputs[i] << endl;
-      //     return 0;
-      //   }
-      // }
       if (max_idx > (N/2)) {
         cout << max_num << endl;
       } else {
@@ -108,7 +88,6 @@ int main() {
           inputs_pq_asc.pop();
         }
         cout << -inputs_pq_asc.top() << endl;
-        // cout << inputs[floor(inputs.size() / 2)] << endl;
       } else {
         for (int i=0; i < (N/2)-1; i++) {
           inputs_pq_asc.pop();
@@ -116,22 +95,12 @@ int main() {
         cout << -inputs_pq_asc.top() << " ";
         inputs_pq_asc.pop();
         cout << -inputs_pq_asc.top() << endl;
-        // cout << inputs[inputs.size() / 2 - 1] << " " << inputs[inputs.size()/2] << endl;
       }
     }
     case 5: {
-      // for (int i=0; i < inputs.size(); i++) {
-      //   if (inputs[i] > 999) {
-      //     return 0;
-      //   }
-      //   if (inputs[i] >= 100) {
-      //     cout << inputs[i] << " ";
-      //   }
-      // }
       while (!inputs_pq_asc.empty()) {
         if (-inputs_pq_asc.top() > 999) {
           break;
-          // return 0;
         }
         if (-inputs_pq_asc.top() >= 100) {
           cout << -inputs_pq_asc.top() << " ";
