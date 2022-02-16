@@ -3,60 +3,42 @@
 using namespace std;
 
 int main() {
-  long long additional_birds=0, wire_len, bird_dist, curr_sitting, temp, wire_start, wire_end, check_pos;
+  long long wire_len, bird_dist, num_birds, temp, rightmost, leftmost, additional_birds=0;
+  priority_queue<long long> pq;
 
-  cin >> wire_len >> bird_dist >> curr_sitting;
+  cin >> wire_len >> bird_dist >> num_birds;
+  // wire_len *= 100;
 
-  wire_end = wire_len - 6;
-  wire_start = 6;
-
-  priority_queue<long long> starting_birds;
-  for (int i=0; i < curr_sitting; i++) {
+  for (int i=0; i < num_birds; i++) {
     cin >> temp;
 
-    starting_birds.push(temp);
-  }
-
-  if (!starting_birds.empty()) {
-    additional_birds = (wire_end - starting_birds.top()) / bird_dist;
-    check_pos = starting_birds.top();
-    starting_birds.pop();
-  } else {
-    check_pos = wire_end;
-    additional_birds++;
+    pq.push(temp);
   }
 
 
-  while (!starting_birds.empty()) {
-    // cout << check_pos << " | " << starting_birds.top() << endl;
-    // if (check_pos > (starting_birds.top() + bird_dist)) {
-    //   additional_birds++;
-    //   check_pos -= bird_dist;
-    // } else {
-    //   check_pos = starting_birds.top() - bird_dist;
-    //   starting_birds.pop();
-    // }
 
-    long long left = starting_birds.top();
-    starting_birds.pop();
-    if (starting_birds.empty()) {
-      break;
+  if (!pq.empty()) {
+    rightmost = pq.top();
+    while (pq.size() > 1) {
+      temp = pq.top();
+      pq.pop();
+      additional_birds += max((temp - pq.top()) / bird_dist -1, (long long)0);
+      // cout << "adding in loop:" << additional_birds << endl;
     }
-    check_pos = starting_birds.top();
+    leftmost = pq.top();
 
-    additional_birds += (check_pos - left) / bird_dist;
+    // after last bird
+    additional_birds += (wire_len -6 - rightmost) / bird_dist;
+    // cout << "after last:" << additional_birds << endl;
+    // before first bird
+    additional_birds += (leftmost -6) / bird_dist;
+    // cout << "before first:" << additional_birds << endl;
+  } else {
+    additional_birds += (wire_len - 6) / bird_dist;
+  }
 
-    cout << "*" << additional_birds << endl;
-    // cout << starting_birds.size() << endl;
-  }
-  // check_pos = starting_birds.top();
-  // cout << check_pos << endl;
-  check_pos -= bird_dist;
-  while (check_pos >= wire_start) {
-    // cout << check_pos << endl;
-    additional_birds++;
-    check_pos -= bird_dist;
-  }
+
 
   cout << additional_birds << endl;
+
 }

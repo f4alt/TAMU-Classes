@@ -3,36 +3,42 @@
 using namespace std;
 
 int main() {
-  int num_tests, num_phone;
-  string smallest="999999999", temp;
+  int num_tests, numbers;
+  string temp;
 
   cin >> num_tests;
 
-  for (int z=0; z< num_tests; z++) {
-    vector<string> numbers;
+  for (int z=0; z < num_tests; z++) {
+    priority_queue<string> pq;
     bool bad = false;
+    cin >> numbers;
 
-    cin >> num_phone;
-
-    for (int x=0; x < num_phone; x++) {
+    for (int i=0; i < numbers; i++) {
       cin >> temp;
 
-      if (smallest.size() > temp.size()) {
-        smallest = temp;
-      }
-      numbers.push_back(temp);
+      pq.push(temp);
     }
 
-    for (int i=0; i < numbers.size(); i++) {
-      if (numbers[i].find(smallest) != string::npos) {
-        cout << "NO" << endl;
+    while (pq.size() > 1) {
+      string cmp1 = pq.top();
+      pq.pop();
+      string cmp = cmp1.substr(0, pq.top().size());
+
+
+      // cout << "cmp1:" << cmp1 << " | cmp:" << cmp << " | top:" << pq.top() << endl;
+      if (cmp == pq.top()) {
+        // cout << cmp << " | " << pq.top() << endl;
         bad = true;
         break;
       }
     }
+
     if (!bad) {
       cout << "YES" << endl;
-      bad = false;
+    } else {
+      cout << "NO" << endl;
     }
   }
+
+  return 0;
 }
