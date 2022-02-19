@@ -53,45 +53,6 @@ class FT {
 };
 
 int main() {
-  int testCases, numMovies, numQueries, front, temp;
-  // movieID, position
-  map<int, int>::iterator it;
-
-  scanf("%d\n", &testCases);
-
-  while (testCases--) {
-    map<int, int> moviePos;
-    scanf("%d %d\n", &numMovies, &numQueries);
-
-    FT tree(numMovies + numQueries);
-
-    for (int i=1; i <= numMovies; i++) {
-      tree.flip(i);
-      moviePos.insert( {i, numMovies - i +1} );
-    }
-    front = numMovies;
-
-    while (numQueries--) {
-      cin >> temp;
-      it = moviePos.find(temp);
-      cout << tree.rsq(front) - tree.rsq(it->second) << " ";
-      // update for move
-      tree.flip(it->second);
-      // update pos in map
-      front++;
-      it->second = front;
-      tree.flip(front);
-
-
-      // sanity prints
-      // for (auto i : moviePos) {
-      //   cout << i.first << " | " << i.second << endl;
-      // }
-      // cout << "front: position " << front << endl;
-    }
-    cout << "\n";
-  }
-
 
 
   return 0;

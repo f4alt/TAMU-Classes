@@ -57,8 +57,8 @@ int main() {
     scanf("%lld\n", &p);
     while (p--) {
       scanf("%lld %lld\n", &year1, &secondVal);
-      cout << year1 << " rsq:" << tree.rsq(year1) << endl;
-      if (secondVal < tree.rsq(year1)) {
+      cout << year1 << " rsq:" << tree.rsq(year1, year1) << " | " << tree.rsq(year1, secondVal) << endl;
+      if (tree.rsq(year1, year1) > tree.rsq(year1, secondVal)) {
         cout << "false\n";
       } else {
         cout << "true\n";
