@@ -27,10 +27,7 @@ shared_ptr<Shape> joint;
 // shared_ptr<Component> root_comp;
 Component* root_comp;
 Component* curr_comp;
-
-bool toggleSpin = false;
-int parent=0;
-int child=0;
+int depth=0;
 
 static void error_callback(int error, const char *description)
 {
@@ -47,31 +44,6 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 void character_callback(GLFWwindow* window, unsigned int codepoint)
 {
 	switch (codepoint) {
-		case '.':
-		{
-			if (child == 1) {
-				child--;
-				parent = (parent +1)% 5;
-			} else {
-				child++;
-			}
-			cout << "parent:" << parent << " child:" << child << endl;
-			break;
-		}
-		case ',':
-		{
-			if (child == 0) {
-				child++;
-				parent--;
-				if (parent == -1) {
-					parent = 4;
-				}
-			} else {
-				child--;
-			}
-			cout << "parent:" << parent << " child:" << child << endl;
-			break;
-		}
 		case 'x':
 		case 'y':
 		case 'z':
@@ -82,9 +54,25 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 		case 'Z':
 			curr_comp->rotatePiece(codepoint, true);
 			break;
-		case 'd':
-			curr_comp->DFS(0);
+		case '.':
+		{
+			depth++;
+			if (depth > root_comp->maxDepth()) {
+				depth = 0;
+			}
+			int* _depth = new int(depth);
+			curr_comp = root_comp->DFS(_depth);
 			break;
+		}
+		case ',':
+		{
+			depth--;
+			if (depth < 0) {
+				depth = root_comp->maxDepth();
+			}
+			int* _depth = new int(depth);
+			curr_comp = root_comp->DFS(_depth);
+		}
 	}
 }
 
@@ -116,8 +104,8 @@ static void init()
 	joint->loadMesh(RES_DIR + "sphere.obj");
 	joint->init();
 
-	// root component with cube shape
-	// root_comp = make_shared<Component>(shape);
+	// root component with cube shape and sphere joint
+	// initialize all starting positions
 	root_comp = new Component(shape, joint);
 	root_comp->updatePos(glm::vec3(0, 2, -10),
 										 	 glm::vec3(0, 0, 0),
@@ -178,6 +166,7 @@ static void init()
 														glm::vec3(-.875, 0, 0),
 														glm::vec3(1.75, .4, .5));
 
+	// attach pieces to their parent, and ultimately everything to torso "root_comp"
 	right_arm->addChild(right_arm_lower);
 	right_leg->addChild(right_leg_lower);
 	left_leg->addChild(left_leg_lower);
@@ -188,6 +177,8 @@ static void init()
 	root_comp->addChild(left_leg);
 	root_comp->addChild(left_arm);
 
+	// initially set current to the torso
+	curr_comp = root_comp;
 
 	// Initialize the GLSL programs.
 	prog = make_shared<Program>();
@@ -237,25 +228,7 @@ static void render()
 
 	// Draw root component
 	prog->bind();
-	double t = glfwGetTime();
-	if (true) {
-		if (child < 1) {
-			if (parent == 0) {
-				curr_comp = root_comp; // ->updateRot(glm::vec3(0, t, 0));
-			} else {
-				curr_comp = root_comp->selectChild(parent); // ->updateRot(glm::vec3(0, t, 0));
-			}
-		} else {
-			if (parent == 0) {
-				curr_comp = root_comp->selectChild(0); // ->updateRot(glm::vec3(0, t, 0));
-			} else {
-				curr_comp = root_comp->selectChild(parent)->selectChild(child-1); // ->updateRot(glm::vec3(0, t, 0));
-			}
-		}
-	}
-	// root_comp->selectChild(1)->updateRot(glm::vec3(t, 0, 0));
 	curr_comp->selected_pulse();
-
 	root_comp->draw(prog, MV, P);
 	prog->unbind();
 

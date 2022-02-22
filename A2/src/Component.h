@@ -29,7 +29,8 @@ public:
   void draw(const std::shared_ptr<Program> prog,
             const std::shared_ptr<MatrixStack> MV,
             const std::shared_ptr<MatrixStack> P) const;
-  int DFS(int depth);
+	int maxDepth();
+  Component* DFS(int* depth);
 
 private:
   std::shared_ptr<Shape> cube;

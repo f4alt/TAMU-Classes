@@ -111,12 +111,29 @@ void Component::draw(const std::shared_ptr<Program> prog,
   MV->popMatrix();
 }
 
-int Component::DFS(int depth) {
-  cout << depth << endl;
-  if (children.size() == 0) {
+int Component::maxDepth() {
+  int depth = 0;
+  if (children.empty()) {
     return 0;
   }
-  for (int i=0; i < children.size(); i++) {
-    children[i]->DFS(children.size() + i);
+  depth += children.size();
+  for (auto i : children) {
+    depth += i->maxDepth();
   }
+  return depth;
+}
+
+Component* Component::DFS(int* depth) {
+  Component* ret;
+  if (*depth == 0) {
+    return this;
+  }
+  if (*depth > 0 && children.empty()) {
+    return nullptr;
+  }
+  for (size_t i=0; i < children.size() && *depth > 0; i++) {
+    *depth -= 1;
+    ret = children[i]->DFS(depth);
+  }
+  return ret;
 }
