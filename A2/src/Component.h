@@ -24,6 +24,7 @@ public:
   void addChild(Component* child);
   Component* selectChild(int position);
   void selected_pulse();
+	void selected_spin();
   void updateRot(glm::vec3 _rot);
   void rotatePiece(char axis, bool forward);
   void draw(const std::shared_ptr<Program> prog,
@@ -37,6 +38,7 @@ private:
   std::shared_ptr<Shape> sphere;
   std::vector<Component*> children;
   glm::vec3 selected;
+	bool spin;
 
   glm::vec3 trans_from_parent;
   glm::vec3 rot;

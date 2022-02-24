@@ -24,7 +24,6 @@ shared_ptr<Program> prog;
 shared_ptr<Program> progIM; // immediate mode
 shared_ptr<Shape> shape;
 shared_ptr<Shape> joint;
-// shared_ptr<Component> root_comp;
 Component* root_comp;
 Component* curr_comp;
 int depth=0;
@@ -180,6 +179,10 @@ static void init()
 	// initially set current to the torso
 	curr_comp = root_comp;
 
+	// select which components to infintely spin
+	root_comp->selectChild(1)->selected_spin();
+	root_comp->selectChild(4)->selectChild(0)->selected_spin();
+
 	// Initialize the GLSL programs.
 	prog = make_shared<Program>();
 	prog->setVerbose(true);
@@ -226,7 +229,7 @@ static void render()
 	MV->pushMatrix();
 	MV->translate(glm::vec3(0, 0, -3));
 
-	// Draw root component
+	// Draw robot using root component
 	prog->bind();
 	curr_comp->selected_pulse();
 	root_comp->draw(prog, MV, P);
