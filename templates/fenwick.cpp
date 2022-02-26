@@ -39,7 +39,7 @@ class FT {
       return rsq(j) - rsq(i-1);
     }
 
-    // flip elem between 1, 0
+    // flip elem either 1 or 0
     void flip(int elem) {
       int add = 1;
       if (rsq(elem, elem) == 1) {
@@ -53,6 +53,7 @@ class FT {
 };
 
 int main() {
+  FT tree(INITIALIZE_ME);
 
 
   return 0;
