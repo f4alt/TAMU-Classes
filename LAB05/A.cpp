@@ -12,23 +12,30 @@ int main() {
 
   while (!cin.eof()) {
     cin >> parent;
-    // cout << "first:" << parent << endl;
+    // cout << "parent:" << parent << endl;
 
     if (parent == "def") {
       cin >> word >> val;
-      // cout << "def found" << endl;
+      if (word == "") {
+        break;
+      }
 
       it = words.find(word);
       if (it == words.end()) {
-        // words.push( {word, val } );
         words.insert(make_pair(word, val));
         words_rev.insert(make_pair(val, word));
       } else {
+        words_rev.erase(it->second);
         it->second = val;
+        words_rev.insert(make_pair(val, word));
       }
     } else if (parent == "calc") {
       string path="";
       cin >> word;
+      // cout << "word:" << word << endl;
+      if (word == "" || word == "=") {
+        break;
+      }
       sum = 0;
       bool unknown = false;
       bool add_found = true;
@@ -73,8 +80,18 @@ int main() {
       // cout << "CLEARING" << endl;
       words.clear();
       words_rev.clear();
-      break;
+      // break;
     }
+
+    // sanity prints
+    // cout << "prints" << endl;
+    // for (auto i : words) {
+    //   cout << i.first << " : " << i.second << endl;
+    // }
+    // for (auto i : words_rev) {
+    //   cout << i.first << " : " << i.second << endl;
+    // }
+    // cout << "end prints" << endl << endl;
   }
 
 

@@ -3,27 +3,20 @@
 using namespace std;
 
 int main() {
-  int needed, to_reg, to_office, res=0;
-  bool on_zero = true;
+  int needed, to_reg, to_office, total=0;
 
   cin >> needed >> to_reg >> to_office;
-  // cout << "cal:" << ((needed - to_reg) / to_office) * to_office << endl;
-  // cout << ((needed - to_reg) % to_office) * to_office*2 + to_reg*2 << endl;
 
-  while (true) {
-    if (on_zero && res+to_reg >= needed) {
-      res += to_reg;
-      break;
-    } else if (!on_zero && res + (to_reg - to_office) >= needed) {
-      res += to_reg - to_office;
-      break;
-    } else {
-      res += to_office;
-      on_zero = !on_zero;
-    }
+  total += to_office;
+  total += abs(to_office - to_reg);
+
+  while (total < needed) {
+    total += 2;
   }
 
-  cout << res + to_reg << endl;
+  total += to_reg;
+
+  cout << total << endl;
 
 
 
