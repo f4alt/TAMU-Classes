@@ -50,6 +50,14 @@ class FT {
         elem = elem + LSOne(elem);
       }
     }
+
+    // prints values in tree
+    void print() {
+        for (int i = 1; i <= n; i++) {
+            cout << rsq(i,i) << " ";
+        }
+        cout << endl;
+    }
 };
 
 int main() {
