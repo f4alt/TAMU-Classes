@@ -22,11 +22,7 @@ void merge(int a, int b) {
   int tempA = find(a);
   int tempB = find(b);
   if (tempA != tempB) {
-    if (tempB == 1) {
-      parent[tempA] = tempB;
-    } else {
-      parent[tempB] = tempA;
-    }
+    parent[tempB] = tempA;
   }
 }
 

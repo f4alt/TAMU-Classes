@@ -2,40 +2,43 @@
 
 using namespace std;
 
+bool customCmp (const pair<int, set<int>>& lhs, const pair<int, set<int>>& rhs) {
+  return lhs.second.size() > rhs.second.size();
+}
+
 int main() {
   int enclosures, left, right;
-  vector<set<int>> restrictions;
+  vector<pair<int, set<int>>> restrictions;
   vector<int> order;
 
   cin >> enclosures;
   restrictions.resize(enclosures+1);
   order.resize(enclosures+1, -1);
 
-  while(scanf("%d-%d\n", &left, &right) != EOF) {
-    restrictions[left].insert(right);
-    restrictions[right].insert(left);
+  for(int i=0; i < restrictions.size(); i++) {
+    restrictions[i].first = i;
   }
 
-  // first should always be 1
-  order[1] = 1;
-  int stuck_try = 2;
+  while(scanf("%d-%d\n", &left, &right) != EOF) {
+    restrictions[left].second.insert(right);
+    restrictions[right].second.insert(left);
+  }
 
-  for (int i=2; i <= enclosures; i++) {
+  std::sort(restrictions.begin()+1, restrictions.end(), customCmp);
+
+
+  for (int i=1; i <= enclosures; i++) {
     set<int> cant_be;
-    for (auto res : restrictions[i]) {
-      // if (res >= i) {
-      //   break;
-      // } else {
+    for (auto res : restrictions[i].second) {
         cant_be.insert(order[res]);
-      // }
     }
 
     // TEST PRINT
-    // cout << i << " cant be: ";
-    // for (auto i : cant_be) {
-    //   cout << i << " ";
-    // }
-    // cout << "\n";
+    cout << i << " cant be: ";
+    for (auto i : cant_be) {
+      cout << i << " ";
+    }
+    cout << "\n";
 
     set<int>::iterator it = cant_be.begin();
     bool assigned = false;
@@ -51,32 +54,25 @@ int main() {
       it++;
     }
     if (!assigned) {
-      // order.resize(enclosures+1, -1);
       order[1] = 1;
       order[i] = rand() % 4 + 1;
       i = 2;
     }
   }
-  // TEST PRINT
-  // cout << endl;
 
-  // TEST PRINT
+  // restriction print
   for (int i=1; i < restrictions.size(); i++) {
-    cout << i << ": ";
-    for (auto it : restrictions[i]) {
+    cout << restrictions[i].first << ": ";
+    for (auto it : restrictions[i].second) {
       cout << it << " ";
     }
     cout << endl;
   }
   cout << endl;
 
-
   // answer
   for (int i=1; i < order.size(); i++) {
     cout << i << " " << order[i] << "\n";
-    if (order[i] == -1) {
-      return -1;
-    }
   }
 
   return 0;
