@@ -14,7 +14,11 @@ long long count(int m, int n)
 
  for(int i=0; i<m; i++) {
    for(int j=val[i]; j<=n; j++) {
+     if (table[j] > 100) {
+       table[j] = 2;
+     }
      table[j] += table[j-val[i]];
+     // cout << "table[" << j << "] += table[" << j-val[i] << "]\n";
    }
  }
  return table[n];
@@ -66,7 +70,7 @@ int main() {
   while (queries--) {
     int amt;
     cin >> amt;
-    long long ways = count(numc, amt);
+    int ways = count(numc, amt);
     if (ways == 0) {
       cout << "Impossible\n";
     } else if (ways > 1) {
