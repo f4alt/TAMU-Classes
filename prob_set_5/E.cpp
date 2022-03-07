@@ -2,82 +2,56 @@
 
 using namespace std;
 
+vector<vector<int>> cant_be;
+vector<int> type;
+
+
+void solve(int pos) {
+    if (pos == type.size()) { // end
+        for(int i = 0; i < type.size(); ++i) {
+            cout << i+1 << ' ' << type[i] << '\n';
+        }
+        exit(0);
+    }
+    for(int assignment = 1; assignment <= 4; assignment++) {
+        bool good = true;
+        for(const int &to : cant_be[pos]) {
+            if(to >= pos) {
+              break;
+            }
+            if(type[to] == assignment) {
+                good = false;
+                break;
+            }
+        }
+        if (good) {
+            type[pos] = assignment;
+            solve(pos+1);
+        }
+    }
+}
+
 int main() {
-  int enclosures, left, right;
-  vector<set<int>> restrictions;
-  vector<int> order;
+    int n;
+    cin >> n;
 
-  cin >> enclosures;
-  restrictions.resize(enclosures+1);
-  order.resize(enclosures+1, -1);
+    cant_be.resize(n);
+    type.resize(n);
 
-  while(scanf("%d-%d\n", &left, &right) != EOF) {
-    restrictions[left].insert(right);
-    restrictions[right].insert(left);
-  }
+    int left, right;
+    char dash;
+    cin >> left >> dash >> right;
+    while(!cin.eof()) {
+        left--;
+        right--;
+        cant_be[left].push_back(right);
+        cant_be[right].push_back(left);
 
-  // first should always be 1
-  order[1] = 1;
-  int stuck_try = 2;
-
-  for (int i=2; i <= enclosures; i++) {
-    set<int> cant_be;
-    for (auto res : restrictions[i]) {
-      // if (res >= i) {
-      //   break;
-      // } else {
-        cant_be.insert(order[res]);
-      // }
+        cin >> left >> dash >> right;
     }
-
-    // TEST PRINT
-    // cout << i << " cant be: ";
-    // for (auto i : cant_be) {
-    //   cout << i << " ";
-    // }
-    // cout << "\n";
-
-    set<int>::iterator it = cant_be.begin();
-    bool assigned = false;
-    if (*it == -1) {
-      it++;
+    for(int i = 0; i < n; ++i) {
+        sort(cant_be[i].begin(), cant_be[i].end());
+        cant_be[i].erase(unique(cant_be[i].begin(), cant_be[i].end()), cant_be[i].end());
     }
-    for (int j=1; j <= 4; j++) {
-      if (cant_be.empty() || it == cant_be.end() || *it != j) {
-        order[i] = j;
-        assigned = true;
-        break;
-      }
-      it++;
-    }
-    if (!assigned) {
-      // order.resize(enclosures+1, -1);
-      order[1] = 1;
-      order[i] = rand() % 4 + 1;
-      i = 2;
-    }
-  }
-  // TEST PRINT
-  // cout << endl;
-
-  // TEST PRINT
-  for (int i=1; i < restrictions.size(); i++) {
-    cout << i << ": ";
-    for (auto it : restrictions[i]) {
-      cout << it << " ";
-    }
-    cout << endl;
-  }
-  cout << endl;
-
-
-  // answer
-  for (int i=1; i < order.size(); i++) {
-    cout << i << " " << order[i] << "\n";
-    if (order[i] == -1) {
-      return -1;
-    }
-  }
-
-  return 0;
+    solve(0);
 }
