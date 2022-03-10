@@ -26,7 +26,7 @@ double RANDOM_COLORS[7][3] = {
 
 int main(int argc, char **argv)
 {
-	if(argc < 5) {
+	if(argc < 6) {
 		cout << "Usage: A1 meshfile filename width height task" << endl;
 		return 0;
 	}
@@ -34,12 +34,20 @@ int main(int argc, char **argv)
 	string meshName(argv[1]);
 	// Output filename
 	string filename(argv[2]);
+	if (filename.find(".png") == std::string::npos) {
+		cout << "ERROR: filename must be .png" << endl;
+		return 0;
+	}
 	// Width of image
 	int width = atoi(argv[3]);
 	// Height of image
 	int height = atoi(argv[4]);
 	// task number
 	int task = atoi(argv[5]);
+	if (task < 1 || task > 7) {
+		cout << "ERROR: bad task choice - must be between 1 and 7" << endl;
+		return 0;
+	}
 	// Create the image. We're using a `shared_ptr`, a C++11 feature.
 	auto image = make_shared<Image>(width, height);
 
@@ -47,9 +55,9 @@ int main(int argc, char **argv)
 	vector<float> posBuf; // list of vertex positions
 	vector<float> norBuf; // list of vertex normals
 	vector<float> texBuf; // list of vertex texture coords
-	vector<triangle*> sorted_buf;
+	vector<triangle*> sorted_buf; // list of triangles sorted using posBuf
+	vector<float>* z_buf = new vector<float>(width * height, -FLT_MAX); // z buffer
 
-	// float zmax = -FLT_MAX;
 	float world_dim[6] = {FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX};
 	int color_iterator =0;
 	tinyobj::attrib_t attrib;
@@ -77,9 +85,7 @@ int main(int argc, char **argv)
 					posBuf.push_back(attrib.vertices[3*idx.vertex_index+0]);
 					posBuf.push_back(attrib.vertices[3*idx.vertex_index+1]);
 					posBuf.push_back(attrib.vertices[3*idx.vertex_index+2]);
-					// cout << attrib.vertices[3*idx.vertex_index+0] << ",";
-					// cout << attrib.vertices[3*idx.vertex_index+1] << ",";
-					// cout << attrib.vertices[3*idx.vertex_index+2] << endl;
+
 					// update world extremes for scaling
 					world_dim[0] = min(world_dim[0], (float)(attrib.vertices[3*idx.vertex_index+0]));
 					world_dim[1] = max(world_dim[1], (float)(attrib.vertices[3*idx.vertex_index+0]));
@@ -105,32 +111,25 @@ int main(int argc, char **argv)
 	}
 	cout << "Number of vertices: " << posBuf.size()/3 << endl;
 
-	// verify world mins and maxs
-	// for (int i=0; i < 6; i++) {
-	// 	cout << world_dim[i] << " ";
-	// }
-	// cout << endl;
-
-	// sort posBuf into scaled triangles
+	// calculate x and y scaling and translation for world to image
 	float scale = min(width / (world_dim[1] - world_dim[0]), height / (world_dim[3] - world_dim[2]));
 	float tx = .5 * width - (scale * (world_dim[0] + world_dim[1]) / 2);
 	float ty = .5 * height - (scale * (world_dim[2] + world_dim[3]) / 2);
+	// scale world x and y dimensions
+	world_dim[0] = world_dim[0] * scale + tx;
+	world_dim[1] = world_dim[1] * scale + tx;
+	world_dim[2] = world_dim[2] * scale + ty;
+	world_dim[3] = world_dim[3] * scale + ty;
+	// sort posBuf into scaled triangles
 	for (size_t i=0; i < posBuf.size(); i+=9) {
 		triangle* temp = new triangle();
-		// verify scale and translation
-		// cout << "scale:" << scale << endl;
-		// cout << "tx:" << tx << endl;
-		// cout << "ty:" << ty << endl;
-
+		// assign verticies scaled x and y and with RANDOM_COLORS RGB values
 		temp->vertices.push_back({posBuf[i  ] * scale + tx,
 															posBuf[i+1] * scale + ty,
 															posBuf[i+2],
 															RANDOM_COLORS[color_iterator%7][0]*255,
 															RANDOM_COLORS[color_iterator%7][1]*255,
 															RANDOM_COLORS[color_iterator%7][2]*255,
-															// norBuf[i  ],
-															// norBuf[i+1],
-															// norBuf[i+2]
 															});
 		color_iterator++;
 		temp->vertices.push_back({posBuf[i+3] * scale + tx,
@@ -139,9 +138,6 @@ int main(int argc, char **argv)
 															RANDOM_COLORS[color_iterator%7][0]*255,
 															RANDOM_COLORS[color_iterator%7][1]*255,
 															RANDOM_COLORS[color_iterator%7][2]*255,
-															// norBuf[i+3],
-															// norBuf[i+4],
-															// norBuf[i+5]
 															});
 		color_iterator++;
 		temp->vertices.push_back({posBuf[i+6] * scale + tx,
@@ -150,16 +146,10 @@ int main(int argc, char **argv)
 															RANDOM_COLORS[color_iterator%7][0]*255,
 															RANDOM_COLORS[color_iterator%7][1]*255,
 															RANDOM_COLORS[color_iterator%7][2]*255,
-															// norBuf[i+6],
-															// norBuf[i+7],
-															// norBuf[i+8]
 															});
 		color_iterator++;
 
 		if (!norBuf.empty()) {
-			// temp->norm.push_back((norBuf[i  ] + norBuf[i+3] + norBuf[i+6]) / 3.0);
-			// temp->norm.push_back((norBuf[i+1] + norBuf[i+4] + norBuf[i+7]) / 3.0);
-			// temp->norm.push_back((norBuf[i+2] + norBuf[i+5] + norBuf[i+8]) / 3.0);
 			temp->norm.push_back(norBuf[i]);
 			temp->norm.push_back(norBuf[i+1]);
 			temp->norm.push_back(norBuf[i+2]);
@@ -171,15 +161,7 @@ int main(int argc, char **argv)
 			temp->norm.push_back(norBuf[i+8]);
 		}
 		sorted_buf.push_back(temp);
-		// z_buf.push_back(posBuf[i+2]);
 	}
-	world_dim[0] = world_dim[0] * scale + tx;
-	world_dim[1] = world_dim[1] * scale + tx;
-	world_dim[2] = world_dim[2] * scale + ty;
-	world_dim[3] = world_dim[3] * scale + ty;
-
-	vector<float>* z_buf = new vector<float>(width * height, -FLT_MAX);
-	// cout << world_dim[0] << "," << world_dim[1] << " | " << world_dim[2] << "," << world_dim[3] << endl;
 
 	switch (task) {
 		case 1:
@@ -237,8 +219,6 @@ int main(int argc, char **argv)
 				for (int y = floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
 					ratio = (y - world_dim[2]) / (world_dim[3] - world_dim[2]);
 					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
-				// for (int y =tri->bb.ymin; y < tri->bb.ymax; y++) {
-					// for (int x = tri->bb.xmin; x < tri->bb.xmax; x++) {
 						if (image->calculateBarycentric_RGB(tri, x, y, ret)) {
 							image->setPixel(x, y, 255*ratio, 0, 255*(1-ratio));
 						}
@@ -250,19 +230,15 @@ int main(int argc, char **argv)
 		case 5:
 		{
 			float ret[4] = {0, 0, 0, 0};
-			// cout << world_dim[4] << " | " << world_dim[5] << endl;
 			for (auto tri: sorted_buf) {
 				image->setBoundingBox(tri);
 				for (int y =floor(tri->bb.ymin); y <= ceil(tri->bb.ymax); y++) {
 					for (int x = floor(tri->bb.xmin); x <= ceil(tri->bb.xmax); x++) {
 						if (image->calculateBarycentric_Z(tri, x, y, ret, z_buf)) {
-							// cout << (ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]) << endl;
 							image->setPixel(x, y, 255*((ret[3] - world_dim[4]) / (world_dim[5] - world_dim[4])), 0, 0);
-							// image->setPixel(x, y, RANDOM_COLORS[color_iterator%7][0]*255, RANDOM_COLORS[color_iterator%7][1]*255, RANDOM_COLORS[color_iterator%7][2]*255);
 						}
 					}
 				}
-				// color_iterator++;
 			}
 			break;
 		}
@@ -278,11 +254,7 @@ int main(int argc, char **argv)
 							float y_norm = (tri->norm[1] * ret[0] + tri->norm[4] * ret[1] + tri->norm[7] * ret[2]) / (ret[0] + ret[1] + ret[2]);
 							float z_norm = (tri->norm[2] * ret[0] + tri->norm[5] * ret[1] + tri->norm[8] * ret[2]) / (ret[0] + ret[1] + ret[2]);
 							image->setPixel(x, y, 255* (x_norm * .5 + .5), 255* (y_norm * .5 + .5), 255* (z_norm * .5 + .5));
-						// 	// cout << (ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]) << endl;
-						// 	image->setPixel(x, y, 255*(ret[0] - world_dim[4]) / (world_dim[5] - world_dim[4]), 0, 0);
 						}
-						// image->calculateNorm(x, y, ret, &norBuf);
-						// image->setPixel_Norm(x, y, ret[0], ret[1], ret[2]);
 					}
 				}
 			}
@@ -299,7 +271,6 @@ int main(int argc, char **argv)
 							float x_norm = (tri->norm[0] * ret[0] + tri->norm[3] * ret[1] + tri->norm[6] * ret[2]) / (ret[0] + ret[1] + ret[2]);
 							float y_norm = (tri->norm[1] * ret[0] + tri->norm[4] * ret[1] + tri->norm[7] * ret[2]) / (ret[0] + ret[1] + ret[2]);
 							float z_norm = (tri->norm[2] * ret[0] + tri->norm[5] * ret[1] + tri->norm[8] * ret[2]) / (ret[0] + ret[1] + ret[2]);
-							// cout << tri->norm[0] * 1/sqrt(3) + tri->norm[1] * 1/sqrt(3) + tri->norm[2] * 1/sqrt(3) << endl;
 							double lighting = max(x_norm * 1/sqrt(3) + y_norm * 1/sqrt(3) + z_norm * 1/sqrt(3), 0.0);
 							image->setPixel(x, y, 255*lighting, 255*lighting, 255*lighting);
 						}

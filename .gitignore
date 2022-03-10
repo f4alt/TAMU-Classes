@@ -11,4 +11,9 @@ CTestTestfile.cmake
 _deps
 build/
 deps/
+<<<<<<< HEAD
+=======
+*.zip
+726009537/
+>>>>>>> b1ca76203dea20b90705a76091e02b88ef8a0603
 .DS_Store
