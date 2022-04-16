@@ -94,8 +94,8 @@ int main() {
 
   // BFS / DFS using 'n' nodes, starting at 'start'
   int start = 1;
-  BFS(n, start);
-  DFS(n, start);
+  BFS(start);
+  DFS(start);
 
   // test output
   for (int i=1; i <= n; i++) {
