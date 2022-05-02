@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 # Name of the project
 PROJECT(L11)
@@ -44,7 +44,7 @@ IF(NOT GLM_INCLUDE_DIR)
 ENDIF()
 INCLUDE_DIRECTORIES(${GLM_INCLUDE_DIR})
 
-# Get the GLFW environment variable. There should be a CMakeLists.txt in the 
+# Get the GLFW environment variable. There should be a CMakeLists.txt in the
 # specified directory.
 SET(GLFW_DIR "$ENV{GLFW_DIR}")
 IF(NOT GLFW_DIR)
@@ -107,9 +107,11 @@ ELSE()
 	TARGET_LINK_LIBRARIES(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/libGLEW.a)
 ENDIF()
 
+# Use c++17
+SET_TARGET_PROPERTIES(${CMAKE_PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+
 # OS specific options and libraries
 IF(WIN32)
-	# c++11 is enabled by default.
 	# -Wall produces way too many warnings.
 	# -pedantic is not supported.
 	# Disable warning 4996.
@@ -118,7 +120,7 @@ IF(WIN32)
 	SET_PROPERTY(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMAKE_PROJECT_NAME})
 ELSE()
 	# Enable all pedantic warnings.
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic")
 	IF(APPLE)
 		# Add required frameworks for GLFW.
 		TARGET_LINK_LIBRARIES(${CMAKE_PROJECT_NAME} "-framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")

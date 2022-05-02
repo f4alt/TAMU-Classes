@@ -8,9 +8,8 @@ attribute vec4 aPos; // In object space
 attribute vec3 aNor; // In object space
 attribute vec2 aTex;
 
-varying vec3 normal; // In camera space
+varying vec3 vNor; // In camera space
 varying vec3 vPos; // in camera space
-varying vec2 vTex;
 
 void main()
 {
@@ -32,11 +31,11 @@ void main()
 	// calculate normals using derivative
 	vec3 dp_dx = vec3(1, -sinx * cost, -sinx * sint);
 	vec3 dp_dtheta = vec3(0, -(cosx + 2) * sint, (cosx + 2) * cost);
-	vec3 nor = cross(dp_dx, dp_dtheta);
+	//vec3 nor = cross(dp_dx, dp_dtheta);
+	vec3 nor = cross(dp_dtheta, dp_dx);
 	vec3 n_hat = normalize(nor);
 
-	normal = vec3(MV * vec4(n_hat, 0.0)); // Assuming MV contains only translations and rotations
-	vTex = aTex;
-
-  vPos = vec3(1.0);
+	vNor = vec3(MV * vec4(n_hat, 0.0)); // Assuming MV contains only translations and rotations
+	vec4 vPos4 = MV * newPos;
+	vPos = vec3(vPos4) / vPos4.w;
 }

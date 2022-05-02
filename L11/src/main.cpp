@@ -90,10 +90,10 @@ static void init()
 	//
 	// General setup
 	//
-	
+
 	// Initialize time.
 	glfwSetTime(0.0);
-	
+
 	// Set background color.
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	// Enable z-buffer test.
@@ -104,26 +104,27 @@ static void init()
 	prog->setVerbose(true);
 	prog->init();
 	prog->addAttribute("aPos");
-	prog->addAttribute("aNor");
+	// prog->addAttribute("aNor");
 	prog->addAttribute("aTex");
 	prog->addUniform("MV");
 	prog->addUniform("P");
+	prog->addUniform("t");
 	prog->addUniform("texture0");
-	prog->setVerbose(false);
-	
+	prog->setVerbose(true);
+
 	camera = make_shared<Camera>();
 	camera->setInitDistance(2.0f);
-	
+
 	texture0 = make_shared<Texture>();
 	texture0->setFilename(RESOURCE_DIR + "tamu.jpg");
 	texture0->init();
 	texture0->setUnit(0);
 	texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
-	
+
 	//
 	// Vertex buffer setup
 	//
-	
+
 	vector<float> posBuf;
 	vector<float> norBuf;
 	vector<float> texBuf;
@@ -136,58 +137,73 @@ static void init()
 	// You need to use one or more for-loops to fill in the position buffer,
 	// normal buffer, texture buffer, and the index buffer.
 	//
-	
-	// Vert 0
-	posBuf.push_back(-0.5f);
-	posBuf.push_back(-0.5f);
-	posBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(1.0f);
-	texBuf.push_back(0.0f);
-	texBuf.push_back(0.0f);
-	// Vert 1
-	posBuf.push_back(0.5f);
-	posBuf.push_back(-0.5f);
-	posBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(1.0f);
-	texBuf.push_back(1.0f);
-	texBuf.push_back(0.0f);
-	// Vert 2
-	posBuf.push_back(-0.5f);
-	posBuf.push_back(0.5f);
-	posBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(1.0f);
-	texBuf.push_back(0.0f);
-	texBuf.push_back(1.0f);
-	// Vert 3
-	posBuf.push_back(0.5f);
-	posBuf.push_back(0.5f);
-	posBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(0.0f);
-	norBuf.push_back(1.0f);
-	texBuf.push_back(1.0f);
-	texBuf.push_back(1.0f);
-	// indices
-	indBuf.push_back(0);
-	indBuf.push_back(1);
-	indBuf.push_back(3);
-	indBuf.push_back(0);
-	indBuf.push_back(3);
-	indBuf.push_back(2);
-	
-	//
-	// END IMPLEMENT ME
-	//
-	
+
+	int points = 50;
+	float tex_scale = 3.0;
+	float theta_scale = 2 * M_PI / (points - 1);	// 0 to 2pi
+
+	// PARAMETRIC SPACE
+	for (int row=0; row < points; row++) {
+		for (int col=0; col < points; col++) {
+			// CPU CALCULATIONS
+			float theta = col * theta_scale;
+			float x = (float)row / (float)(points - 1) * 10;
+			// float f = cos(x) + 2.0;
+			//
+			// float y = f * cos(theta);
+			// float z = f * sin(theta);
+			//
+			// // push back vert row/x, col/y, z
+			// posBuf.push_back(x);
+			// posBuf.push_back(y);
+			// posBuf.push_back(z);
+			//
+			// glm::vec3 dp_dx(1, -sin(x) * cos(theta), -sin(x) * sin(theta));
+			// glm::vec3 dp_dtheta(0, -(cos(x) + 2) * sin(theta), (cos(x) + 2) * cos(theta));
+			// glm::vec3 n = glm::cross(dp_dx, dp_dtheta);
+			// glm::vec3 n_hat = glm::normalize(n);
+			// // push back normals
+			// norBuf.push_back(n_hat.x);
+			// norBuf.push_back(n_hat.y);
+			// norBuf.push_back(n_hat.z);
+
+			// GPU CALCULATIONS
+			// float theta = col * theta_scale;
+			// float x = (float)row / (float)(points - 1) * 10;
+
+			posBuf.push_back(x);
+			posBuf.push_back(theta);
+			posBuf.push_back(0.0f);
+
+			norBuf.push_back(0.0f);
+			norBuf.push_back(0.0f);
+			norBuf.push_back(0.0f);
+
+			// push back tex (on a 1 scale) - Mercator projection
+			// cartesian x and y
+			float curr_row_pos = (float)row / (float)(points-1);
+			float curr_col_pos = (float)col / (float)(points-1);
+			texBuf.push_back(curr_col_pos * tex_scale);
+			texBuf.push_back(curr_row_pos * tex_scale);
+
+			// push triangles into indBuf
+			int bottom_left_tri_vert = points * row + col;
+			int top_right_tri_vert = bottom_left_tri_vert + 1 + points;
+			if (row != points-1 && col != points-1) {
+				indBuf.push_back(top_right_tri_vert);
+				indBuf.push_back(bottom_left_tri_vert + 1);
+				indBuf.push_back(bottom_left_tri_vert);
+
+				indBuf.push_back(top_right_tri_vert - 1);
+				indBuf.push_back(top_right_tri_vert);
+				indBuf.push_back(bottom_left_tri_vert);
+			}
+		}
+	}
+
 	// Total number of indices
 	indCount = (int)indBuf.size();
-		
+
 	// Generate buffer IDs and put them in the bufIDs map.
 	GLuint tmp[4];
 	glGenBuffers(4, tmp);
@@ -205,9 +221,9 @@ static void init()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indBuf.size()*sizeof(unsigned int), &indBuf[0], GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	
+
 	assert(norBuf.size() == posBuf.size());
-	
+
 	GLSL::checkError(GET_FILE_LINE);
 }
 
@@ -226,48 +242,69 @@ static void render()
 	} else {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
-	
+
 	// Get current frame buffer size.
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	camera->setAspect((float)width/(float)height);
-	
+
 	// Matrix stacks
 	auto P = make_shared<MatrixStack>();
 	auto MV = make_shared<MatrixStack>();
-	
+
 	// Apply camera transforms
 	P->pushMatrix();
 	camera->applyProjectionMatrix(P);
 	MV->pushMatrix();
 	camera->applyViewMatrix(MV);
-	
+
 	prog->bind();
 	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(P->topMatrix()));
+	double t = glfwGetTime();
+	glUniform1f(prog->getUniform("t"), t);
 	glEnableVertexAttribArray(prog->getAttribute("aPos"));
-	GLSL::checkError(GET_FILE_LINE);
-	glEnableVertexAttribArray(prog->getAttribute("aNor"));
-	GLSL::checkError(GET_FILE_LINE);
+	// GLSL::checkError(GET_FILE_LINE);
+	// glEnableVertexAttribArray(prog->getAttribute("aNor"));
+	// GLSL::checkError(GET_FILE_LINE);
 	glEnableVertexAttribArray(prog->getAttribute("aTex"));
 	glBindBuffer(GL_ARRAY_BUFFER, bufIDs["bPos"]);
 	glVertexAttribPointer(prog->getAttribute("aPos"), 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 	glBindBuffer(GL_ARRAY_BUFFER, bufIDs["bNor"]);
-	glVertexAttribPointer(prog->getAttribute("aNor"), 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+	// glVertexAttribPointer(prog->getAttribute("aNor"), 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 	glBindBuffer(GL_ARRAY_BUFFER, bufIDs["bTex"]);
 	glVertexAttribPointer(prog->getAttribute("aTex"), 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufIDs["bInd"]);
+	// rotate MV to view vase upright
+	MV->rotate(-M_PI/2, 0, 0, 1);
+
+	// translate MV for squash and stretch
+	// float ay = 1.3;
+	// float as = 0.5;
+	// float p = 1.7;
+	// float t0 = 0.9;
+	// float t = glfwGetTime();
+	// float y_trans = ay * (0.5 * sin((2 * M_PI / p) * (t + t0)) + 0.5);
+	// float squash_stretch = -as * (0.5 * cos((4 * M_PI / p) * (t + t0)) + 0.5) + 1;
+	// glm::vec3 bounce(0.0, y_trans, 0.0);
+	// glm::vec3 deform(squash_stretch, 1.0, squash_stretch);
+	// MV->translate(bounce);
+	// MV->scale(deform);
 	glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, value_ptr(MV->topMatrix()));
+	// send MV inverse transpose
+	// auto MVit = glm::transpose(glm::inverse(MV->topMatrix()));
+	// glUniformMatrix4fv(progs[0]->getUniform("MVit"), 1, GL_FALSE, glm::value_ptr(MVit));
+
 	glDrawElements(GL_TRIANGLES, indCount, GL_UNSIGNED_INT, (void *)0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDisableVertexAttribArray(prog->getAttribute("aTex"));
-	glDisableVertexAttribArray(prog->getAttribute("aNor"));
+	// glDisableVertexAttribArray(prog->getAttribute("aNor"));
 	glDisableVertexAttribArray(prog->getAttribute("aPos"));
 	prog->unbind();
-	
+
 	MV->popMatrix();
 	P->popMatrix();
-	
+
 	GLSL::checkError(GET_FILE_LINE);
 }
 

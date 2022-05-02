@@ -86,10 +86,10 @@ void Shape::fitToUnitBox()
 		vmax.z = max(vmax.z, v.z);
 	}
 
-	std::cout << vmin.x << " | " << vmax.x << std::endl;
-	std::cout << vmin.y << " | " << vmax.y << std::endl;
-	std::cout << vmin.z << " | " << vmax.z << std::endl;
-	
+	// std::cout << vmin.x << " | " << vmax.x << std::endl;
+	// std::cout << vmin.y << " | " << vmax.y << std::endl;
+	// std::cout << vmin.z << " | " << vmax.z << std::endl;
+
 	glm::vec3 center = 0.5f*(vmin + vmax);
 	glm::vec3 diff = vmax - vmin;
 	float diffmax = diff.x;

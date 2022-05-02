@@ -125,13 +125,87 @@ void Component::rotatePiece(char axis, bool forward) {
   }
 }
 
+// draws first pass with minimal inputs and outputs to texture
+void Component::drawFP(Material* material,
+                       const std::shared_ptr<MatrixStack> MV,
+                       const std::shared_ptr<MatrixStack> P) const {
+  prog->bind();
+  double t = glfwGetTime() * scale.x * 2;
+  MV->pushMatrix();
+     // Where is the current joint with respect to the parent
+     MV->translate(trans_from_parent);
+
+     // filter rotation
+     if (rot.x != 0) {
+       MV->rotate(rot.x, 1, 0, 0);
+     }
+     if (rot.y != 0) {
+       MV->rotate(rot.y, 0, 1, 0);
+     }
+     if (rot.z != 0) {
+       MV->rotate(rot.z, 0, 0, 1);
+     }
+
+     MV->pushMatrix();
+       // component specific spin animation
+       if (bunny && anim) {
+         MV->rotate(t, 0, 1, 0);
+       }
+
+       // component specific shear animation
+       if (teapot && anim) {
+         glm::mat4 S(1.0f);
+         S[1][2] = -0.5f*cos(t);
+         MV->multMatrix(S);
+       } else {
+         MV->multMatrix(shear);
+       }
+
+       if (sphere && anim) {
+         // translate MV
+         float ay = 1.3;
+         float as = 0.5;
+         float p = 5.0;
+         float t0 = 0.9;
+         float y_trans = ay * (0.5 * sin((2 * M_PI / p) * (t + t0)) + 0.5);
+         float squash_stretch = -as * (0.5 * cos((4 * M_PI / p) * (t + t0)) + 0.5) + 1;
+         glm::vec3 bounce(0.0, y_trans, 0.0);
+         glm::vec3 deform(squash_stretch, 1.0, squash_stretch);
+         MV->translate(bounce);
+         MV->scale(deform);
+       }
+
+       MV->pushMatrix();
+           // Where is the current mesh with respect to currents joint
+           MV->translate(trans_to_mesh);
+           // currents scale
+           MV->scale(scale * selected);
+
+           // draw
+           glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, value_ptr(P->topMatrix()));
+         	 glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, value_ptr(MV->topMatrix()));
+         	 auto MVit = glm::transpose(glm::inverse(MV->topMatrix()));
+         	 glUniformMatrix4fv(prog->getUniform("MVit"), 1, GL_FALSE, glm::value_ptr(MVit));
+         	 glUniform3fv(prog->getUniform("ke"), 1, glm::value_ptr(material->getKa()));
+         	 glUniform3fv(prog->getUniform("kd"), 1, glm::value_ptr(material->getKd()));
+           if (vase && anim) {
+             glUniform1f(prog->getUniform("t"), t*3);
+           }
+         	 shape->draw(prog);
+       MV->popMatrix();
+     MV->popMatrix();
+
+  MV->popMatrix();
+  prog->unbind();
+}
+
 // recursively draws elemet and children
 void Component::draw(Material* material,
                      const std::shared_ptr<MatrixStack> MV,
                      const std::shared_ptr<MatrixStack> P) const {
   prog->bind();
   double t = glfwGetTime() * scale.x * 2;
-  glm::vec3 lights_vec[material->getNumLights() * 2];
+  glm::vec3 lights_vec[4];
   MV->pushMatrix();
 
   material->fillLights(lights_vec, MV->topMatrix());

@@ -36,6 +36,9 @@ public:
   void updateRot(glm::vec3 _rot);
 	void setShear(glm::mat4 _shear);
   void rotatePiece(char axis, bool forward);
+	void drawFP(Material* material,
+							const std::shared_ptr<MatrixStack> MV,
+							const std::shared_ptr<MatrixStack> P) const;
   void draw(Material* material,
             const std::shared_ptr<MatrixStack> MV,
             const std::shared_ptr<MatrixStack> P) const;

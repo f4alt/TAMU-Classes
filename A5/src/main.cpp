@@ -38,15 +38,85 @@ bool OFFLINE = false;
 
 shared_ptr<Camera> camera;
 std::vector<shared_ptr<Program>> progs;
-shared_ptr<Program> prog_TEST;
 std::vector<Material*> materials;
 std::vector<Component*> components;
+const int numLights = 50;
 std::vector<Light*> lights;
-int numLights = 20;
+glm::vec3 lights_vec[numLights * 2];
+
+// deferred rendering globals
+shared_ptr<Program> progPass2;
+int textureWidth = 640;
+int textureHeight = 480;
+GLuint framebufferID;
+GLuint posTexture, norTexture, keTexture, kdTexture;
+shared_ptr<Shape> shape2;
+
+void genTextures() {
+	// generate and bind the framebuffer
+	glGenFramebuffers(1, &framebufferID);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferID);
+
+	// create textureA
+	glGenTextures(1, &posTexture);
+	glBindTexture(GL_TEXTURE_2D, posTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, posTexture, 0);
+
+	// create textureB
+	glGenTextures(1, &norTexture);
+	glBindTexture(GL_TEXTURE_2D, norTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, norTexture, 0);
+
+	// create textureC
+	glGenTextures(1, &keTexture);
+	glBindTexture(GL_TEXTURE_2D, keTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, keTexture, 0);
+
+	// create textureD
+	glGenTextures(1, &kdTexture);
+	glBindTexture(GL_TEXTURE_2D, kdTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, kdTexture, 0);
 
 
-// texture components (add to class later?)
-shared_ptr<Texture> texture0;
+	// bind depth buffer for depth tests
+	GLuint depthrenderbuffer;
+	glGenRenderbuffers(1, &depthrenderbuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, textureWidth, textureHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+
+	// attach the four textures as output to frame buffer
+	GLenum attachments[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
+	glDrawBuffers(4, attachments);
+
+	// error checking
+	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		cerr << "Framebuffer is not ok" << endl;
+	}
+
+	// reset framebuffer back to onscreen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
 
 bool keyToggles[256] = {false}; // only for English keyboards!
 
@@ -113,6 +183,9 @@ static void char_callback(GLFWwindow *window, unsigned int key)
 static void resize_callback(GLFWwindow *window, int width, int height)
 {
 	glViewport(0, 0, width, height);
+	textureWidth = width;
+	textureHeight = height;
+	genTextures();
 }
 
 // https://lencerf.github.io/post/2019-09-21-save-the-opengl-rendering-to-image-file/
@@ -143,60 +216,80 @@ static void init()
 	// Initialize time.
 	glfwSetTime(0.0);
 
-	// Set background color.
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	// Enable z-buffer test.
-	glEnable(GL_DEPTH_TEST);
-
-	shared_ptr<Program> prog = make_shared<Program>();
-	prog->setShaderNames(RESOURCE_DIR + "vase_vert.glsl", RESOURCE_DIR + "blinn-phong_frag.glsl");
-	prog->setVerbose(true);
-	prog->init();
-	prog->addAttribute("aPos");
-	prog->addAttribute("aNor");
-	prog->addAttribute("aTex");
-	prog->addUniform("MV");
-	prog->addUniform("MVit");
-	prog->addUniform("lightInfo");
-	prog->addUniform("ka");
-	prog->addUniform("kd");
-	prog->addUniform("ks");
-	prog->addUniform("s");
-	prog->addUniform("P");
-	prog->addUniform("t");
-	prog->addUniform("texture0");
-	prog->setVerbose(true);
-
+	// basic prog for pass one
 	shared_ptr<Program> prog1 = make_shared<Program>();
-	prog1->setShaderNames(RESOURCE_DIR + "blinn-phong_vert.glsl", RESOURCE_DIR + "blinn-phong_frag.glsl");
+	prog1 = make_shared<Program>();
+	prog1->setShaderNames(RESOURCE_DIR + "pass1_simp_vert.glsl", RESOURCE_DIR + "pass1_frag.glsl");
 	prog1->setVerbose(true);
 	prog1->init();
-	prog1->addAttribute("aPos");
-	prog1->addAttribute("aNor");
-	prog1->addAttribute("aTex");
+	// vert
 	prog1->addUniform("P");
 	prog1->addUniform("MV");
 	prog1->addUniform("MVit");
-	prog1->addUniform("lightInfo");
-	prog1->addUniform("ka");
+	prog1->addAttribute("aPos");
+	prog1->addAttribute("aNor");
+	prog1->addAttribute("aTex");
+	// frag
+	prog1->addUniform("ke");
 	prog1->addUniform("kd");
-	prog1->addUniform("ks");
-	prog1->addUniform("s");
-	prog1->addUniform("T1");
-	prog1->addUniform("texture0");
-	prog1->setVerbose(false);
 
-	progs.push_back(prog);
+	// prog for vase using GPU move calculations
+	shared_ptr<Program> prog2 = make_shared<Program>();
+	prog2 = make_shared<Program>();
+	prog2->setShaderNames(RESOURCE_DIR + "vase_vert.glsl", RESOURCE_DIR + "pass1_frag.glsl");
+	prog2->setVerbose(true);
+	prog2->init();
+	// vert
+	prog2->addUniform("P");
+	prog2->addUniform("MV");
+	prog2->addUniform("MVit");
+	prog2->addAttribute("aPos");
+	prog2->addAttribute("aNor");
+	prog2->addAttribute("aTex");
+	prog2->addUniform("t");
+	// frag
+	prog2->addUniform("ke");
+	prog2->addUniform("kd");
+
+
+	progPass2 = make_shared<Program>();
+	progPass2->setShaderNames(RESOURCE_DIR + "pass2_vert.glsl", RESOURCE_DIR + "pass2_frag.glsl");
+	progPass2->setVerbose(true);
+	progPass2->init();
+	// vert
+	progPass2->addUniform("P");
+	progPass2->addUniform("MV");
+	progPass2->addAttribute("aPos");
+	progPass2->addAttribute("aTex");
+	progPass2->addAttribute("aNor");
+	// frag
+	progPass2->addUniform("posTexture");
+	progPass2->addUniform("norTexture");
+	progPass2->addUniform("keTexture");
+	progPass2->addUniform("kdTexture");
+	progPass2->addUniform("windowSize");
+	progPass2->addUniform("lightInfo");
+	progPass2->bind();
+	glUniform1i(progPass2->getUniform("posTexture"), 0);
+	glUniform1i(progPass2->getUniform("norTexture"), 1);
+	glUniform1i(progPass2->getUniform("keTexture"), 2);
+	glUniform1i(progPass2->getUniform("kdTexture"), 3);
+	progPass2->unbind();
+
 	progs.push_back(prog1);
+	progs.push_back(prog2);
 
 	// create x lights centered at 9 0 9, add to lights vector
 	srand(time(0));
 	float ang = 360.0 / (float)numLights;
 	for (int i=0; i < numLights; i++) {
-		Light* light = new Light(glm::vec3((r0_1() * 5)*cos(ang * i) + 9,
-													   0.3f,
-													   (r0_1() * 5)*sin(ang * i) + 9),
-													   glm::vec3(r0_1(), r0_1(), r0_1()));
+		glm::vec3 light_pos((r0_1() * 10)*cos(ang * i) + 9,
+											   0.3f,
+											   (r0_1() * 10)*sin(ang * i) + 9);
+
+	  glm::vec3 light_col(r0_1(), r0_1(), r0_1());
+
+		Light* light = new Light(light_pos, light_col);
 		lights.push_back(light);
 	}
 
@@ -237,38 +330,34 @@ static void init()
 	teapot->loadMesh(RESOURCE_DIR + "teapot.obj");
 	teapot->init();
 
-
 	shared_ptr<Shape> cube = make_shared<Shape>();
 	cube->loadMesh(RESOURCE_DIR + "cube.obj");
 	cube->init();
 
+	shape2 = make_shared<Shape>();
+	shape2->loadMesh(RESOURCE_DIR + "cube.obj");
+	shape2->init();
+
 	shared_ptr<Shape> sphere = make_shared<Shape>();
 	sphere->gen_sphere();
 	sphere->init();
-
 
 	shared_ptr<Shape> vase = make_shared<Shape>();
 	vase->gen_vase();
 	vase->init();
 
 	// create single components
-	Component* ground = new Component(cube, progs[1]);
+	Component* ground = new Component(cube, progs[0]);
 	ground->updatePos(glm::vec3(9.0f, -0.1f, 9.0f),
 										glm::vec3(0.0f, 0.0f, 0.0f),
 										glm::vec3(0.0f, 0.0f, 0.0f),
 										glm::vec3(25.0f, 0.5f, 25.0f));
 
-	Component* sun = new Component(sphere, progs[1]);
-	sun->updatePos(glm::vec3(-9.0f, 0.5f, -9.0f),
-								 glm::vec3(0.0f, 0.0f, 0.0f),
-								 glm::vec3(0.0f, 0.0f, 0.0f),
-								 glm::vec3(0.5f));
-
 	components.push_back(ground);
 
 	// add x lightBalls with same position as lights
 	for (int i=0; i < numLights; i++) {
-		Component* light_src = new Component(sphere, progs[1]);
+		Component* light_src = new Component(sphere, progs[0]);
 		light_src->updatePos(lights[i]->getPos(),
 												 glm::vec3(0.0f, 0.0f, 0.0f),
 												 glm::vec3(0.0f, 0.0f, 0.0f),
@@ -279,7 +368,6 @@ static void init()
 
 	// create components with shapes
 	std::vector<shared_ptr<Shape> > ground_shapes = { bunny, teapot, sphere, vase };
-
 	for (int i=0; i < 10; i++) {
 		for (int j=0; j < 10; j++) {
 			float scale_stagger = r0_1();
@@ -287,7 +375,7 @@ static void init()
 				scale_stagger = .4;
 			}
 			int chosen_shape = rand() % ground_shapes.size();
-			Component* temp = new Component(ground_shapes[chosen_shape], chosen_shape == 3 ? progs[0] : progs[1]);
+			Component* temp = new Component(ground_shapes[chosen_shape], chosen_shape == 3 ? progs[1] : progs[0]);
 			float bunny_trans = -.186996 + (1 - scale_stagger) * .333099;
 
 			switch (chosen_shape) {
@@ -333,58 +421,89 @@ static void init()
 		}
 	}
 
+	genTextures();
+
 	GLSL::checkError(GET_FILE_LINE);
 }
 
 // This function is called every frame to draw the scene.
 static void render()
 {
-	// Clear framebuffer.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	if(keyToggles[(unsigned)'c']) {
-		glEnable(GL_CULL_FACE);
-	} else {
-		glDisable(GL_CULL_FACE);
-	}
-	if(keyToggles[(unsigned)'p']) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	} else {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-
-	// Get current frame buffer size.
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);
-	camera->setAspect((float)width/(float)height);
-
-	// Matrix stacks
 	auto P = make_shared<MatrixStack>();
 	auto MV = make_shared<MatrixStack>();
 
+	//////////////////////////////////////////////////////
+	// Render to the framebuffer
+	//////////////////////////////////////////////////////
 
-	// ***** main viewport *****
-	glViewport(0, 0, width, height);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, posTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, norTexture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, keTexture);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, kdTexture);
+	glActiveTexture(GL_TEXTURE0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, framebufferID);
+	glViewport(0, 0, textureWidth, textureHeight);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 
 	P->pushMatrix();
 	MV->pushMatrix();
 
-	// Apply camera transforms
+	camera->setAspect(1.0f);
 	camera->applyProjectionMatrix(P);
 	camera->applyViewMatrix(MV);
 
+	materials[0]->fillLights(lights_vec, MV->topMatrix());
+
 	// draw ground
-	components[0]->draw(materials[numLights], MV, P);
+	components[0]->drawFP(materials[numLights], MV, P);
 
 	// draw light balls
 	for (int i=0; i < numLights; i++) {
-		components[1+i]->draw(materials[i], MV, P);
+		components[1+i]->drawFP(materials[i], MV, P);
 	}
 
 	// draw rest
 	for (int i=numLights+1; i < (int)components.size(); i++) {
 		components[i]->togAnim(keyToggles[(unsigned)' ']);
-		components[i]->draw(materials[i-1], MV, P);
+		components[i]->drawFP(materials[i-1], MV, P);
 	}
+
+	MV->popMatrix();
+	P->popMatrix();
+
+
+	//////////////////////////////////////////////////////
+	// Render to the screen
+	//////////////////////////////////////////////////////
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	glViewport(0, 0, width, height);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	P->pushMatrix();
+	MV->pushMatrix();
+	MV->scale(glm::vec3(2.0f));
+
+	progPass2->bind();
+	glUniformMatrix4fv(progPass2->getUniform("P"), 1, GL_FALSE, value_ptr(P->topMatrix()));
+	glUniformMatrix4fv(progPass2->getUniform("MV"), 1, GL_FALSE, value_ptr(MV->topMatrix()));
+	glUniform3fv(progPass2->getUniform("lightInfo"), numLights * 2, glm::value_ptr(lights_vec[0]));
+	glUniform2f(progPass2->getUniform("windowSize"), (float)width, (float)height);
+	shape2->draw(progPass2);
+	glActiveTexture(GL_TEXTURE0);
+	progPass2->unbind();
 
 	MV->popMatrix();
 	P->popMatrix();
@@ -401,7 +520,7 @@ static void render()
 int main(int argc, char **argv)
 {
 	if(argc < 2) {
-		cout << "Usage: A4 RESOURCE_DIR" << endl;
+		cout << "Usage: A5 RESOURCE_DIR" << endl;
 		return 0;
 	}
 	RESOURCE_DIR = argv[1] + string("/");
