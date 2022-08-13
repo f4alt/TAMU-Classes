@@ -1,0 +1,8 @@
+2002 rsq:4920
+false
+2003 rsq:10821
+false
+1985 rsq:5782
+false
+2005 rsq:31263
+false

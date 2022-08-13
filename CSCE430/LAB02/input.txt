@@ -1,0 +1,38 @@
+5
+1
+a: upper-upper-upper-upper class
+2
+a: lower-lower-middle-lower class
+b: upper class
+12
+a: upper-upper-upper class
+b: upper-upper-upper class
+c: middle-upper class
+d: lower-upper class
+e: middle-middle-middle class
+f: middle-middle class
+g: upper-middle class
+h: lower-middle class
+i: lower-lower-lower class
+j: lower-lower class
+k: middle-lower class
+l: upper-lower class
+12
+a: upper-upper-upper class
+b: upper-upper-upper class
+c: middle-upper class
+d: lower-upper class
+e: middle-middle-middle class
+f: middle-middle class
+g: upper-middle class
+h: lower-middle class
+i: lower-lower-lower class
+j: lower-lower class
+k: middle-lower class
+l: upper-lower class
+5
+mom: upper-upper-lower-middle class
+dad: middle-middle-middle-lower-middle class
+queenelizabeth: upper-upper-upper class
+chair: lower-lower class
+unclebob: middle-middle-lower-middle class
