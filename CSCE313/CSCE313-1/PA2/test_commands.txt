@@ -1,0 +1,2 @@
+echo "Hello world | Life is Good > Great $"
+echo 'Hello world | Life is Good > Great $'
